@@ -9,9 +9,9 @@ jobs:
       - name: Verificar nome da branch
         shell: bash
         run: |
-          BRANCH_NAME="${{ github.ref_name }}"
+          BRANCH_NAME="${{ github.head_ref }}"
           echo "Nome da branch: '$BRANCH_NAME'"
           if ! [[ "$BRANCH_NAME" =~ ^(feature|fix|release)/[0-9]+$ ]]; then
-            echo "❌ Nome de branch inválido! Use feature, fix ou release/ocorrencia para um branch valida, ex: feature/17"
+            echo "❌ Nome de branch inválido! Use feature, fix ou release/ocorrencia para um branch válido, ex: feature/17"
             exit 1
           fi
