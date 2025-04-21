@@ -18,30 +18,301 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldWidget(
-      body: Center(
-        child: Column(
-          children: [
-            Text("Teste do input"),
-            const SizedBox(height: 20),
-            Center(
-              child: InputWidget(
-                labelText: "Nome",
-                hintText: "Digite seu nome",
-                controller: TextEditingController(),
+      currentPage: 0,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3A608F),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Center(
+                      child: Text(
+                        'Seja bem-vindo de volta',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Center(
+                      child: RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Vamos continuar sua ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'sequência',
+                              style: TextStyle(
+                                color: Color(0xFFFFB563),
+                                fontSize: 16,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Center(
+                      child: RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Ultima sessão de estudos:',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Center(
+                      child: RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Ontem - 22h40',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text("Teste Card"),
-            CardWidget(icon: Icon(Icons.home), width: 80.0, height: 45.0),
-            const SizedBox(height: 20),
-            Text(
-              widget.title,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-          ],
+              const SizedBox(height: 24),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Color(0xFFDDE0E6)),
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Não perca a sequência',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Color(0xFFDDE0E6)),
+                                borderRadius: BorderRadius.circular(8),
+                                color: Colors.white,
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.local_fire_department, color: Colors.orange),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    '56 dias',
+                                    style: TextStyle(
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Sequencia',
+                            style: TextStyle(fontSize: 10, fontFamily: 'Poppins'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 80,
+                      color: Color(0xFFDDE0E6),
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Continue Evoluindo',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Color(0xFFDDE0E6)),
+                                borderRadius: BorderRadius.circular(8),
+                                color: Colors.white,
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.flash_on, color: Colors.amber),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    '50',
+                                    style: TextStyle(
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Nível Atual',
+                            style: TextStyle(fontSize: 10, fontFamily: 'Poppins'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFDDE0E6)),
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Continue de onde parou',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Divider(
+                      color: Color(0xFFDDE0E6),
+                      thickness: 0.8,
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.notes),
+                        SizedBox(width: 12),
+                        Text(
+                          'Vestibular', 
+                          style: TextStyle(
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          )
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFDDE0E6)),
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Fique atento',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Divider(
+                      color: Color(0xFFDDE0E6),
+                      thickness: 0.8,
+                    ),
+                    Text(
+                      'Próximo evento',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'List item', 
+                      style: TextStyle(
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      )
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      currentPage: _selectedIndex,
     );
   }
 }
