@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/presentation/HomePage.dart';
+import 'package:pi5_ms_mobile/src/presentation/LoginPage.dart';
 import 'package:pi5_ms_mobile/src/presentation/ProvasPage.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/shared/util.dart';
@@ -32,10 +33,11 @@ class _MyAppState extends State<MyApp> {
           themeMode: themeMode,
           theme: theme.light(),
           darkTheme: theme.dark(),
-          initialRoute: '/',
+          initialRoute: '/login',
           routes: {
             '/': (context) => const HomePage(title: "PI5 MS Mobile"),
             '/provas': (context) => const ProvasPage(),
+            '/login': (context) => const LoginPage(),
           },
           debugShowCheckedModeBanner: false,
         );
