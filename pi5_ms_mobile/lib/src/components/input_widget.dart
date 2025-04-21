@@ -19,6 +19,7 @@ class InputWidget extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final GestureTapCallback? onTap;
   final InputDecoration? decoration;
+  final Widget? suffixIcon;
 
   const InputWidget({
     super.key,
@@ -40,6 +41,7 @@ class InputWidget extends StatelessWidget {
     this.onSubmitted,
     this.onTap,
     this.decoration,
+    this.suffixIcon,
   });
 
   @override
@@ -66,6 +68,8 @@ class InputWidget extends StatelessWidget {
             InputDecoration(
               labelText: labelText,
               hintText: hintText,
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              suffixIcon: suffixIcon,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4.0),
               ),
