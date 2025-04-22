@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 class MenuItem {
   final String label;
   final IconData icon;
+  final VoidCallback? onTap;
 
-  MenuItem({required this.label, required this.icon});
+  const MenuItem({
+    required this.label,
+    required this.icon,
+    this.onTap,
+  });
 }
 
 class DrawerWidget extends StatelessWidget {
@@ -117,7 +122,12 @@ class DrawerWidget extends StatelessWidget {
                           fontWeight: isSelected ? FontWeight.bold : null,
                         ),
                       ),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.pop(context);
+                        if (item.onTap != null) {
+                          item.onTap!();
+                        }
+                      },
                     ),
                   );
                 },
