@@ -24,9 +24,17 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
       appBar: AppBarWidget(),
       drawer: DrawerWidget(
         menuItems: [
-          MenuItem(label: "Início", icon: Icons.home),
+          MenuItem(
+            label: "Início",
+            icon: Icons.calendar_today,
+            onTap: () => Navigator.pushNamed(context, '/home'),
+          ),
           MenuItem(label: "Provas", icon: Icons.article),
-          MenuItem(label: "Cronograma", icon: Icons.calendar_today),
+          MenuItem(
+            label: "Cronograma",
+            icon: Icons.calendar_today,
+            onTap: () => Navigator.pushNamed(context, '/cronograma'),
+          ),
           MenuItem(label: "Matérias", icon: Icons.book),
           MenuItem(label: "Desenpenho", icon: Icons.assessment),
           MenuItem(label: "Histórico", icon: Icons.history),
