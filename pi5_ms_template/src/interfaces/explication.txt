@@ -1,0 +1,1 @@
+Entrada e saída do sistema (HTTP, CLI, etc)
