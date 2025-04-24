@@ -5,6 +5,8 @@ import 'package:pi5_ms_mobile/src/presentation/ProvasPage.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/shared/util.dart';
 import 'package:pi5_ms_mobile/src/presentation/CronogramaPage.dart';
+import 'package:pi5_ms_mobile/src/presentation/DesempenhoPage.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,6 +32,15 @@ class _MyAppState extends State<MyApp> {
       valueListenable: _themeMode,
       builder: (context, themeMode, child) {
         return MaterialApp(
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', 'US'),
+            Locale('pt', 'BR'),
+          ],
           title: "PI5 MS Mobile",
           themeMode: themeMode,
           theme: theme.light(),
@@ -41,6 +52,7 @@ class _MyAppState extends State<MyApp> {
             '/provas': (context) => const ProvasPage(),
             '/login': (context) => const LoginPage(),
             '/cronograma': (context) => const CronogramaPage(),
+            '/desempenho': (context) => const DesempenhoPage(),
           },
           debugShowCheckedModeBanner: false,
         );
