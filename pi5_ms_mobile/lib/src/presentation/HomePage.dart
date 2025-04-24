@@ -1,6 +1,5 @@
+// ignore: file_names
 import 'package:flutter/material.dart';
-import 'package:pi5_ms_mobile/src/components/card_widget.dart';
-import 'package:pi5_ms_mobile/src/components/input_widget.dart';
 import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,8 +12,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final int _selectedIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     return ScaffoldWidget(
@@ -27,19 +24,19 @@ class _HomePageState extends State<HomePage> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF3A608F),
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Center(
+                    Center(
                       child: Text(
                         'Seja bem-vindo de volta',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           fontSize: 26,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w400,
@@ -49,12 +46,12 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 14),
                     Center(
                       child: RichText(
-                        text: const TextSpan(
+                        text: TextSpan(
                           children: [
                             TextSpan(
                               text: 'Vamos continuar sua ',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                                 fontSize: 16,
                                 fontFamily: 'Roboto',
                                 fontWeight: FontWeight.w500,
@@ -310,7 +307,7 @@ class _HomePageState extends State<HomePage> {
                     Text(
                       'Próximo evento',
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.outline,
                         fontSize: 12,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
