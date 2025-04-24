@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/components/card_widget.dart';
+import 'package:pi5_ms_mobile/src/components/gauge_chart_widget.dart';
 import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
 import 'package:pi5_ms_mobile/src/components/search_widget.dart';
 
@@ -62,10 +63,7 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  "Aqui fica os gráficos das provas",
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                DashboardGaugesSyncfusion(),
                 const SizedBox(height: 10),
                 SearchBarWidget(
                   controller: _searchController,
