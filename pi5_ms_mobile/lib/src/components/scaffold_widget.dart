@@ -36,13 +36,16 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
             onTap: () => Navigator.pushNamed(context, '/cronograma'),
           ),
           MenuItem(label: "Matérias", icon: Icons.book),
-          MenuItem(label: "Desenpenho", icon: Icons.assessment),
+          MenuItem(
+            label: "Desempenho", 
+            icon: Icons.assessment,
+            onTap: () => Navigator.pushNamed(context, '/desempenho')
+          ),
           MenuItem(label: "Histórico", icon: Icons.history),
           MenuItem(label: "Perfil", icon: Icons.person),
         ],
       ), // opcional
       body: widget.body,
-      bottomNavigationBar: NavigationWidget(currentIndex: widget.currentPage),
     );
   }
 }
