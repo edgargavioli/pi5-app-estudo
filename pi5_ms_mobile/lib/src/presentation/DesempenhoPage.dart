@@ -1,8 +1,8 @@
+// ignore: file_names
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
 import 'package:pi5_ms_mobile/src/components/button_widget.dart';
-import 'package:intl/intl.dart';
 
 class DesempenhoPage extends StatefulWidget {
   const DesempenhoPage({super.key});
@@ -76,19 +76,6 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
       barRods: [
         BarChartRodData(
           toY: (i + 1) * 2,
-          color: const Color(0xFF3A608F),
-          width: 12,
-        ),
-      ],
-    );
-  });
-
-  final List<BarChartGroupData> _monthlyData = List.generate(30, (i) {
-    return BarChartGroupData(
-      x: i + 1,
-      barRods: [
-        BarChartRodData(
-          toY: (i % 7 + 1) * 1.2,
           color: const Color(0xFF3A608F),
           width: 12,
         ),
