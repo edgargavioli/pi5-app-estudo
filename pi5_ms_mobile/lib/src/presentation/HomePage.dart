@@ -1,6 +1,5 @@
+// ignore: file_names
 import 'package:flutter/material.dart';
-import 'package:pi5_ms_mobile/src/components/card_widget.dart';
-import 'package:pi5_ms_mobile/src/components/input_widget.dart';
 import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -13,8 +12,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final int _selectedIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     return ScaffoldWidget(
@@ -27,19 +24,19 @@ class _HomePageState extends State<HomePage> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF3A608F),
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Center(
+                    Center(
                       child: Text(
                         'Seja bem-vindo de volta',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           fontSize: 26,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w400,
@@ -49,12 +46,12 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 14),
                     Center(
                       child: RichText(
-                        text: const TextSpan(
+                        text: TextSpan(
                           children: [
                             TextSpan(
                               text: 'Vamos continuar sua ',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                                 fontSize: 16,
                                 fontFamily: 'Roboto',
                                 fontWeight: FontWeight.w500,
@@ -115,11 +112,16 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 24),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Color(0xFFDDE0E6)),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 12,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -139,15 +141,20 @@ class _HomePageState extends State<HomePage> {
                             padding: const EdgeInsets.symmetric(horizontal: 30),
                             child: Container(
                               decoration: BoxDecoration(
-                                border: Border.all(color: Color(0xFFDDE0E6)),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
                                 borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: const [
-                                  Icon(Icons.local_fire_department, color: Colors.orange),
+                                  Icon(
+                                    Icons.local_fire_department,
+                                    color: Colors.orange,
+                                  ),
                                   SizedBox(width: 8),
                                   Text(
                                     '56 dias',
@@ -162,9 +169,9 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
+                          Text(
                             'Sequencia',
-                            style: TextStyle(fontSize: 10, fontFamily: 'Poppins'),
+                            style: Theme.of(context).textTheme.labelSmall,
                           ),
                         ],
                       ),
@@ -172,7 +179,7 @@ class _HomePageState extends State<HomePage> {
                     Container(
                       width: 1,
                       height: 80,
-                      color: Color(0xFFDDE0E6),
+                      color: Theme.of(context).colorScheme.outlineVariant,
                     ),
                     Expanded(
                       child: Column(
@@ -191,9 +198,11 @@ class _HomePageState extends State<HomePage> {
                             padding: const EdgeInsets.symmetric(horizontal: 30),
                             child: Container(
                               decoration: BoxDecoration(
-                                border: Border.all(color: Color(0xFFDDE0E6)),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
                                 borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Row(
@@ -216,7 +225,10 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(height: 8),
                           const Text(
                             'Nível Atual',
-                            style: TextStyle(fontSize: 10, fontFamily: 'Poppins'),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontFamily: 'Poppins',
+                            ),
                           ),
                         ],
                       ),
@@ -227,14 +239,16 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 24),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFDDE0E6)),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       'Continue de onde parou',
                       style: TextStyle(
@@ -244,7 +258,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Divider(
-                      color: Color(0xFFDDE0E6),
+                      color: Theme.of(context).colorScheme.outline,
                       thickness: 0.8,
                     ),
                     SizedBox(height: 8),
@@ -253,12 +267,12 @@ class _HomePageState extends State<HomePage> {
                         Icon(Icons.notes),
                         SizedBox(width: 12),
                         Text(
-                          'Vestibular', 
+                          'Vestibular',
                           style: TextStyle(
                             fontFamily: 'Roboto',
                             fontWeight: FontWeight.w500,
                             fontSize: 14,
-                          )
+                          ),
                         ),
                       ],
                     ),
@@ -268,14 +282,16 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 24),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFDDE0E6)),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       'Fique atento',
                       style: TextStyle(
@@ -285,13 +301,13 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Divider(
-                      color: Color(0xFFDDE0E6),
+                      color: Theme.of(context).colorScheme.outline,
                       thickness: 0.8,
                     ),
                     Text(
                       'Próximo evento',
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.outline,
                         fontSize: 12,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
@@ -299,12 +315,12 @@ class _HomePageState extends State<HomePage> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'List item', 
+                      'List item',
                       style: TextStyle(
                         fontFamily: 'Roboto',
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
-                      )
+                      ),
                     ),
                   ],
                 ),
