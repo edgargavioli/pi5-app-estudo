@@ -4,22 +4,37 @@ import 'package:pi5_ms_mobile/src/components/gauge_chart_widget.dart';
 import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
 import 'package:pi5_ms_mobile/src/components/search_widget.dart';
 
-class ProvaslistagemPage extends StatefulWidget {
-  const ProvaslistagemPage({super.key});
+class MateriasListagemPage extends StatefulWidget {
+  final int provaId;
+
+  const MateriasListagemPage({super.key, required this.provaId});
 
   @override
-  State<ProvaslistagemPage> createState() => _ProvaslistagemPageState();
+  _MateriasListagemPageState createState() => _MateriasListagemPageState();
 }
 
-class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
+class _MateriasListagemPageState extends State<MateriasListagemPage> {
   final TextEditingController _searchController = TextEditingController();
   int? _selectedIndex;
+
+  // Simulação de dados das matérias com provaId
+  final List<Map<String, dynamic>> _materias = [
+    {'id': 1, 'nome': 'Matemática', 'provaId': 1},
+    {'id': 2, 'nome': 'Português', 'provaId': 2},
+    {'id': 3, 'nome': 'História', 'provaId': 1},
+    {'id': 4, 'nome': 'Geografia', 'provaId': 3},
+    {'id': 5, 'nome': 'Ciências', 'provaId': 2},
+  ];
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double padding = screenWidth * 0.01;
-    final navigate = Navigator.of(context);
+
+    final List<Map<String, dynamic>> filteredMaterias =
+        _materias
+            .where((materia) => materia['provaId'] == widget.provaId)
+            .toList();
 
     return ScaffoldWidget(
       currentPage: 1,
@@ -31,7 +46,7 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
             FloatingActionButton(
               backgroundColor: Theme.of(context).colorScheme.errorContainer,
               onPressed: () {
-                print("deletar prova");
+                print("Deletar matéria: ${filteredMaterias[_selectedIndex!]}");
               },
               child: Icon(
                 Icons.delete_outline,
@@ -42,14 +57,14 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
           FloatingActionButton.extended(
             backgroundColor: Theme.of(context).colorScheme.primary,
             onPressed: () {
-              print("adicionar prova");
+              print("Adicionar matéria para a prova ${widget.provaId}");
             },
             icon: Icon(
               Icons.add,
               color: Theme.of(context).colorScheme.onPrimary,
             ),
             label: Text(
-              "Adicionar Prova",
+              "Adicionar Matéria",
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
@@ -69,20 +84,14 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
                     GaugeData(
                       label: "Tempo",
                       valueText: "00h00m",
-                      value: 0.5,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    GaugeData(
-                      label: "Nivel",
-                      valueText: "150xp",
-                      value: 50,
-                      color: Colors.amberAccent,
-                    ),
-                    GaugeData(
-                      label: "Desempenho",
-                      valueText: "0%",
                       value: 0,
                       color: Theme.of(context).colorScheme.primary,
+                    ),
+                    GaugeData(
+                      label: "Desenpenho",
+                      valueText: "10%",
+                      value: 10,
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
                   ],
                 ),
@@ -96,17 +105,19 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
                 const SizedBox(height: 10),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: 5, // Número de itens na lista
+                    itemCount: filteredMaterias.length,
                     itemBuilder: (context, index) {
                       return CardWidget(
-                        title: "Prova ${index + 1}",
-                        icon: Icons.article,
+                        title: filteredMaterias[index]['nome'],
+                        icon: Icons.book,
                         color:
                             _selectedIndex == index
                                 ? Theme.of(context).colorScheme.primaryContainer
                                 : null,
                         onTap: () {
-                          navigate.pushNamed('/materias', arguments: index);
+                          print(
+                            "Abrir detalhes da matéria: ${filteredMaterias[index]}",
+                          );
                         },
                         onLongPress: () {
                           setState(() {
