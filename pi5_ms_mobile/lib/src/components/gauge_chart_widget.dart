@@ -2,32 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class DashboardGaugesSyncfusion extends StatelessWidget {
-  const DashboardGaugesSyncfusion({super.key});
+  final List<GaugeData> gauges;
+
+  const DashboardGaugesSyncfusion({super.key, required this.gauges});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: const [
-        GaugeCard(
-          label: 'Tempo',
-          valueText: '00h00m',
-          value: 0,
-          color: Colors.indigo,
-        ),
-        GaugeCard(
-          label: 'Nível',
-          valueText: '150xp',
-          value: 30,
-          color: Colors.amber,
-        ),
-        GaugeCard(
-          label: 'Desempenho',
-          valueText: '0%',
-          value: 0,
-          color: Colors.blueAccent,
-        ),
-      ],
+      children:
+          gauges.map((gauge) {
+            return GaugeCard(
+              label: gauge.label,
+              valueText: gauge.valueText,
+              value: gauge.value,
+              color: gauge.color,
+            );
+          }).toList(),
     );
   }
 }
@@ -96,4 +87,18 @@ class GaugeCard extends StatelessWidget {
       ],
     );
   }
+}
+
+class GaugeData {
+  final String label;
+  final String valueText;
+  final double value;
+  final Color color;
+
+  GaugeData({
+    required this.label,
+    required this.valueText,
+    required this.value,
+    required this.color,
+  });
 }
