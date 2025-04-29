@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  auth-service:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/auth_db
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=auth_db
+      - ACCESS_TOKEN_SECRET=access_token_secret_key_change_in_production
+      - REFRESH_TOKEN_SECRET=refresh_token_secret_key_change_in_production
+      - ACCESS_TOKEN_EXPIRY=15m
+      - REFRESH_TOKEN_EXPIRY=7d
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=465
+      - SMTP_USER=alanvitorb98@gmail.com
+      # Substitua pela senha de app gerada nas configurações do Google
+      - SMTP_PASS=ccpdjquukkmkytzz
+      - EMAIL_FROM=alanvitorb98@gmail.com
+      - APP_URL=http://localhost:3000
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - RABBITMQ_EXCHANGE=auth_events
+      - PASSWORD_SALT_ROUNDS=10
+      - EMAIL_VERIFICATION_ENABLED=true
+      - MAX_LOGIN_ATTEMPTS=5
+      - ACCOUNT_LOCK_TIME=30m
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
