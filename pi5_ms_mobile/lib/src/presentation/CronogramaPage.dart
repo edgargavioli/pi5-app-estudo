@@ -104,7 +104,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
                                 padding: const EdgeInsets.all(12),
                                 child: Text(event, style: const TextStyle(fontFamily: 'Poppins')),
                               ),
-                            )).toList(),
+                            )),
                         const SizedBox(height: 12),
                       ],
                     ),
