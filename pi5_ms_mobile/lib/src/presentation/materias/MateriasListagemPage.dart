@@ -17,7 +17,6 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
   final TextEditingController _searchController = TextEditingController();
   int? _selectedIndex;
 
-  // Simulação de dados das matérias com provaId
   final List<Map<String, dynamic>> _materias = [
     {'id': 1, 'nome': 'Matemática', 'provaId': 1},
     {'id': 2, 'nome': 'Português', 'provaId': 2},
@@ -36,28 +35,24 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
             .where((materia) => materia['provaId'] == widget.provaId)
             .toList();
 
+    final List<String> materiasNames =
+        filteredMaterias.map((materia) => materia['nome'] as String).toList();
+
     return ScaffoldWidget(
       currentPage: 1,
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (_selectedIndex != null)
-            FloatingActionButton(
-              backgroundColor: Theme.of(context).colorScheme.errorContainer,
-              onPressed: () {
-                print("Deletar matéria: ${filteredMaterias[_selectedIndex!]}");
-              },
-              child: Icon(
-                Icons.delete_outline,
-                color: Theme.of(context).colorScheme.onErrorContainer,
-              ),
-            ),
-          const SizedBox(height: 12),
           FloatingActionButton.extended(
             backgroundColor: Theme.of(context).colorScheme.primary,
             onPressed: () {
-              print("Adicionar matéria para a prova ${widget.provaId}");
+              Navigator.pushNamed(
+                context,
+                '/materias/adicionar',
+                arguments:
+                    filteredMaterias.isNotEmpty ? materiasNames : <String>[],
+              );
             },
             icon: Icon(
               Icons.add,
