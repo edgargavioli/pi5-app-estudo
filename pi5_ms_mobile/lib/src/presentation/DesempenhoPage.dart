@@ -260,8 +260,9 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
                                               .toList(),
                                     ),
                               );
-                              if (exam != null)
+                              if (exam != null) {
                                 setState(() => _selectedExam = exam);
+                              }
                             },
                             icon: const Icon(Icons.filter_list, size: 18),
                             label: Text(

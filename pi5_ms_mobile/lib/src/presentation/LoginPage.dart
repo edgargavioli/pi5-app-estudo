@@ -245,14 +245,14 @@ class ButtonWidget extends StatelessWidget {
     final style = ButtonStyle(
       backgroundColor:
           outlined
-              ? MaterialStateProperty.all(Colors.transparent)
-              : MaterialStateProperty.all(colorSelected),
-      foregroundColor: MaterialStateProperty.all(textColorSelected),
-      padding: MaterialStateProperty.all(
+              ? WidgetStateProperty.all(Colors.transparent)
+              : WidgetStateProperty.all(colorSelected),
+      foregroundColor: WidgetStateProperty.all(textColorSelected),
+      padding: WidgetStateProperty.all(
         padding ?? const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
       ),
-      minimumSize: MaterialStateProperty.all(const Size.fromHeight(48)),
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+      minimumSize: WidgetStateProperty.all(const Size.fromHeight(48)),
+      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
         shape ??
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
@@ -262,7 +262,7 @@ class ButtonWidget extends StatelessWidget {
                       : BorderSide.none,
             ),
       ),
-      elevation: MaterialStateProperty.all(outlined ? 0 : 2),
+      elevation: WidgetStateProperty.all(outlined ? 0 : 2),
     );
 
     return SizedBox(
