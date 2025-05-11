@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/presentation/HomePage.dart';
 import 'package:pi5_ms_mobile/src/presentation/LoginPage.dart';
 import 'package:pi5_ms_mobile/src/presentation/estudos/EstudosPage.dart';
+import 'package:pi5_ms_mobile/src/presentation/materias/AdicionarMateriaPage.dart';
+import 'package:pi5_ms_mobile/src/presentation/materias/MateriasListagemPage.dart';
 import 'package:pi5_ms_mobile/src/presentation/provas/ProvasListagemPage.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/shared/util.dart';
@@ -52,6 +54,15 @@ class _MyAppState extends State<MyApp> {
             '/cronograma': (context) => const CronogramaPage(),
             '/desempenho': (context) => const DesempenhoPage(),
             '/estudos': (context) => const EstudosPage(),
+            '/materias':
+                (context) => MateriasListagemPage(
+                  provaId: ModalRoute.of(context)?.settings.arguments as int,
+                ),
+            '/materias/adicionar': (context) {
+              final materias =
+                  ModalRoute.of(context)?.settings.arguments as List<String>?;
+              return AdicionarMateriaPage(materias: materias ?? []);
+            },
           },
           debugShowCheckedModeBanner: false,
         );
