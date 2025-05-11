@@ -6,6 +6,9 @@ class CardWidget extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final Color? color;
+  final Widget? trailing;
+  final double? height;
+  final double? width;
 
   const CardWidget({
     super.key,
@@ -14,12 +17,16 @@ class CardWidget extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.color,
+    this.trailing,
+    this.height,
+    this.width,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 73,
+      height: height ?? 73,
+      width: width ?? double.infinity,
       child: Card(
         elevation: 0,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -42,6 +49,7 @@ class CardWidget extends StatelessWidget {
           ),
           onTap: onTap,
           onLongPress: onLongPress,
+          trailing: trailing,
         ),
       ),
     );
