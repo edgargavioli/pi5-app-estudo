@@ -36,40 +36,44 @@ class _CronogramaPageState extends State<CronogramaPage> {
             ),
           ),
           const Divider(thickness: 1, height: 20),
-          TableCalendar(
-            eventLoader: (day) => _events[_normalize(day)] ?? [],
-            firstDay: DateTime.utc(2020, 1, 1),
-            lastDay: DateTime.utc(2030, 12, 31),
-            focusedDay: _focusedDay,
-            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
-              });
-            },
-            calendarStyle: const CalendarStyle(
-              todayDecoration: BoxDecoration(
-                color: Color(0xFF3a608f),
-                shape: BoxShape.circle,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: TableCalendar(
+              locale: 'pt_BR',
+              eventLoader: (day) => _events[_normalize(day)] ?? [],
+              firstDay: DateTime.utc(2020, 1, 1),
+              lastDay: DateTime.utc(2030, 12, 31),
+              focusedDay: _focusedDay,
+              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+              },
+              calendarStyle: const CalendarStyle(
+                todayDecoration: BoxDecoration(
+                  color: Color(0xFF3a608f),
+                  shape: BoxShape.circle,
+                ),
+                selectedDecoration: BoxDecoration(
+                  color: Color(0xFF73777F),
+                  shape: BoxShape.circle,
+                ),
               ),
-              selectedDecoration: BoxDecoration(
-                color: Color(0xFF73777F),
-                shape: BoxShape.circle,
+              headerStyle: const HeaderStyle(
+                formatButtonVisible: false,
+                titleCentered: true,
+                titleTextStyle: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF3a608f),
+                ),
+                leftChevronIcon: Icon(Icons.chevron_left, color: Color(0xFF3a608f)),
+                rightChevronIcon: Icon(Icons.chevron_right, color: Color(0xFF3a608f)),
               ),
+              calendarFormat: CalendarFormat.month,
             ),
-            headerStyle: const HeaderStyle(
-              formatButtonVisible: false,
-              titleCentered: true,
-              titleTextStyle: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF3a608f),
-              ),
-              leftChevronIcon: Icon(Icons.chevron_left, color: Color(0xFF3a608f)),
-              rightChevronIcon: Icon(Icons.chevron_right, color: Color(0xFF3a608f)),
-            ),
-            calendarFormat: CalendarFormat.month,
           ),
           const Divider(thickness: 1, height: 20),
           Expanded(

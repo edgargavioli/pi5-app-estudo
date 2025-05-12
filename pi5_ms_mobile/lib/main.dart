@@ -12,6 +12,7 @@ import 'package:pi5_ms_mobile/src/presentation/DesempenhoPage.dart';
 import 'package:pi5_ms_mobile/src/presentation/provas/EditProvaPage.dart';
 import 'package:pi5_ms_mobile/src/presentation/provas/AdicionarProvaPage.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:pi5_ms_mobile/src/presentation/historico/HistoricoPage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,6 +58,7 @@ class _MyAppState extends State<MyApp> {
             '/desempenho': (context) => const DesempenhoPage(),
             '/estudos': (context) => const EstudosPage(),
             '/editprova': (context) => const EditProvaPage(),
+            '/historico': (context) => const HistoricoPage(),
             '/addprova': (context) => const AdicionarProvaPage(),
             '/materias':
                 (context) => MateriasListagemPage(
