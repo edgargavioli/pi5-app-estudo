@@ -43,11 +43,15 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
           ),
           MenuItem(label: "Matérias", icon: Icons.book),
           MenuItem(
-            label: "Desenpenho", 
+            label: "Desempenho", 
             icon: Icons.assessment,
             onTap: () => Navigator.pushNamed(context, '/desempenho'),
           ),
-          MenuItem(label: "Histórico", icon: Icons.history),
+          MenuItem(
+            label: "Histórico", 
+            icon: Icons.history,
+            onTap: () => Navigator.pushNamed(context, '/historico'),
+          ),
           MenuItem(label: "Perfil", icon: Icons.person),
         ],
       ), // opcional
