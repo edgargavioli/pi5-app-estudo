@@ -42,7 +42,7 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
           FloatingActionButton.extended(
             backgroundColor: Theme.of(context).colorScheme.primary,
             onPressed: () {
-              print("adicionar prova");
+              Navigator.pushNamed(context, '/addprova');
             },
             icon: Icon(
               Icons.add,
