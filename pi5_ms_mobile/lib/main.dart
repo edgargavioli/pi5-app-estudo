@@ -10,6 +10,7 @@ import 'package:pi5_ms_mobile/src/shared/util.dart';
 import 'package:pi5_ms_mobile/src/presentation/CronogramaPage.dart';
 import 'package:pi5_ms_mobile/src/presentation/DesempenhoPage.dart';
 import 'package:pi5_ms_mobile/src/presentation/provas/EditProvaPage.dart';
+import 'package:pi5_ms_mobile/src/presentation/provas/AdicionarProvaPage.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:pi5_ms_mobile/src/presentation/historico/HistoricoPage.dart';
 
@@ -58,6 +59,7 @@ class _MyAppState extends State<MyApp> {
             '/estudos': (context) => const EstudosPage(),
             '/editprova': (context) => const EditProvaPage(),
             '/historico': (context) => const HistoricoPage(),
+            '/addprova': (context) => const AdicionarProvaPage(),
             '/materias':
                 (context) => MateriasListagemPage(
                   provaId: ModalRoute.of(context)?.settings.arguments as int,
