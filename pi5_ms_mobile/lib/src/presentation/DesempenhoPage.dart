@@ -86,7 +86,7 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldWidget(
-      currentPage: 3, // index for Desempenho
+      currentPage: 4, // index for Desempenho
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 20.0),
