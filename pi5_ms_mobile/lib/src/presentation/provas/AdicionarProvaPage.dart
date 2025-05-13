@@ -14,8 +14,10 @@ class AdicionarProvaPage extends StatefulWidget {
 class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController dataProvaController = TextEditingController();
-  final TextEditingController dataInicioInscricaoController = TextEditingController();
-  final TextEditingController dataFimInscricaoController = TextEditingController();
+  final TextEditingController dataInicioInscricaoController =
+      TextEditingController();
+  final TextEditingController dataFimInscricaoController =
+      TextEditingController();
   final TextEditingController materiaController = TextEditingController();
 
   List<String> materias = [];
@@ -78,7 +80,10 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Período de inscrição', style: TextStyle(fontSize: 12, color: Colors.grey[700])),
+                child: Text(
+                  'Período de inscrição',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                ),
               ),
               const SizedBox(height: 4),
               Row(
@@ -88,7 +93,8 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                       labelText: 'De:',
                       controller: dataInicioInscricaoController,
                       readOnly: true,
-                      onTap: () => selecionarData(dataInicioInscricaoController),
+                      onTap:
+                          () => selecionarData(dataInicioInscricaoController),
                       width: double.infinity,
                     ),
                   ),
@@ -123,7 +129,10 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                   title: materia,
                   icon: Icons.article,
                   trailing: IconButton(
-                    icon: const Icon(Icons.remove_circle, color: Colors.redAccent),
+                    icon: const Icon(
+                      Icons.remove_circle,
+                      color: Colors.redAccent,
+                    ),
                     onPressed: () => removerMateria(idx),
                   ),
                 );
@@ -134,11 +143,14 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFD7E8FF),
         onPressed: () {
           Navigator.popAndPushNamed(context, '/provas');
         },
-        child: const Icon(Icons.check, color: Colors.black),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: Icon(
+          Icons.check,
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
       ),
     );
   }
