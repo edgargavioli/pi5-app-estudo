@@ -3,6 +3,7 @@ import 'package:pi5_ms_mobile/src/presentation/HomePage.dart';
 import 'package:pi5_ms_mobile/src/presentation/LoginPage.dart';
 import 'package:pi5_ms_mobile/src/presentation/estudos/EstudosPage.dart';
 import 'package:pi5_ms_mobile/src/presentation/materias/AdicionarMateriaPage.dart';
+import 'package:pi5_ms_mobile/src/presentation/materias/MateriasConfig.dart';
 import 'package:pi5_ms_mobile/src/presentation/materias/MateriasListagemPage.dart';
 import 'package:pi5_ms_mobile/src/presentation/provas/ProvasListagemPage.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
@@ -64,6 +65,11 @@ class _MyAppState extends State<MyApp> {
               final materias =
                   ModalRoute.of(context)?.settings.arguments as List<String>?;
               return AdicionarMateriaPage(materias: materias ?? []);
+            },
+            '/materias/configurar': (context) {
+              final materias =
+                  ModalRoute.of(context)?.settings.arguments as List<String>?;
+              return ConfigMateriaPage(materias: materias ?? []);
             },
           },
           debugShowCheckedModeBanner: false,
