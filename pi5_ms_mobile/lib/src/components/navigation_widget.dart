@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/presentation/HomePage.dart';
 import 'package:pi5_ms_mobile/src/presentation/provas/ProvasListagemPage.dart';
+import 'package:pi5_ms_mobile/src/presentation/user/UserProfilePageMain.dart';
 
 class NavigationWidget extends StatelessWidget {
   final int currentIndex;
@@ -18,9 +19,9 @@ class NavigationWidget extends StatelessWidget {
         case 1:
           nextPage = const ProvaslistagemPage();
           break;
-        // case 2:
-        //   nextPage = const PerfilPage();
-        //   break;
+         case 2:
+           nextPage = const UserProfilePageMain();
+           break;
         default:
           return;
       }

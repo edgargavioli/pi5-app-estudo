@@ -50,13 +50,13 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
             isSelected: widget.currentPage == 3, 
           ),
           MenuItem(
-            label: "Desempenho", 
+            label: "Desempenho",
             icon: Icons.assessment,
             onTap: () => Navigator.pushNamed(context, '/desempenho'),
             isSelected: widget.currentPage == 4, 
           ),
           MenuItem(
-            label: "Histórico", 
+            label: "Histórico",
             icon: Icons.history,
             onTap: () => Navigator.pushNamed(context, '/historico'),
             isSelected: widget.currentPage == 5, 
@@ -64,6 +64,7 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
           MenuItem(
             label: "Perfil", 
             icon: Icons.person,
+            onTap: () => Navigator.pushNamed(context, '/perfil'),
             isSelected: widget.currentPage == 6, 
           ),
         ],
