@@ -23,7 +23,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldWidget(
-      currentPage: 1,
+      currentPage: 2,
       body: Column(
         children: [
           Text(

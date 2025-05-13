@@ -39,7 +39,7 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
         filteredMaterias.map((materia) => materia['nome'] as String).toList();
 
     return ScaffoldWidget(
-      currentPage: 1,
+      currentPage: 3,
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
