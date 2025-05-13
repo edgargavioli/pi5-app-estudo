@@ -7,12 +7,14 @@ class ScaffoldWidget extends StatefulWidget {
   final Widget body;
   final int currentPage;
   final Widget? floatingActionButton;
+  final AppBar? appBar;
 
   const ScaffoldWidget({
     super.key,
     required this.body,
     required this.currentPage,
     this.floatingActionButton,
+    this.appBar,
   });
 
   @override
@@ -23,7 +25,7 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarWidget(),
+      appBar: widget.appBar ?? AppBarWidget(),
       drawer: DrawerWidget(
         menuItems: [
           MenuItem(
@@ -43,12 +45,12 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
           ),
           MenuItem(label: "Matérias", icon: Icons.book),
           MenuItem(
-            label: "Desempenho", 
+            label: "Desempenho",
             icon: Icons.assessment,
             onTap: () => Navigator.pushNamed(context, '/desempenho'),
           ),
           MenuItem(
-            label: "Histórico", 
+            label: "Histórico",
             icon: Icons.history,
             onTap: () => Navigator.pushNamed(context, '/historico'),
           ),
@@ -57,7 +59,7 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
       ), // opcional
       body: widget.body,
       floatingActionButton: widget.floatingActionButton,
-      bottomNavigationBar: NavigationWidget(currentIndex: widget.currentPage),
+      bottomNavigationBar: NavigationWidget(currentPage: widget.currentPage),
     );
   }
 }
