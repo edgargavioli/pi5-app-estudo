@@ -23,7 +23,7 @@ class _HistoricoPageState extends State<HistoricoPage> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldWidget(
-      currentPage: 1,
+      currentPage: 5,
       body: Column(
         children: [
           Text(
