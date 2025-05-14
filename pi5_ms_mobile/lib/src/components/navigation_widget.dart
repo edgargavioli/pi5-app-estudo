@@ -13,16 +13,28 @@ class _NavigationWidgetState extends State<NavigationWidget> {
   late int _selectedIndex;
 
   final List<NavigationDestination> destinations = [
-    const NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-    const NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
+    const NavigationDestination(icon: Icon(Icons.home), label: 'Início'),
+    const NavigationDestination(icon: Icon(Icons.article), label: 'Provas'),
     const NavigationDestination(
-      icon: Icon(Icons.notifications),
-      label: 'Notifications',
+      icon: Icon(Icons.calendar_today),
+      label: 'Cronograma',
     ),
-    const NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+    const NavigationDestination(icon: Icon(Icons.history), label: 'Histórico'),
+    const NavigationDestination(
+      icon: Icon(Icons.assessment),
+      label: 'Desempenho',
+    ),
+    const NavigationDestination(icon: Icon(Icons.person), label: 'Perfil'),
   ];
 
-  final List<String> routes = ['/home', '/provas', '/historico', '/profile'];
+  final List<String> routes = [
+    '/home',
+    '/provas',
+    '/cronograma',
+    '/historico',
+    '/desempenho',
+    '/perfil',
+  ];
 
   @override
   void initState() {
@@ -34,7 +46,6 @@ class _NavigationWidgetState extends State<NavigationWidget> {
     setState(() {
       _selectedIndex = index;
     });
-    Navigator.pushNamed(context, routes[index]);
   }
 
   @override
