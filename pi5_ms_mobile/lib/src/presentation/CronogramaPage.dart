@@ -23,7 +23,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldWidget(
-      currentPage: 1,
+      currentPage: 2,
       body: Column(
         children: [
           Text(
@@ -69,50 +69,75 @@ class _CronogramaPageState extends State<CronogramaPage> {
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF3a608f),
                 ),
-                leftChevronIcon: Icon(Icons.chevron_left, color: Color(0xFF3a608f)),
-                rightChevronIcon: Icon(Icons.chevron_right, color: Color(0xFF3a608f)),
+                leftChevronIcon: Icon(
+                  Icons.chevron_left,
+                  color: Color(0xFF3a608f),
+                ),
+                rightChevronIcon: Icon(
+                  Icons.chevron_right,
+                  color: Color(0xFF3a608f),
+                ),
               ),
               calendarFormat: CalendarFormat.month,
             ),
           ),
           const Divider(thickness: 1, height: 20),
           Expanded(
-            child: _selectedDay == null
-                ? Center(
-                    child: Text(
-                      'Selecione um dia para ver eventos.',
-                      style: TextStyle(fontFamily: 'Poppins', fontSize: 14),
-                    ),
-                  )
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Text(
-                            'Eventos em ${_selectedDay!.day}/${_selectedDay!.month}/${_selectedDay!.year}',
-                            style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+            child:
+                _selectedDay == null
+                    ? Center(
+                      child: Text(
+                        'Selecione um dia para ver eventos.',
+                        style: TextStyle(fontFamily: 'Poppins', fontSize: 14),
+                      ),
+                    )
+                    : SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
+                            child: Text(
+                              'Eventos em ${_selectedDay!.day}/${_selectedDay!.month}/${_selectedDay!.year}',
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        ...?_events[_normalize(_selectedDay!)]?.map((event) => Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                          const SizedBox(height: 4),
+                          ...?_events[_normalize(_selectedDay!)]?.map(
+                            (event) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 4.0,
+                              ),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: const Color(0xFFDDE0E6)),
+                                  border: Border.all(
+                                    color: const Color(0xFFDDE0E6),
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                   color: Colors.white,
                                 ),
                                 padding: const EdgeInsets.all(12),
-                                child: Text(event, style: const TextStyle(fontFamily: 'Poppins')),
+                                child: Text(
+                                  event,
+                                  style: const TextStyle(fontFamily: 'Poppins'),
+                                ),
                               ),
-                            )),
-                        const SizedBox(height: 12),
-                      ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
                     ),
-                  ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -126,21 +151,22 @@ class _CronogramaPageState extends State<CronogramaPage> {
                   // exactly as in your earlier implementation but inside this onPressed.
                   final type = await showModalBottomSheet<String>(
                     context: context,
-                    builder: (ctx) => Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          title: const Text('Evento'),
-                          leading: const Icon(Icons.event),
-                          onTap: () => Navigator.pop(ctx, 'evento'),
+                    builder:
+                        (ctx) => Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              title: const Text('Evento'),
+                              leading: const Icon(Icons.event),
+                              onTap: () => Navigator.pop(ctx, 'evento'),
+                            ),
+                            ListTile(
+                              title: const Text('Estudo'),
+                              leading: const Icon(Icons.school),
+                              onTap: () => Navigator.pop(ctx, 'estudo'),
+                            ),
+                          ],
                         ),
-                        ListTile(
-                          title: const Text('Estudo'),
-                          leading: const Icon(Icons.school),
-                          onTap: () => Navigator.pop(ctx, 'estudo'),
-                        ),
-                      ],
-                    ),
                   );
                   if (type == null) return;
                   if (type == 'evento') {
@@ -150,57 +176,83 @@ class _CronogramaPageState extends State<CronogramaPage> {
                     TimeOfDay? end;
                     final result = await showDialog<bool>(
                       context: context,
-                      builder: (ctx) => StatefulBuilder(
-                        builder: (ctx, setSt) => AlertDialog(
-                          title: const Text('Novo Evento'),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextField(
-                                controller: nameCtl,
-                                decoration: const InputDecoration(labelText: 'Nome do evento'),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TextButton(
-                                      onPressed: () async {
-                                        final t = await showTimePicker(context: ctx, initialTime: TimeOfDay.now());
-                                        if (t != null) setSt(() => start = t);
-                                      },
-                                      child: Text(start?.format(ctx) ?? 'Horário início'),
-                                    ),
+                      builder:
+                          (ctx) => StatefulBuilder(
+                            builder:
+                                (ctx, setSt) => AlertDialog(
+                                  title: const Text('Novo Evento'),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      TextField(
+                                        controller: nameCtl,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Nome do evento',
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextButton(
+                                              onPressed: () async {
+                                                final t = await showTimePicker(
+                                                  context: ctx,
+                                                  initialTime: TimeOfDay.now(),
+                                                );
+                                                if (t != null)
+                                                  setSt(() => start = t);
+                                              },
+                                              child: Text(
+                                                start?.format(ctx) ??
+                                                    'Horário início',
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: TextButton(
+                                              onPressed: () async {
+                                                final t = await showTimePicker(
+                                                  context: ctx,
+                                                  initialTime: TimeOfDay.now(),
+                                                );
+                                                if (t != null)
+                                                  setSt(() => end = t);
+                                              },
+                                              child: Text(
+                                                end?.format(ctx) ??
+                                                    'Horário fim',
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                  Expanded(
-                                    child: TextButton(
-                                      onPressed: () async {
-                                        final t = await showTimePicker(context: ctx, initialTime: TimeOfDay.now());
-                                        if (t != null) setSt(() => end = t);
-                                      },
-                                      child: Text(end?.format(ctx) ?? 'Horário fim'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed:
+                                          () => Navigator.pop(ctx, false),
+                                      child: const Text('Cancelar'),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                    TextButton(
+                                      onPressed: () {
+                                        if (nameCtl.text.isNotEmpty &&
+                                            start != null &&
+                                            end != null)
+                                          Navigator.pop(ctx, true);
+                                      },
+                                      child: const Text('Salvar'),
+                                    ),
+                                  ],
+                                ),
                           ),
-                          actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-                            TextButton(
-                              onPressed: () {
-                                if (nameCtl.text.isNotEmpty && start != null && end != null) Navigator.pop(ctx, true);
-                              },
-                              child: const Text('Salvar'),
-                            ),
-                          ],
-                        ),
-                      ),
                     );
                     if (result == true) {
                       setState(() {
                         final key = _normalize(_selectedDay!);
-                        final desc = '${nameCtl.text} (${start!.format(context)} - ${end!.format(context)})';
+                        final desc =
+                            '${nameCtl.text} (${start!.format(context)} - ${end!.format(context)})';
                         _events[key] = (_events[key] ?? [])..add(desc);
                       });
                     }
@@ -214,65 +266,109 @@ class _CronogramaPageState extends State<CronogramaPage> {
                     TimeOfDay? end;
                     final result = await showDialog<bool>(
                       context: context,
-                      builder: (ctx) => StatefulBuilder(
-                        builder: (ctx, setSt) => AlertDialog(
-                          title: const Text('Novo Estudo'),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              DropdownButtonFormField<String>(
-                                value: selectedProva,
-                                items: provas.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
-                                onChanged: (v) => setSt(() => selectedProva = v!),
-                                decoration: const InputDecoration(labelText: 'Prova'),
-                              ),
-                              DropdownButtonFormField<String>(
-                                value: selectedMat,
-                                items: materias.map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
-                                onChanged: (v) => setSt(() => selectedMat = v!),
-                                decoration: const InputDecoration(labelText: 'Matéria'),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TextButton(
-                                      onPressed: () async {
-                                        final t = await showTimePicker(context: ctx, initialTime: TimeOfDay.now());
-                                        if (t != null) setSt(() => start = t);
-                                      },
-                                      child: Text(start?.format(ctx) ?? 'Início'),
-                                    ),
+                      builder:
+                          (ctx) => StatefulBuilder(
+                            builder:
+                                (ctx, setSt) => AlertDialog(
+                                  title: const Text('Novo Estudo'),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      DropdownButtonFormField<String>(
+                                        value: selectedProva,
+                                        items:
+                                            provas
+                                                .map(
+                                                  (p) => DropdownMenuItem(
+                                                    value: p,
+                                                    child: Text(p),
+                                                  ),
+                                                )
+                                                .toList(),
+                                        onChanged:
+                                            (v) =>
+                                                setSt(() => selectedProva = v!),
+                                        decoration: const InputDecoration(
+                                          labelText: 'Prova',
+                                        ),
+                                      ),
+                                      DropdownButtonFormField<String>(
+                                        value: selectedMat,
+                                        items:
+                                            materias
+                                                .map(
+                                                  (m) => DropdownMenuItem(
+                                                    value: m,
+                                                    child: Text(m),
+                                                  ),
+                                                )
+                                                .toList(),
+                                        onChanged:
+                                            (v) =>
+                                                setSt(() => selectedMat = v!),
+                                        decoration: const InputDecoration(
+                                          labelText: 'Matéria',
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextButton(
+                                              onPressed: () async {
+                                                final t = await showTimePicker(
+                                                  context: ctx,
+                                                  initialTime: TimeOfDay.now(),
+                                                );
+                                                if (t != null)
+                                                  setSt(() => start = t);
+                                              },
+                                              child: Text(
+                                                start?.format(ctx) ?? 'Início',
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: TextButton(
+                                              onPressed: () async {
+                                                final t = await showTimePicker(
+                                                  context: ctx,
+                                                  initialTime: TimeOfDay.now(),
+                                                );
+                                                if (t != null)
+                                                  setSt(() => end = t);
+                                              },
+                                              child: Text(
+                                                end?.format(ctx) ?? 'Fim',
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                  Expanded(
-                                    child: TextButton(
-                                      onPressed: () async {
-                                        final t = await showTimePicker(context: ctx, initialTime: TimeOfDay.now());
-                                        if (t != null) setSt(() => end = t);
-                                      },
-                                      child: Text(end?.format(ctx) ?? 'Fim'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed:
+                                          () => Navigator.pop(ctx, false),
+                                      child: const Text('Cancelar'),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                    TextButton(
+                                      onPressed: () {
+                                        if (start != null && end != null)
+                                          Navigator.pop(ctx, true);
+                                      },
+                                      child: const Text('Salvar'),
+                                    ),
+                                  ],
+                                ),
                           ),
-                          actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-                            TextButton(
-                              onPressed: () {
-                                if (start != null && end != null) Navigator.pop(ctx, true);
-                              },
-                              child: const Text('Salvar'),
-                            ),
-                          ],
-                        ),
-                      ),
                     );
                     if (result == true) {
                       setState(() {
                         final key = _normalize(_selectedDay!);
-                        final desc = 'Estudo: $selectedProva / $selectedMat (${start!.format(context)}-${end!.format(context)})';
+                        final desc =
+                            'Estudo: $selectedProva / $selectedMat (${start!.format(context)}-${end!.format(context)})';
                         _events[key] = (_events[key] ?? [])..add(desc);
                       });
                     }
