@@ -1,59 +1,50 @@
 import 'package:flutter/material.dart';
 
-class NavigationWidget extends StatefulWidget {
-  final int currentPage;
+class BottonNavBarWidget extends StatefulWidget {
+  final PageController pageController;
+  final ValueNotifier<int> currentIndex;
 
-  const NavigationWidget({super.key, required this.currentPage});
+  const BottonNavBarWidget({
+    super.key,
+    required this.pageController,
+    required this.currentIndex,
+  });
 
   @override
-  State<NavigationWidget> createState() => _NavigationWidgetState();
+  State<BottonNavBarWidget> createState() => _BottonNavBarWidgetState();
 }
 
-class _NavigationWidgetState extends State<NavigationWidget> {
-  late int _selectedIndex;
-
-  final List<NavigationDestination> destinations = [
-    const NavigationDestination(icon: Icon(Icons.home), label: 'Início'),
-    const NavigationDestination(icon: Icon(Icons.article), label: 'Provas'),
-    const NavigationDestination(
-      icon: Icon(Icons.calendar_today),
-      label: 'Cronograma',
-    ),
-    const NavigationDestination(icon: Icon(Icons.history), label: 'Histórico'),
-    const NavigationDestination(
-      icon: Icon(Icons.assessment),
-      label: 'Desempenho',
-    ),
-    const NavigationDestination(icon: Icon(Icons.person), label: 'Perfil'),
-  ];
-
-  final List<String> routes = [
-    '/home',
-    '/provas',
-    '/cronograma',
-    '/historico',
-    '/desempenho',
-    '/perfil',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedIndex = widget.currentPage;
-  }
-
-  void _onDestinationSelected(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
+class _BottonNavBarWidgetState extends State<BottonNavBarWidget> {
   @override
   Widget build(BuildContext context) {
-    return NavigationBar(
-      selectedIndex: _selectedIndex,
-      destinations: destinations,
-      onDestinationSelected: _onDestinationSelected,
+    return ValueListenableBuilder<int>(
+      valueListenable: widget.currentIndex,
+      builder: (context, currentIndex, _) {
+        return NavigationBar(
+          selectedIndex: currentIndex,
+          onDestinationSelected: (index) {
+            widget.currentIndex.value = index;
+            widget.pageController.animateToPage(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          },
+          destinations: const [
+            NavigationDestination(icon: Icon(Icons.home), label: 'Início'),
+            NavigationDestination(icon: Icon(Icons.article), label: 'Provas'),
+            NavigationDestination(
+              icon: Icon(Icons.calendar_today),
+              label: 'Cronograma',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.history),
+              label: 'Histórico',
+            ),
+            NavigationDestination(icon: Icon(Icons.person), label: 'Perfil'),
+          ],
+        );
+      },
     );
   }
 }

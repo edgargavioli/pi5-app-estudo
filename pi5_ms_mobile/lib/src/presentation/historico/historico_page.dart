@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
-import 'package:pi5_ms_mobile/src/components/button_widget.dart';
 
 class HistoricoPage extends StatefulWidget {
   const HistoricoPage({super.key});
@@ -22,9 +20,8 @@ class _HistoricoPageState extends State<HistoricoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldWidget(
-      currentPage: 3,
-      body: Column(
+    return Center(
+      child: Column(
         children: [
           Text(
             'Histórico',

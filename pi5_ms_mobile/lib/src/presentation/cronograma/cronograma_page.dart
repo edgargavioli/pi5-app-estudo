@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
 import 'package:pi5_ms_mobile/src/components/button_widget.dart';
 
 class CronogramaPage extends StatefulWidget {
@@ -22,9 +21,8 @@ class _CronogramaPageState extends State<CronogramaPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldWidget(
-      currentPage: 2,
-      body: Column(
+    return Center(
+      child: Column(
         children: [
           Text(
             'Cronograma',

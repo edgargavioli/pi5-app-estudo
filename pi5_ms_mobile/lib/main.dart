@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pi5_ms_mobile/src/presentation/HomePage.dart';
-import 'package:pi5_ms_mobile/src/presentation/LoginPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/estudos/EstudosPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/materias/AdicionarMateriaPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/materias/MateriasListagemPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/provas/ProvasListagemPage.dart';
+import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
+import 'package:pi5_ms_mobile/src/presentation/auth/login_page.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/shared/util.dart';
-import 'package:pi5_ms_mobile/src/presentation/CronogramaPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/DesempenhoPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/provas/EditProvaPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/provas/AdicionarProvaPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/user/UserProfilePageMain.dart';
-import 'package:pi5_ms_mobile/src/presentation/user/UserProfilePageInfo.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:pi5_ms_mobile/src/presentation/historico/HistoricoPage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,6 +18,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final ValueNotifier<ThemeMode> _themeMode = ValueNotifier(ThemeMode.system);
+  bool _isAuthenticated = false;
 
   @override
   Widget build(BuildContext context) {
@@ -50,33 +40,20 @@ class _MyAppState extends State<MyApp> {
           themeMode: themeMode,
           theme: theme.light(),
           darkTheme: theme.dark(),
-          initialRoute: '/',
+          initialRoute: _isAuthenticated ? '/home' : '/login',
           routes: {
-            '/': (context) => const LoginPage(),
-            '/home': (context) => const HomePage(title: "PI5 MS Mobile"),
-            '/provas': (context) => const ProvaslistagemPage(),
-            '/login': (context) => const LoginPage(),
-            '/cronograma': (context) => const CronogramaPage(),
-            '/desempenho': (context) => const DesempenhoPage(),
-            '/estudos': (context) => const EstudosPage(),
-            '/editprova': (context) => const EditProvaPage(),
-            '/historico': (context) => const HistoricoPage(),
-            '/addprova': (context) => const AdicionarProvaPage(),
-            '/perfil': (context) => const UserProfilePageMain(),
-            '/perfilInfo': (context) => const UserProfilePageInfo(),
-            '/materias':
-                (context) => MateriasListagemPage(
-                  provaId: ModalRoute.of(context)?.settings.arguments as int,
-                ),
-            '/materias/adicionar': (context) {
-              final materias =
-                  ModalRoute.of(context)?.settings.arguments as List<String>?;
-              return AdicionarMateriaPage(materias: materias ?? []);
-            },
+            '/': (context) => LoginPage(onLogin: _onLogin),
+            '/home': (context) => ScaffoldWidget(),
           },
           debugShowCheckedModeBanner: false,
         );
       },
     );
+  }
+
+  void _onLogin() {
+    setState(() {
+      _isAuthenticated = true;
+    });
   }
 }
