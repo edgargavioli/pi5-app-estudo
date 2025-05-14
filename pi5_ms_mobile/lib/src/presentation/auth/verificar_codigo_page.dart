@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/components/input_widget.dart';
-import 'package:pi5_ms_mobile/src/presentation/LoginPage.dart';
+import 'package:pi5_ms_mobile/src/presentation/auth/login_page.dart';
+import 'package:pi5_ms_mobile/src/presentation/auth/nova_senha_page.dart';
+import 'package:pi5_ms_mobile/src/presentation/auth/recuperar_senha_page.dart';
 
-class SignupPage extends StatefulWidget {
-  const SignupPage({super.key});
- 
+class VerificaCodigoPage extends StatefulWidget {
+  const VerificaCodigoPage({super.key});
+
   @override
-  State<SignupPage> createState() => _SignupPageState();
+  State<VerificaCodigoPage> createState() => _VerificaCodigoPageState();
 }
- 
-class _SignupPageState extends State<SignupPage> {
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
- 
+
+class _VerificaCodigoPageState extends State<VerificaCodigoPage> {
+  final TextEditingController _codigoController = TextEditingController();
+
+  @override
+  void dispose() {
+    _codigoController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -27,7 +30,7 @@ class _SignupPageState extends State<SignupPage> {
         body: Column(
           children: [
             Expanded(
-              flex: 8,
+              flex: 1,
               child: ClipPath(
                 clipper: BottomWaveClipper(),
                 child: Container(
@@ -54,11 +57,18 @@ class _SignupPageState extends State<SignupPage> {
                             Align(
                               alignment: Alignment.topLeft,
                               child: IconButton(
-                                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                                icon: const Icon(
+                                  Icons.arrow_back_ios,
+                                  color: Colors.white,
+                                ),
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) =>
+                                              const RecuperaSenhaPage(),
+                                    ),
                                   );
                                 },
                               ),
@@ -97,7 +107,7 @@ class _SignupPageState extends State<SignupPage> {
                         child: Padding(
                           padding: EdgeInsets.only(left: 30),
                           child: Text(
-                            'Crie a sua\nconta',
+                            'Verifique\no código',
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               color: Colors.white,
@@ -114,85 +124,29 @@ class _SignupPageState extends State<SignupPage> {
               ),
             ),
             Expanded(
-              flex: 10,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
                       width: 300,
                       height: 56,
                       child: InputWidget(
-                        labelText: 'NOME',
-                        hintText: 'Edgar Allan Poe',
-                        controller: _nameController,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    SizedBox(
-                      width: 300,
-                      height: 56,
-                      child: InputWidget(
-                        labelText: 'EMAIL',
-                        hintText: 'edgar@gmail.com',
-                        controller: _emailController,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    SizedBox(
-                      width: 300,
-                      height: 56,
-                      child: InputWidget(
-                        labelText: 'SENHA',
+                        labelText: 'CODIGO DE VERIFICACAO',
                         hintText: '********',
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
+                        controller: _codigoController,
+                        obscureText: true,
                       ),
                     ),
-                    const SizedBox(height: 18),
-                    SizedBox(
-                      width: 300,
-                      height: 56,
-                      child: InputWidget(
-                        labelText: 'CONFIRME A SENHA',
-                        hintText: '********',
-                        controller: _confirmPasswordController,
-                        obscureText: _obscureConfirmPassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureConfirmPassword = !_obscureConfirmPassword;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 200),
                     ButtonWidget(
-                      text: 'Criar conta',
+                      text: 'Verificar',
                       onPressed: () {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
+                            builder: (context) => const NovaSenhaPage(),
                           ),
                         );
                       },
@@ -201,12 +155,7 @@ class _SignupPageState extends State<SignupPage> {
                     const SizedBox(height: 24),
                     TextButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
-                          ),
-                        );
+                        Navigator.pop(context);
                       },
                       child: const Text(
                         'Voltar ao login',
@@ -227,37 +176,25 @@ class _SignupPageState extends State<SignupPage> {
       ),
     );
   }
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
 }
 
-// Copy of the clipper used in LoginPage
 class BottomWaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     Path path = Path();
-    path.lineTo(0, size.height - 70); // lower start
-
+    path.lineTo(0, size.height - 40);
     path.quadraticBezierTo(
       size.width * 0.25,
-      size.height - 110,
+      size.height - 100,
       size.width * 0.5,
-      size.height - 70,
+      size.height - 40,
     );
-
     path.quadraticBezierTo(
       size.width * 0.75,
-      size.height - 30,
+      size.height + 20,
       size.width,
-      size.height - 70,
+      size.height - 40,
     );
-
     path.lineTo(size.width, 0);
     path.close();
     return path;

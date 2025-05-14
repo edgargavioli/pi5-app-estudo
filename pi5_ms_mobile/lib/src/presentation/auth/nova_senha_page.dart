@@ -1,25 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/components/input_widget.dart';
-import 'package:pi5_ms_mobile/src/presentation/LoginPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/NovaSenhaPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/RecuperaSenhaPage.dart';
+import 'package:pi5_ms_mobile/src/presentation/auth/login_page.dart';
+import 'package:pi5_ms_mobile/src/presentation/auth/verificar_codigo_page.dart';
 
-class VerificaCodigoPage extends StatefulWidget {
-  const VerificaCodigoPage({super.key});
+class NovaSenhaPage extends StatefulWidget {
+  const NovaSenhaPage({super.key});
 
   @override
-  State<VerificaCodigoPage> createState() => _VerificaCodigoPageState();
+  State<NovaSenhaPage> createState() => _NovaSenhaPageState();
 }
 
-class _VerificaCodigoPageState extends State<VerificaCodigoPage> {
-  final TextEditingController _codigoController = TextEditingController();
-
-  @override
-  void dispose() {
-    _codigoController.dispose();
-    super.dispose();
-  }
+class _NovaSenhaPageState extends State<NovaSenhaPage> {
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +62,9 @@ class _VerificaCodigoPageState extends State<VerificaCodigoPage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const RecuperaSenhaPage(),
+                                      builder:
+                                          (context) =>
+                                              const VerificaCodigoPage(),
                                     ),
                                   );
                                 },
@@ -105,7 +104,7 @@ class _VerificaCodigoPageState extends State<VerificaCodigoPage> {
                         child: Padding(
                           padding: EdgeInsets.only(left: 30),
                           child: Text(
-                            'Verifique\no código',
+                            'Defina sua\nnova senha',
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               color: Colors.white,
@@ -131,34 +130,62 @@ class _VerificaCodigoPageState extends State<VerificaCodigoPage> {
                       width: 300,
                       height: 56,
                       child: InputWidget(
-                        labelText: 'CODIGO DE VERIFICACAO',
+                        labelText: 'SENHA',
                         hintText: '********',
-                        controller: _codigoController,
-                        obscureText: true,
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 200),
-                    ButtonWidget(
-                      text: 'Verificar',
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const NovaSenhaPage(),
+                    const SizedBox(height: 34),
+                    SizedBox(
+                      width: 300,
+                      height: 56,
+                      child: InputWidget(
+                        labelText: 'CONFIRME A SENHA',
+                        hintText: '********',
+                        controller: _confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey,
                           ),
-                        );
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 110),
+                    ButtonWidget(
+                      text: 'Definir a senha',
+                      onPressed: () {
+                        Navigator.pop(context);
                       },
                       color: const Color(0xff3a608f),
                     ),
                     const SizedBox(height: 24),
                     TextButton(
                       onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
-                          ),
-                        );
+                        Navigator.pop(context);
                       },
                       child: const Text(
                         'Voltar ao login',

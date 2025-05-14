@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/components/input_widget.dart';
-import 'package:pi5_ms_mobile/src/presentation/HomePage.dart';
-import 'package:pi5_ms_mobile/src/presentation/SignupPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/RecuperaSenhaPage.dart';
+import 'package:pi5_ms_mobile/src/presentation/inicio_page.dart';
+import 'package:pi5_ms_mobile/src/presentation/auth/registro_page.dart';
+import 'package:pi5_ms_mobile/src/presentation/auth/recuperar_senha_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final VoidCallback onLogin;
+  const LoginPage({super.key, required this.onLogin});
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -110,7 +111,9 @@ class _LoginPageState extends State<LoginPage> {
                         obscureText: _obscurePassword,
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             color: Colors.grey,
                           ),
                           onPressed: () {
@@ -129,16 +132,14 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const RecuperaSenhaPage()),
+                            MaterialPageRoute(
+                              builder: (context) => const RecuperaSenhaPage(),
+                            ),
                           );
                         },
                         child: const Text(
                           'Esqueceu a Senha?',
-                          style: TextStyle(
-                            color: Color(
-                              0xFF4A4A4A,
-                            ),
-                          ),
+                          style: TextStyle(color: Color(0xFF4A4A4A)),
                         ),
                       ),
                     ),
@@ -146,12 +147,8 @@ class _LoginPageState extends State<LoginPage> {
                     ButtonWidget(
                       text: 'Entrar',
                       onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomePage(title: 'Home'),
-                          ),
-                        );
+                        widget.onLogin();
+                        Navigator.pushReplacementNamed(context, '/home');
                       },
                       color: const Color(0xff3a608f),
                     ),
@@ -161,10 +158,12 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const SignupPage()),
+                          MaterialPageRoute(
+                            builder: (context) => const SignupPage(),
+                          ),
                         );
                       },
-                      color: const Color(0xFF73777F), 
+                      color: const Color(0xFF73777F),
                       textColor: const Color(0xFF191C20),
                       outlined: true,
                     ),

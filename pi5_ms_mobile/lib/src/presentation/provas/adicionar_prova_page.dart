@@ -51,9 +51,18 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldWidget(
-      currentPage: 1,
-      body: SingleChildScrollView(
+    return Center(
+      // floatingActionButton: FloatingActionButton(
+      //     onPressed: () {
+      //       Navigator.popAndPushNamed(context, '/provas');
+      //     },
+      //     backgroundColor: Theme.of(context).colorScheme.primary,
+      //     child: Icon(
+      //       Icons.check,
+      //       color: Theme.of(context).colorScheme.onPrimary,
+      //     ),
+      //   ),
+      child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -140,16 +149,6 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
               const SizedBox(height: 80), // Espaço para o botão flutuante
             ],
           ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.popAndPushNamed(context, '/provas');
-        },
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        child: Icon(
-          Icons.check,
-          color: Theme.of(context).colorScheme.onPrimary,
         ),
       ),
     );
