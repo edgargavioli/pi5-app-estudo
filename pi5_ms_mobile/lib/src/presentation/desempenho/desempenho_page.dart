@@ -1,7 +1,6 @@
 // ignore: file_names
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
 import 'package:pi5_ms_mobile/src/components/button_widget.dart';
 
 class DesempenhoPage extends StatefulWidget {
@@ -85,9 +84,8 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldWidget(
-      currentPage: 4, // index for Desempenho
-      body: SafeArea(
+    return Center(
+      child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 20.0),
           child: Column(

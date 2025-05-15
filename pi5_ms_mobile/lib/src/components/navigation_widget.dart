@@ -1,64 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:pi5_ms_mobile/src/presentation/HomePage.dart';
-import 'package:pi5_ms_mobile/src/presentation/provas/ProvasListagemPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/user/UserProfilePageMain.dart';
 
-class NavigationWidget extends StatelessWidget {
-  final int currentIndex;
+class BottonNavBarWidget extends StatefulWidget {
+  final PageController pageController;
+  final ValueNotifier<int> currentIndex;
 
-  const NavigationWidget({super.key, required this.currentIndex});
-
-  void _onItemTapped(BuildContext context, int index) {
-    if (index != currentIndex) {
-      Widget nextPage;
-
-      switch (index) {
-        case 0:
-          nextPage = const HomePage(title: "PI5 MS Mobile");
-          break;
-        case 1:
-          nextPage = const ProvaslistagemPage();
-          break;
-         case 2:
-           nextPage = const UserProfilePageMain();
-           break;
-        default:
-          return;
-      }
-
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => nextPage,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0); // horizontal slide
-            const end = Offset.zero;
-            const curve = Curves.easeInOut;
-
-            var tween = Tween(
-              begin: begin,
-              end: end,
-            ).chain(CurveTween(curve: curve));
-
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
-        ),
-      );
-    }
-  }
+  const BottonNavBarWidget({
+    super.key,
+    required this.pageController,
+    required this.currentIndex,
+  });
 
   @override
+  State<BottonNavBarWidget> createState() => _BottonNavBarWidgetState();
+}
+
+class _BottonNavBarWidgetState extends State<BottonNavBarWidget> {
+  @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: (index) => _onItemTapped(context, index),
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
-        BottomNavigationBarItem(icon: Icon(Icons.edit), label: 'Provas'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-      ],
+    return ValueListenableBuilder<int>(
+      valueListenable: widget.currentIndex,
+      builder: (context, currentIndex, _) {
+        return Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline,
+              width: 0.5,
+            ),
+          ),
+          child: NavigationBar(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            selectedIndex: currentIndex,
+            onDestinationSelected: (index) {
+              widget.currentIndex.value = index;
+              widget.pageController.animateToPage(
+                index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            },
+            destinations: const [
+              NavigationDestination(icon: Icon(Icons.home), label: ''),
+              NavigationDestination(icon: Icon(Icons.article), label: ''),
+              NavigationDestination(
+                icon: Icon(Icons.calendar_today),
+                label: '',
+              ),
+              NavigationDestination(icon: Icon(Icons.history), label: ''),
+              NavigationDestination(icon: Icon(Icons.bar_chart), label: ''),
+              NavigationDestination(icon: Icon(Icons.person), label: ''),
+            ],
+          ),
+        );
+      },
     );
   }
 }

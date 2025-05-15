@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/components/input_widget.dart';
-import 'package:pi5_ms_mobile/src/presentation/LoginPage.dart';
-import 'package:pi5_ms_mobile/src/presentation/VerificaCodigoPage.dart';
+import 'package:pi5_ms_mobile/src/presentation/auth/login_page.dart';
+import 'package:pi5_ms_mobile/src/presentation/auth/verificar_codigo_page.dart';
 
 class RecuperaSenhaPage extends StatefulWidget {
   const RecuperaSenhaPage({super.key});
@@ -50,12 +50,12 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> {
                             Align(
                               alignment: Alignment.topLeft,
                               child: IconButton(
-                                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                                icon: const Icon(
+                                  Icons.arrow_back_ios,
+                                  color: Colors.white,
+                                ),
                                 onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                                  );
+                                  Navigator.pop(context);
                                 },
                               ),
                             ),
@@ -133,7 +133,9 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const VerificaCodigoPage()),
+                          MaterialPageRoute(
+                            builder: (context) => const VerificaCodigoPage(),
+                          ),
                         );
                       },
                       color: const Color(0xff3a608f),
@@ -141,12 +143,7 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> {
                     const SizedBox(height: 24),
                     TextButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
-                          ),
-                        );
+                        Navigator.pop(context);
                       },
                       child: const Text(
                         'Voltar ao login',
@@ -167,7 +164,7 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> {
       ),
     );
   }
-  
+
   @override
   void dispose() {
     _emailController.dispose();

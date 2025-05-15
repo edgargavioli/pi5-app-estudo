@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pi5_ms_mobile/src/components/card_widget.dart';
 
 class EditProvaPage extends StatefulWidget {
   const EditProvaPage({super.key});
 
   @override
-  _EditProvaPageState createState() => _EditProvaPageState();
+  State<EditProvaPage> createState() => _EditProvaPageState();
 }
 
 class _EditProvaPageState extends State<EditProvaPage> {
@@ -50,15 +51,17 @@ class _EditProvaPageState extends State<EditProvaPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9FF),
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
-        leading: const BackButton(color: Colors.black),
-        title: const Text(
+        leading: BackButton(color: colorScheme.onSurface),
+        title: Text(
           'Editar Prova',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: colorScheme.onSurface),
         ),
         centerTitle: true,
       ),
@@ -76,7 +79,7 @@ class _EditProvaPageState extends State<EditProvaPage> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Período de inscrição',
-                style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                style: TextStyle(fontSize: 12, color: colorScheme.onSurface),
               ),
             ),
             const SizedBox(height: 4),
@@ -87,9 +90,9 @@ class _EditProvaPageState extends State<EditProvaPage> {
                     controller: dataInicioInscricaoController,
                     readOnly: true,
                     onTap: () => selecionarData(dataInicioInscricaoController),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'De:',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -99,9 +102,9 @@ class _EditProvaPageState extends State<EditProvaPage> {
                     controller: dataFimInscricaoController,
                     readOnly: true,
                     onTap: () => selecionarData(dataFimInscricaoController),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Até:',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -127,17 +130,13 @@ class _EditProvaPageState extends State<EditProvaPage> {
               child: ListView.builder(
                 itemCount: materias.length,
                 itemBuilder: (context, index) {
-                  return Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.article),
-                      title: Text(materias[index]),
-                      trailing: IconButton(
-                        icon: const Icon(
-                          Icons.remove_circle,
-                          color: Colors.redAccent,
-                        ),
-                        onPressed: () => removerMateria(index),
-                      ),
+                  return CardWidget(
+                    title: materias[index],
+                    icon: Icons.book,
+                    trailing: IconButton(
+                      color: colorScheme.error,
+                      icon: Icon(Icons.remove_circle, color: colorScheme.error),
+                      onPressed: () => removerMateria(index),
                     ),
                   );
                 },
@@ -148,9 +147,11 @@ class _EditProvaPageState extends State<EditProvaPage> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 16.0),
                 child: FloatingActionButton(
-                  backgroundColor: const Color(0xFFD7E8FF),
-                  onPressed: () {},
-                  child: const Icon(Icons.check, color: Colors.black),
+                  backgroundColor: colorScheme.primary,
+                  onPressed: () {
+                    // Salvar alterações
+                  },
+                  child: Icon(Icons.check, color: colorScheme.onPrimary),
                 ),
               ),
             ),

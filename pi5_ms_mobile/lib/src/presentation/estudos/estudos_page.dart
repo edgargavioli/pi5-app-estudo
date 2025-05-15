@@ -5,7 +5,7 @@ import 'dart:async';
 // removed ScaffoldWidget import to use simple Scaffold
 
 class EstudosPage extends StatefulWidget {
-  const EstudosPage({Key? key}) : super(key: key);
+  const EstudosPage({super.key});
   @override
   State<EstudosPage> createState() => _EstudosPageState();
 }
@@ -106,7 +106,7 @@ class _EstudosPageState extends State<EstudosPage> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios),
+                      icon: const Icon(Icons.arrow_back),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -322,10 +322,13 @@ class _EstudosPageState extends State<EstudosPage> {
                                   top: Radius.circular(24),
                                 ),
                               ),
-                              builder: (context) => FractionallySizedBox(
-                                heightFactor: 0.85,
-                                child: SaveSessionSheet(elapsedTime: _elapsed),
-                              ),
+                              builder:
+                                  (context) => FractionallySizedBox(
+                                    heightFactor: 0.85,
+                                    child: SaveSessionSheet(
+                                      elapsedTime: _elapsed,
+                                    ),
+                                  ),
                             );
                           },
                           child: const Icon(
@@ -348,11 +351,13 @@ class _EstudosPageState extends State<EstudosPage> {
 /// A placeholder bottom sheet for saving a session.
 class SaveSessionSheet extends StatelessWidget {
   final Duration elapsedTime;
-  const SaveSessionSheet({Key? key, required this.elapsedTime}) : super(key: key);
+  const SaveSessionSheet({Key? key, required this.elapsedTime})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    String formattedTime = '${elapsedTime.inHours.toString().padLeft(2, '0')}:'
+    String formattedTime =
+        '${elapsedTime.inHours.toString().padLeft(2, '0')}:'
         '${(elapsedTime.inMinutes % 60).toString().padLeft(2, '0')}:'
         '${(elapsedTime.inSeconds % 60).toString().padLeft(2, '0')}';
     // For the progress indicator, assuming 3 hours is the goal
@@ -653,7 +658,9 @@ class SaveSessionSheet extends StatelessWidget {
               child: ButtonWidget(
                 text: 'Salvar',
                 onPressed: () {
-                  Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/home', (route) => false);
                 },
                 color: Theme.of(context).colorScheme.primary,
                 textStyle: const TextStyle(

@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/components/card_widget.dart';
 
 class ConfigMateriaPage extends StatefulWidget {
-  final List<String> materias;
-
-  const ConfigMateriaPage({super.key, required this.materias});
+  const ConfigMateriaPage({super.key});
 
   @override
-  _ConfigMateriaPageState createState() => _ConfigMateriaPageState();
+  State<ConfigMateriaPage> createState() => _ConfigMateriaPageState();
 }
 
 class _ConfigMateriaPageState extends State<ConfigMateriaPage> {
