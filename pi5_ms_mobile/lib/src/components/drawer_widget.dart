@@ -1,15 +1,38 @@
 import 'package:flutter/material.dart';
 
-class MenuItem {
+class MenuItem extends StatelessWidget {
   final String label;
   final IconData icon;
   final VoidCallback? onTap;
+  final bool isSelected;
 
   const MenuItem({
+    super.key,
     required this.label,
     required this.icon,
     this.onTap,
+    this.isSelected = false,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isSelected ? Theme.of(context).colorScheme.primary : null,
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? Theme.of(context).colorScheme.primary : null,
+        ),
+      ),
+      onTap: onTap,
+      selected: isSelected,
+      selectedTileColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+    );
+  }
 }
 
 class DrawerWidget extends StatelessWidget {
@@ -22,7 +45,7 @@ class DrawerWidget extends StatelessWidget {
     return Drawer(
       backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(topRight: Radius.circular(40)),
       ),
       child: SafeArea(
@@ -86,40 +109,31 @@ class DrawerWidget extends StatelessWidget {
                 itemCount: menuItems.length,
                 itemBuilder: (context, index) {
                   final item = menuItems[index];
-                  final isSelected = index == 0;
                   return Container(
                     margin: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 4,
                     ),
-                    decoration:
-                        isSelected
-                            ? BoxDecoration(
-                              color:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(12),
-                            )
-                            : null,
+                    decoration: item.isSelected
+                        ? BoxDecoration(
+                            color: Theme.of(context).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          )
+                        : null,
                     child: ListTile(
                       leading: Icon(
                         item.icon,
-                        color:
-                            isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.onSurface,
+                        color: item.isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurface,
                       ),
                       title: Text(
                         item.label,
                         style: TextStyle(
-                          color:
-                              isSelected
-                                  ? Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimaryContainer
-                                  : Theme.of(context).colorScheme.onSurface,
-                          fontWeight: isSelected ? FontWeight.bold : null,
+                          color: item.isSelected
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Theme.of(context).colorScheme.onSurface,
+                          fontWeight: item.isSelected ? FontWeight.bold : null,
                         ),
                       ),
                       onTap: () {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/components/navigation_widget.dart';
 import 'package:pi5_ms_mobile/src/components/pageview/page_view.dart';
+import 'package:pi5_ms_mobile/src/presentation/materias/materias_config_page.dart';
 
 class ScaffoldWidget extends StatefulWidget {
   const ScaffoldWidget({super.key});
@@ -28,7 +29,10 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'materia') {
-                // Do something for Option 1
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConfigMateriaPage()),
+                );
               }
             },
             itemBuilder:
