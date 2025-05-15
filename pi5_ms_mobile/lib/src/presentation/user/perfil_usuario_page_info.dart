@@ -112,7 +112,7 @@ class _UserProfilePageInfoState extends State<UserProfilePageInfo> {
         floatingActionButton: FloatingActionButton(
           backgroundColor: const Color(0xFFD7E8FF),
           onPressed: () {
-            // Salvar alterações
+            Navigator.pop(context);
           },
           child: const Icon(Icons.check, color: Colors.black),
         ),

@@ -41,6 +41,10 @@ class _BottonNavBarWidgetState extends State<BottonNavBarWidget> {
               icon: Icon(Icons.history),
               label: 'Histórico',
             ),
+            NavigationDestination(
+              icon: Icon(Icons.bar_chart),
+              label: 'Desempenho',
+            ),
             NavigationDestination(icon: Icon(Icons.person), label: 'Perfil'),
           ],
         );

@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/components/card_widget.dart';
 import 'package:pi5_ms_mobile/src/components/gauge_chart_widget.dart';
-import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
 import 'package:pi5_ms_mobile/src/components/search_widget.dart';
+import 'package:pi5_ms_mobile/src/presentation/estudos/estudos_page.dart';
+import 'package:pi5_ms_mobile/src/presentation/materias/adicionar_materia_page.dart';
 
 class MateriasListagemPage extends StatefulWidget {
+  final String title;
   final int provaId;
 
-  const MateriasListagemPage({super.key, required this.provaId});
+  const MateriasListagemPage({
+    super.key,
+    required this.title,
+    required this.provaId,
+  });
 
   @override
-  _MateriasListagemPageState createState() => _MateriasListagemPageState();
+  State<MateriasListagemPage> createState() => _MateriasListagemPageState();
 }
 
 class _MateriasListagemPageState extends State<MateriasListagemPage> {
@@ -38,104 +44,98 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
     final List<String> materiasNames =
         filteredMaterias.map((materia) => materia['nome'] as String).toList();
 
-    return Center(
-      child:
-      // floatingActionButton: Column(
-      //   mainAxisAlignment: MainAxisAlignment.end,
-      //   crossAxisAlignment: CrossAxisAlignment.end,
-      //   children: [
-      //     FloatingActionButton.extended(
-      //       backgroundColor: Theme.of(context).colorScheme.primary,
-      //       onPressed: () {
-      //         Navigator.pushNamed(
-      //           context,
-      //           '/materias/adicionar',
-      //           arguments:
-      //               filteredMaterias.isNotEmpty ? materiasNames : <String>[],
-      //         );
-      //       },
-      //       icon: Icon(
-      //         Icons.add,
-      //         color: Theme.of(context).colorScheme.onPrimary,
-      //       ),
-      //       label: Text(
-      //         "Adicionar Matéria",
-      //         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-      //           color: Theme.of(context).colorScheme.onPrimary,
-      //         ),
-      //       ),
-      //     ),
-      //   ],
-      // ),
-      Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                DashboardGaugesSyncfusion(
-                  gauges: [
-                    GaugeData(
-                      label: "Tempo",
-                      valueText: "00h00m",
-                      value: 0,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    GaugeData(
-                      label: "Desenpenho",
-                      valueText: "10%",
-                      value: 10,
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
-                  ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // Volta para a página anterior
+          },
+        ),
+      ),
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: padding, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            DashboardGaugesSyncfusion(
+              gauges: [
+                GaugeData(
+                  label: "Tempo",
+                  valueText: "00h00m",
+                  value: 0,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                const SizedBox(height: 10),
-                SearchBarWidget(
-                  controller: _searchController,
-                  onSubmitted: (value) {
-                    print("Pesquisando por: $value");
-                  },
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: filteredMaterias.length,
-                    itemBuilder: (context, index) {
-                      return CardWidget(
-                        title: filteredMaterias[index]['nome'],
-                        icon: Icons.book,
-                        color:
-                            _selectedIndex == index
-                                ? Theme.of(context).colorScheme.primaryContainer
-                                : null,
-                        onTap: () {
-                          print(
-                            "Abrir detalhes da matéria: ${filteredMaterias[index]}",
-                          );
-                        },
-                        onLongPress: () {
-                          setState(() {
-                            _selectedIndex = index;
-                          });
-                        },
-                      );
-                    },
-                  ),
+                GaugeData(
+                  label: "Desempenho",
+                  valueText: "10%",
+                  value: 10,
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
               ],
             ),
-          ),
-          if (_selectedIndex != null)
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedIndex = null;
-                });
+            const SizedBox(height: 10),
+            SearchBarWidget(
+              controller: _searchController,
+              onSubmitted: (value) {
+                print("Pesquisando por: $value");
               },
-              child: Container(color: Colors.transparent),
             ),
-        ],
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: filteredMaterias.length,
+                itemBuilder: (context, index) {
+                  return CardWidget(
+                    title: filteredMaterias[index]['nome'],
+                    icon: Icons.book,
+                    color:
+                        _selectedIndex == index
+                            ? Theme.of(context).colorScheme.primaryContainer
+                            : null,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => EstudosPage()),
+                      );
+                    },
+                    onLongPress: () {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => AdicionarMateriaPage(
+                    materias:
+                        filteredMaterias.isNotEmpty
+                            ? materiasNames
+                            : <String>[],
+                  ),
+            ),
+          );
+        },
+        icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
+        label: Text(
+          "Adicionar Matéria",
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
+        ),
       ),
     );
   }

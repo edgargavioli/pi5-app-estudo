@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
           themeMode: themeMode,
           theme: theme.light(),
           darkTheme: theme.dark(),
-          initialRoute: _isAuthenticated ? '/home' : '/login',
+          initialRoute: _isAuthenticated ? '/home' : '/',
           routes: {
             '/': (context) => LoginPage(onLogin: _onLogin),
             '/home': (context) => ScaffoldWidget(),

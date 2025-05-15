@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/components/card_widget.dart';
 import 'package:pi5_ms_mobile/src/components/gauge_chart_widget.dart';
-import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
 import 'package:pi5_ms_mobile/src/components/search_widget.dart';
+import 'package:pi5_ms_mobile/src/presentation/materias/materias_listagem_page.dart';
+import 'package:pi5_ms_mobile/src/presentation/provas/adicionar_prova_page.dart';
+import 'package:pi5_ms_mobile/src/presentation/provas/editar_prova_page.dart';
 
 class ProvaslistagemPage extends StatefulWidget {
   const ProvaslistagemPage({super.key});
@@ -19,7 +21,6 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double padding = screenWidth * 0.01;
-    final navigate = Navigator.of(context);
 
     return Center(
       child: Stack(
@@ -71,7 +72,16 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
                                 ? Theme.of(context).colorScheme.primaryContainer
                                 : null,
                         onTap: () {
-                          navigate.pushNamed('/materias', arguments: index);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => MateriasListagemPage(
+                                    provaId: index,
+                                    title: "Prova ${index + 1}",
+                                  ),
+                            ),
+                          );
                         },
                         onLongPress: () {
                           setState(() {
@@ -94,7 +104,6 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
               },
               child: Container(color: Colors.transparent),
             ),
-          // Adicionando os FloatingActionButtons
           Positioned(
             bottom: 16,
             right: 16,
@@ -102,7 +111,7 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (_selectedIndex != null)
+                if (_selectedIndex != null) ...[
                   FloatingActionButton(
                     backgroundColor:
                         Theme.of(context).colorScheme.errorContainer,
@@ -114,11 +123,34 @@ class _ProvaslistagemPageState extends State<ProvaslistagemPage> {
                       color: Theme.of(context).colorScheme.onErrorContainer,
                     ),
                   ),
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
+                  FloatingActionButton(
+                    backgroundColor:
+                        Theme.of(context).colorScheme.secondaryContainer,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EditProvaPage(),
+                        ),
+                      );
+                    },
+                    child: Icon(
+                      Icons.edit,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 FloatingActionButton.extended(
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   onPressed: () {
-                    Navigator.pushNamed(context, '/addprova');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdicionarProvaPage(),
+                      ),
+                    );
                   },
                   icon: Icon(
                     Icons.add,
