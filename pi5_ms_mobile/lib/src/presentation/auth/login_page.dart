@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/components/input_widget.dart';
-import 'package:pi5_ms_mobile/src/presentation/inicio_page.dart';
 import 'package:pi5_ms_mobile/src/presentation/auth/registro_page.dart';
 import 'package:pi5_ms_mobile/src/presentation/auth/recuperar_senha_page.dart';
 
@@ -10,7 +9,7 @@ class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.onLogin});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {

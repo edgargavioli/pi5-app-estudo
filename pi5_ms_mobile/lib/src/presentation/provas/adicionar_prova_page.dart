@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../components/input_widget.dart';
 import '../../components/card_widget.dart';
-import '../../components/scaffold_widget.dart';
 
 class AdicionarProvaPage extends StatefulWidget {
   const AdicionarProvaPage({super.key});
@@ -51,18 +50,16 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      // floatingActionButton: FloatingActionButton(
-      //     onPressed: () {
-      //       Navigator.popAndPushNamed(context, '/provas');
-      //     },
-      //     backgroundColor: Theme.of(context).colorScheme.primary,
-      //     child: Icon(
-      //       Icons.check,
-      //       color: Theme.of(context).colorScheme.onPrimary,
-      //     ),
-      //   ),
-      child: SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // Volta para a página anterior
+          },
+        ),
+      ),
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -149,6 +146,16 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
               const SizedBox(height: 80), // Espaço para o botão flutuante
             ],
           ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: Icon(
+          Icons.check,
+          color: Theme.of(context).colorScheme.onPrimary,
         ),
       ),
     );

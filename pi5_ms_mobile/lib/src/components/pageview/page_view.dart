@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/presentation/cronograma/cronograma_page.dart';
+import 'package:pi5_ms_mobile/src/presentation/desempenho/desempenho_page.dart';
 import 'package:pi5_ms_mobile/src/presentation/historico/historico_page.dart';
 import 'package:pi5_ms_mobile/src/presentation/inicio_page.dart';
 import 'package:pi5_ms_mobile/src/presentation/provas/provas_listagem_page.dart';
@@ -30,6 +31,7 @@ class _PageViewWidgetState extends State<PageViewWidget> {
         ProvaslistagemPage(),
         CronogramaPage(),
         HistoricoPage(),
+        DesempenhoPage(),
         UserProfilePageMain(),
       ],
     );

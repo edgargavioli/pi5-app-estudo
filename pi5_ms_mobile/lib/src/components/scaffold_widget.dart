@@ -23,12 +23,27 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(top: 60.0),
-        child: PageViewWidget(
-          pageController: _pageController,
-          currentIndex: _currentIndex,
-        ),
+      appBar: AppBar(
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'materia') {
+                // Do something for Option 1
+              }
+            },
+            itemBuilder:
+                (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'materia',
+                    child: Text('Configurar matérias'),
+                  ),
+                ],
+          ),
+        ],
+      ),
+      body: PageViewWidget(
+        pageController: _pageController,
+        currentIndex: _currentIndex,
       ),
       bottomNavigationBar: BottonNavBarWidget(
         pageController: _pageController,
