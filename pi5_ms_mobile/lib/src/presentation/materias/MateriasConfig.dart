@@ -50,16 +50,18 @@ class _ConfigMateriaPageState extends State<ConfigMateriaPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final filteredMaterias = _materiasAdicionadas.where((materia) {
-      if (_filtroSelecionado == 'Todas as Provas') {
-        return true;
-      } else if (_filtroSelecionado == 'Apenas principais') {
-        return materia.contains('Matéria') || materia.contains('Português');
-      } else if (_filtroSelecionado == 'Apenas secundárias') {
-        return !(materia.contains('Matéria') || materia.contains('História'));
-      }
-      return true;
-    }).toList();
+    final filteredMaterias =
+        _materiasAdicionadas.where((materia) {
+          switch (_filtroSelecionado) {
+            case 'Prova de História':
+              return materia.toLowerCase().contains('história');
+            case 'Prova de Geografia':
+              return materia.toLowerCase().contains('geografia');
+            case 'Todas as Provas':
+            default:
+              return true;
+          }
+        }).toList();
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -92,21 +94,24 @@ class _ConfigMateriaPageState extends State<ConfigMateriaPage> {
             // Dropdown de seleção de matéria
             DropdownButtonFormField<String>(
               value: _materiaSelecionada,
-              items: _materias
-                  .map((materia) => DropdownMenuItem(
-                        value: materia,
-                        child: Text(materia),
-                      ))
-                  .toList()
-                ..add(
-                  DropdownMenuItem(
-                    value: "nova_materia",
-                    child: Text(
-                      "Adicionar nova matéria...",
-                      style: TextStyle(color: theme.colorScheme.primary),
+              items:
+                  _materias
+                      .map(
+                        (materia) => DropdownMenuItem(
+                          value: materia,
+                          child: Text(materia),
+                        ),
+                      )
+                      .toList()
+                    ..add(
+                      DropdownMenuItem(
+                        value: "nova_materia",
+                        child: Text(
+                          "Adicionar nova matéria...",
+                          style: TextStyle(color: theme.colorScheme.primary),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
               onChanged: (value) {
                 if (value == "nova_materia") {
                   showDialog(
@@ -130,8 +135,9 @@ class _ConfigMateriaPageState extends State<ConfigMateriaPage> {
                           TextButton(
                             onPressed: () {
                               if (novaMateria.isNotEmpty &&
-                                  !_materias.contains(novaMateria)) {
+                                  !_materiasNaoUsadas.contains(novaMateria)) {
                                 setState(() {
+                                  _materiasNaoUsadas.add(novaMateria);
                                   _materias.add(novaMateria);
                                   _materiaSelecionada = novaMateria;
                                 });
@@ -156,7 +162,6 @@ class _ConfigMateriaPageState extends State<ConfigMateriaPage> {
             ),
             const SizedBox(height: 12),
 
-            // Botão adicionar
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -178,7 +183,6 @@ class _ConfigMateriaPageState extends State<ConfigMateriaPage> {
 
             const SizedBox(height: 24),
 
-            // Filtro e matérias por vestibular
             Center(
               child: Text(
                 "Matérias por vestibular",
@@ -191,14 +195,13 @@ class _ConfigMateriaPageState extends State<ConfigMateriaPage> {
             Divider(color: theme.colorScheme.outline),
             const SizedBox(height: 12),
 
-            // Filtro de matérias (Dropdown)
             DropdownButtonFormField<String>(
               value: _filtroSelecionado,
               onChanged: (value) {
                 setState(() => _filtroSelecionado = value!);
               },
               decoration: InputDecoration(
-                labelText: 'Filtrar matérias',
+                labelText: 'Filtrar Provas',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -209,18 +212,18 @@ class _ConfigMateriaPageState extends State<ConfigMateriaPage> {
                   child: Text('Todas as Provas'),
                 ),
                 DropdownMenuItem(
-                  value: 'Apenas principais',
-                  child: Text('Prova Português'),
+                  value: 'Prova de História',
+                  child: Text('Prova de História'),
                 ),
                 DropdownMenuItem(
-                  value: 'Apenas secundárias',
-                  child: Text('Prova História'),
+                  value: 'Prova de Geografia',
+                  child: Text('Prova de Geografia'),
                 ),
               ],
             ),
+
             const SizedBox(height: 12),
 
-            // Lista de matérias por vestibular
             Expanded(
               child: ListView.builder(
                 itemCount: filteredMaterias.length,
@@ -243,10 +246,9 @@ class _ConfigMateriaPageState extends State<ConfigMateriaPage> {
 
             const SizedBox(height: 12),
 
-            // Matérias não utilizadas
             Center(
               child: Text(
-                "Matérias por não utilizadas",
+                "Por matérias não utilizadas",
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: theme.colorScheme.outline,
                 ),
@@ -265,12 +267,8 @@ class _ConfigMateriaPageState extends State<ConfigMateriaPage> {
                     title: materiaNaoUsada,
                     icon: Icons.book,
                     trailing: IconButton(
-                      icon: Icon(
-                        Icons.delete,
-                        color: theme.colorScheme.error,
-                      ),
-                      onPressed: () =>
-                          _removerMateriaNaoUsada(materiaNaoUsada),
+                      icon: Icon(Icons.delete, color: theme.colorScheme.error),
+                      onPressed: () => _removerMateriaNaoUsada(materiaNaoUsada),
                     ),
                   );
                 },
