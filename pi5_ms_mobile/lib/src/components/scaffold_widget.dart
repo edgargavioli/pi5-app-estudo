@@ -1,77 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:pi5_ms_mobile/src/components/appbar_widget.dart';
-import 'package:pi5_ms_mobile/src/components/drawer_widget.dart';
 import 'package:pi5_ms_mobile/src/components/navigation_widget.dart';
+import 'package:pi5_ms_mobile/src/components/pageview/page_view.dart';
+import 'package:pi5_ms_mobile/src/presentation/materias/materias_config_page.dart';
 
 class ScaffoldWidget extends StatefulWidget {
-  final Widget body;
-  final int currentPage;
-  final Widget? floatingActionButton;
-
-  const ScaffoldWidget({
-    super.key,
-    required this.body,
-    required this.currentPage,
-    this.floatingActionButton,
-  });
+  const ScaffoldWidget({super.key});
 
   @override
   State<ScaffoldWidget> createState() => _ScaffoldWidgetState();
 }
 
 class _ScaffoldWidgetState extends State<ScaffoldWidget> {
+  final PageController _pageController = PageController();
+  final ValueNotifier<int> _currentIndex = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _currentIndex.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarWidget(),
-      drawer: DrawerWidget(
-        menuItems: [
-          MenuItem(
-            label: "Início",
-            icon: Icons.calendar_today,
-            onTap: () => Navigator.pushNamed(context, '/home'),
-            isSelected: widget.currentPage == 0, 
-          ),
-          MenuItem(
-            label: "Provas",
-            icon: Icons.article,
-            onTap: () => Navigator.pushNamed(context, '/provas'),
-            isSelected: widget.currentPage == 1, 
-          ),
-          MenuItem(
-            label: "Cronograma",
-            icon: Icons.calendar_today,
-            onTap: () => Navigator.pushNamed(context, '/cronograma'),
-            isSelected: widget.currentPage == 2, 
-          ),
-          MenuItem(
-            label: "Matérias", 
-            icon: Icons.book,
-            isSelected: widget.currentPage == 3, 
-          ),
-          MenuItem(
-            label: "Desempenho",
-            icon: Icons.assessment,
-            onTap: () => Navigator.pushNamed(context, '/desempenho'),
-            isSelected: widget.currentPage == 4, 
-          ),
-          MenuItem(
-            label: "Histórico",
-            icon: Icons.history,
-            onTap: () => Navigator.pushNamed(context, '/historico'),
-            isSelected: widget.currentPage == 5, 
-          ),
-          MenuItem(
-            label: "Perfil", 
-            icon: Icons.person,
-            onTap: () => Navigator.pushNamed(context, '/perfil'),
-            isSelected: widget.currentPage == 6, 
+      appBar: AppBar(
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'materia') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConfigMateriaPage()),
+                );
+              }
+            },
+            itemBuilder:
+                (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'materia',
+                    child: Text('Configurar matérias'),
+                  ),
+                ],
           ),
         ],
       ),
-      body: widget.body,
-      floatingActionButton: widget.floatingActionButton,
-      bottomNavigationBar: NavigationWidget(currentIndex: widget.currentPage),
+      body: PageViewWidget(
+        pageController: _pageController,
+        currentIndex: _currentIndex,
+      ),
+      bottomNavigationBar: BottonNavBarWidget(
+        pageController: _pageController,
+        currentIndex: _currentIndex,
+      ),
     );
   }
 }

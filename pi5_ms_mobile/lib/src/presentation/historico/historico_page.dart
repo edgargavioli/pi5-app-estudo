@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:pi5_ms_mobile/src/components/scaffold_widget.dart';
-import 'package:pi5_ms_mobile/src/components/button_widget.dart';
 
 class HistoricoPage extends StatefulWidget {
   const HistoricoPage({super.key});
@@ -22,9 +20,8 @@ class _HistoricoPageState extends State<HistoricoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldWidget(
-      currentPage: 5,
-      body: Column(
+    return Center(
+      child: Column(
         children: [
           Text(
             'Histórico',
@@ -69,50 +66,75 @@ class _HistoricoPageState extends State<HistoricoPage> {
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF3a608f),
                 ),
-                leftChevronIcon: Icon(Icons.chevron_left, color: Color(0xFF3a608f)),
-                rightChevronIcon: Icon(Icons.chevron_right, color: Color(0xFF3a608f)),
+                leftChevronIcon: Icon(
+                  Icons.chevron_left,
+                  color: Color(0xFF3a608f),
+                ),
+                rightChevronIcon: Icon(
+                  Icons.chevron_right,
+                  color: Color(0xFF3a608f),
+                ),
               ),
               calendarFormat: CalendarFormat.month,
             ),
           ),
           const Divider(thickness: 1, height: 20),
           Expanded(
-            child: _selectedDay == null
-                ? Center(
-                    child: Text(
-                      'Selecione um dia para ver eventos.',
-                      style: TextStyle(fontFamily: 'Poppins', fontSize: 14),
-                    ),
-                  )
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Text(
-                            'Eventos em ${_selectedDay!.day}/${_selectedDay!.month}/${_selectedDay!.year}',
-                            style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+            child:
+                _selectedDay == null
+                    ? Center(
+                      child: Text(
+                        'Selecione um dia para ver eventos.',
+                        style: TextStyle(fontFamily: 'Poppins', fontSize: 14),
+                      ),
+                    )
+                    : SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
+                            child: Text(
+                              'Eventos em ${_selectedDay!.day}/${_selectedDay!.month}/${_selectedDay!.year}',
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        ...?_events[_normalize(_selectedDay!)]?.map((event) => Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                          const SizedBox(height: 4),
+                          ...?_events[_normalize(_selectedDay!)]?.map(
+                            (event) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 4.0,
+                              ),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: const Color(0xFFDDE0E6)),
+                                  border: Border.all(
+                                    color: const Color(0xFFDDE0E6),
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                   color: Colors.white,
                                 ),
                                 padding: const EdgeInsets.all(12),
-                                child: Text(event, style: const TextStyle(fontFamily: 'Poppins')),
+                                child: Text(
+                                  event,
+                                  style: const TextStyle(fontFamily: 'Poppins'),
+                                ),
                               ),
-                            )),
-                        const SizedBox(height: 12),
-                      ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
                     ),
-                  ),
           ),
         ],
       ),
