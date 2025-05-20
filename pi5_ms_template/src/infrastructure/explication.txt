@@ -1,1 +1,0 @@
-Conexão com DB, serviços externos, envio de e-mail, etc
