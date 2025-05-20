@@ -1,0 +1,6 @@
+// Organiza tudo aqui dentro pra n ter erro
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE")
+}
