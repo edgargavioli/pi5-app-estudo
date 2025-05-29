@@ -1,106 +1,165 @@
-const RegisterUserUseCase = require('../../application/useCases/auth/RegisterUserUseCase');
-const { createHateoasLinks } = require('../../infrastructure/utils/hateoas');
-const { verifyPassword } = require('../../infrastructure/utils/passwordUtils');
-const jwt = require('jsonwebtoken');
-const userRepository = require('../../infrastructure/repositories/UserRepository');
-const { handleGoogleAuth } = require('../../infrastructure/services/googleService');
-const { verifyEmailToken, sendPasswordResetEmail, resetUserPassword } = require('../../infrastructure/services/emailService');
+const authService = require('../../infrastructure/services/AuthService');
+const emailService = require('../../infrastructure/services/EmailService');
+const loggingService = require('../../infrastructure/services/LoggingService');
+const { handleError, AppError } = require('../../middleware/errorHandler');
 
 class AuthController {
   async register(req, res) {
     try {
-      const registerUseCase = new RegisterUserUseCase(userRepository);
-      const user = await registerUseCase.execute(req.body);
+      const result = await authService.register(req.body);
       
-      const response = createHateoasLinks(req, user, {
-        login: {
-          href: '/api/auth/login',
-          method: 'POST'
+      loggingService.info('User registered successfully', { userId: result.user.id });
+
+      res.status(201).json({
+        status: 'success',
+        data: result,
+        _links: {
+          login: {
+            href: `${req.protocol}://${req.get('host')}/api/auth/login`,
+            method: 'POST'
+          },
+          profile: {
+            href: `${req.protocol}://${req.get('host')}/api/users/${result.user.id}`,
+            method: 'GET'
+          }
         }
       });
-
-      res.status(201).json(response);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      loggingService.error('Registration failed', { error: error.message });
+      handleError(error, res);
     }
   }
 
   async login(req, res) {
     try {
       const { email, password } = req.body;
-      const user = await userRepository.findByEmail(email);
+      const result = await authService.login(email, password);
 
-      if (!user) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
+      loggingService.info('User logged in successfully', { userId: result.user.id });
 
-      const isValidPassword = await verifyPassword(password, user.password);
-      if (!isValidPassword) {
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-
-      // Update last login
-      await userRepository.updateLastLogin(user.id);
-
-      // Generate JWT token
-      const token = jwt.sign(
-        { userId: user.id },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-      );
-
-      const response = createHateoasLinks(req, {
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name
+      res.json({
+        status: 'success',
+        data: result,
+        _links: {
+          profile: {
+            href: `${req.protocol}://${req.get('host')}/api/users/${result.user.id}`,
+            method: 'GET'
+          },
+          refresh: {
+            href: `${req.protocol}://${req.get('host')}/api/auth/refresh`,
+            method: 'POST'
+          },
+          logout: {
+            href: `${req.protocol}://${req.get('host')}/api/auth/logout`,
+            method: 'POST'
+          }
         }
       });
-
-      res.json(response);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      loggingService.error('Login failed', { error: error.message, email: req.body.email });
+      handleError(error, res);
     }
   }
 
-  async googleAuth(req, res) {
+  async refreshToken(req, res) {
     try {
-      const { token } = req.body;
-      const result = await handleGoogleAuth(token);
-      res.json(result);
+      const { refreshToken } = req.body;
+      const result = await authService.refreshToken(refreshToken);
+
+      loggingService.info('Token refreshed successfully');
+
+      res.json({
+        status: 'success',
+        data: result,
+        _links: {
+          refresh: {
+            href: `${req.protocol}://${req.get('host')}/api/auth/refresh`,
+            method: 'POST'
+          }
+        }
+      });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      loggingService.error('Token refresh failed', { error: error.message });
+      handleError(error, res);
     }
   }
 
   async verifyEmail(req, res) {
     try {
-      const { token } = req.params;
-      const result = await verifyEmailToken(token);
-      res.json(result);
+      const { token } = req.query;
+      const result = await authService.verifyEmail(token);
+
+      loggingService.info('Email verified successfully', { userId: result.user.id });
+
+      res.json({
+        status: 'success',
+        data: result,
+        _links: {
+          login: {
+            href: `${req.protocol}://${req.get('host')}/api/auth/login`,
+            method: 'POST'
+          }
+        }
+      });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      loggingService.error('Email verification failed', { error: error.message });
+      handleError(error, res);
     }
   }
 
-  async forgotPassword(req, res) {
+  async logout(req, res) {
+    try {
+      // In a stateless JWT system, logout is handled client-side
+      // But we can log the event for security monitoring
+      loggingService.info('User logged out', { userId: req.user?.id });
+
+      res.json({
+        success: true,
+        message: 'Logged out successfully'
+      });
+    } catch (error) {
+      handleError(error, res);
+    }
+  }
+
+  async requestPasswordReset(req, res) {
     try {
       const { email } = req.body;
-      await sendPasswordResetEmail(email);
-      res.json({ message: 'Password reset email sent' });
+      
+      // Generate password reset token
+      const resetToken = authService.generateToken({ email, type: 'password-reset' }, '1h');
+      
+      // Send password reset email
+      await emailService.sendPasswordResetEmail(email, resetToken);
+      
+      loggingService.info('Password reset requested', { email });
+      
+      res.json({
+        success: true,
+        message: 'Password reset email sent'
+      });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      loggingService.error('Password reset request failed', { error: error.message, email: req.body.email });
+      handleError(error, res);
     }
   }
 
   async resetPassword(req, res) {
     try {
-      const { token, password } = req.body;
-      await resetUserPassword(token, password);
-      res.json({ message: 'Password has been reset' });
+      const { token, newPassword } = req.body;
+      
+      const result = await authService.resetPassword(token, newPassword);
+      
+      loggingService.info('Password reset successfully', { userId: result.user.id });
+      
+      res.json({
+        success: true,
+        message: 'Password reset successfully',
+        user: result.user
+      });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      loggingService.error('Password reset failed', { error: error.message });
+      handleError(error, res);
     }
   }
 }

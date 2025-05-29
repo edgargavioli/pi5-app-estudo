@@ -1,6 +1,6 @@
 const User = require('../../../domain/entities/User');
 const { hashPassword } = require('../../../infrastructure/utils/passwordUtils');
-const { sendVerificationEmail } = require('../../../infrastructure/services/emailService');
+const { sendVerificationEmail } = require('../../../infrastructure/services/EmailService');
 
 class RegisterUserUseCase {
   constructor(userRepository) {

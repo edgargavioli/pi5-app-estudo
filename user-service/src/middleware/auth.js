@@ -1,4 +1,7 @@
-const tokenService = require('../services/TokenService');
+const authService = require('../infrastructure/services/AuthService');
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
 
 const authenticate = async (req, res, next) => {
   try {
@@ -12,19 +15,24 @@ const authenticate = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const user = await tokenService.verifyToken(token);
+    const decoded = authService.verifyToken(token);
+
+    // Get user from database
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId }
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
 
     if (!user.isEmailVerified) {
       return res.status(403).json({
         status: 'error',
         message: 'Please verify your email before accessing this resource'
-      });
-    }
-
-    if (user.status !== 'active') {
-      return res.status(403).json({
-        status: 'error',
-        message: 'Your account is not active'
       });
     }
 
@@ -60,5 +68,6 @@ const authorize = (...roles) => {
 
 module.exports = {
   authenticate,
+  authMiddleware: authenticate,
   authorize
 }; 

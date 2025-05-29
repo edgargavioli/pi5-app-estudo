@@ -2,15 +2,15 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/AuthController');
 const healthController = require('../controllers/HealthController');
-const { authenticate } = require('../middleware/auth');
-const { authLimiter, passwordResetLimiter, registerLimiter, apiLimiter } = require('../middleware/rateLimiter');
+const { authenticate } = require('../../middleware/auth');
+const { authLimiter, passwordResetLimiter, registerLimiter, apiLimiter } = require('../../middleware/rateLimiter');
 const {
   registerValidation,
   loginValidation,
   passwordResetRequestValidation,
   passwordResetValidation,
   refreshTokenValidation
-} = require('../middleware/validation');
+} = require('../../middleware/validation');
 
 // Health Check
 router.get('/health', healthController.check);

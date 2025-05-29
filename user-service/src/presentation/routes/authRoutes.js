@@ -1,20 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/AuthController');
-const { validateRequest } = require('../middleware/validation');
-const { rateLimiter } = require('../middleware/rateLimiter');
-const Joi = require('joi');
+const { authMiddleware } = require('../middleware/auth');
+const {
+  registerValidation,
+  loginValidation,
+  passwordResetRequestValidation,
+  passwordResetValidation,
+  refreshTokenValidation
+} = require('../middleware/validation');
+const {
+  authLimiter,
+  passwordResetLimiter,
+  registerLimiter,
+  apiLimiter,
+  rateLimiter
+} = require('../middleware/rateLimiter');
+const Password = require('../../domain/valueObjects/Password');
 
-const registerSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-  name: Joi.string().required()
-});
-
-const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required()
-});
+// Apply rate limiting to all routes
+router.use(apiLimiter);
 
 /**
  * @swagger
@@ -22,45 +27,40 @@ const loginSchema = Joi.object({
  *   schemas:
  *     User:
  *       type: object
- *       required:
- *         - email
- *         - password
- *         - name
  *       properties:
  *         id:
  *           type: string
- *           description: The auto-generated id of the user
+ *           description: The user's unique identifier
  *         email:
  *           type: string
- *           description: The user's email
- *         password:
- *           type: string
- *           description: The user's password
+ *           format: email
+ *           description: The user's email address
  *         name:
  *           type: string
- *           description: The user's name
+ *           description: The user's full name
  *         points:
  *           type: integer
- *           description: The user's points
- *         lastLogin:
+ *           description: The user's points balance
+ *         isEmailVerified:
+ *           type: boolean
+ *           description: Whether the user's email is verified
+ *     AuthResponse:
+ *       type: object
+ *       properties:
+ *         token:
  *           type: string
- *           format: date-time
- *           description: The user's last login time
- *         createdAt:
+ *           description: JWT access token
+ *         user:
+ *           $ref: '#/components/schemas/User'
+ *     Error:
+ *       type: object
+ *       properties:
+ *         status:
  *           type: string
- *           format: date-time
- *           description: The user's creation time
- *         updatedAt:
+ *           enum: [fail, error]
+ *         message:
  *           type: string
- *           format: date-time
- *           description: The user's last update time
- */
-
-/**
- * @swagger
- * tags:
- *   name: Auth
- *   description: Authentication endpoints
+ *           description: Error message
  */
 
 /**
@@ -85,24 +85,34 @@ const loginSchema = Joi.object({
  *                 format: email
  *               password:
  *                 type: string
- *                 minLength: 6
+ *                 minLength: 8
+ *                 description: |
+ *                   Password must meet the following requirements:
+ *                   - At least 8 characters long
+ *                   - At least one uppercase letter
+ *                   - At least one lowercase letter
+ *                   - At least one number
+ *                   - At least one special character
  *               name:
  *                 type: string
+ *                 minLength: 2
  *     responses:
  *       201:
  *         description: User registered successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/AuthResponse'
  *       400:
- *         description: Invalid input
+ *         description: Invalid input data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       429:
+ *         description: Too many registration attempts
  */
-router.post('/register', 
-  rateLimiter,
-  validateRequest(registerSchema),
-  authController.register
-);
+router.post('/register', registerLimiter, registerValidation, authController.register);
 
 /**
  * @swagger
@@ -131,26 +141,23 @@ router.post('/register',
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                 user:
- *                   $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/AuthResponse'
  *       401:
  *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       429:
+ *         description: Too many login attempts
  */
-router.post('/login',
-  rateLimiter,
-  validateRequest(loginSchema),
-  authController.login
-);
+router.post('/login', authLimiter, loginValidation, authController.login);
 
 /**
  * @swagger
- * /api/auth/google:
+ * /api/auth/refresh-token:
  *   post:
- *     summary: Login with Google
+ *     summary: Refresh access token
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -159,52 +166,21 @@ router.post('/login',
  *           schema:
  *             type: object
  *             required:
- *               - token
+ *               - refreshToken
  *             properties:
- *               token:
+ *               refreshToken:
  *                 type: string
- *                 description: Google OAuth token
  *     responses:
  *       200:
- *         description: Google login successful
- *       400:
- *         description: Invalid token
+ *         description: Token refreshed successfully
+ *       401:
+ *         description: Invalid refresh token
  */
-router.post('/google',
-  rateLimiter,
-  validateRequest(Joi.object({
-    token: Joi.string().required()
-  })),
-  authController.googleAuth
-);
+router.post('/refresh-token', refreshTokenValidation, authController.refreshToken);
 
 /**
  * @swagger
- * /api/auth/verify-email/{token}:
- *   get:
- *     summary: Verify email address
- *     tags: [Auth]
- *     parameters:
- *       - in: path
- *         name: token
- *         schema:
- *           type: string
- *         required: true
- *         description: Email verification token
- *     responses:
- *       200:
- *         description: Email verified successfully
- *       400:
- *         description: Invalid token
- */
-router.get('/verify-email/:token',
-  rateLimiter,
-  authController.verifyEmail
-);
-
-/**
- * @swagger
- * /api/auth/forgot-password:
+ * /api/auth/request-password-reset:
  *   post:
  *     summary: Request password reset
  *     tags: [Auth]
@@ -223,16 +199,24 @@ router.get('/verify-email/:token',
  *     responses:
  *       200:
  *         description: Password reset email sent
- *       400:
- *         description: Invalid email
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Password reset email sent
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       429:
+ *         description: Too many password reset attempts
  */
-router.post('/forgot-password',
-  rateLimiter,
-  validateRequest(Joi.object({
-    email: Joi.string().email().required()
-  })),
-  authController.forgotPassword
-);
+router.post('/request-password-reset', passwordResetLimiter, passwordResetRequestValidation, authController.requestPasswordReset);
 
 /**
  * @swagger
@@ -252,23 +236,57 @@ router.post('/forgot-password',
  *             properties:
  *               token:
  *                 type: string
- *                 description: Password reset token
+ *                 description: Reset token received via email
  *               password:
  *                 type: string
- *                 minLength: 6
+ *                 minLength: 8
+ *                 description: |
+ *                   New password must meet the following requirements:
+ *                   - At least 8 characters long
+ *                   - At least one uppercase letter
+ *                   - At least one lowercase letter
+ *                   - At least one number
+ *                   - At least one special character
  *     responses:
  *       200:
  *         description: Password reset successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Password reset successful
  *       400:
- *         description: Invalid token or password
+ *         description: Invalid or expired token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       429:
+ *         description: Too many password reset attempts
  */
-router.post('/reset-password',
-  rateLimiter,
-  validateRequest(Joi.object({
-    token: Joi.string().required(),
-    password: Joi.string().min(6).required()
-  })),
-  authController.resetPassword
-);
+router.post('/reset-password', passwordResetLimiter, passwordResetValidation, authController.resetPassword);
+
+/**
+ * @swagger
+ * /api/auth/verify-email:
+ *   get:
+ *     summary: Verify email address
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid or expired token
+ */
+router.get('/verify-email', authController.verifyEmail);
 
 module.exports = router; 

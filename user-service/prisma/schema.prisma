@@ -20,6 +20,7 @@ model User {
   lastLogin         DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  imageBase64       String?  // Base64-encoded profile image
 
   // Study-related fields
   studyPreferences  StudyPreferences?

@@ -1,5 +1,5 @@
 const rateLimit = require('express-rate-limit');
-const LoggingService = require('../services/LoggingService');
+const LoggingService = require('../infrastructure/services/LoggingService');
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

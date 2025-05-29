@@ -5,9 +5,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const routes = require('./routes');
 const { errorHandler } = require('./middleware/errorHandler');
-const loggingService = require('./services/LoggingService');
+const loggingService = require('./infrastructure/services/LoggingService');
 const prisma = require('./infrastructure/database/config');
 
 const app = express();
@@ -19,8 +18,6 @@ app.use(express.json());
 
 // Logging
 app.use(loggingService.logRequest.bind(loggingService));
-// Optionally, log errors as well:
-// app.use(loggingService.logError.bind(loggingService));
 app.use(morgan('combined'));
 
 // Swagger configuration
@@ -28,9 +25,9 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Authentication Service API',
+      title: 'User Service API',
       version: '1.0.0',
-      description: 'API documentation for the Authentication Service'
+      description: 'API documentation for the User Service (Authentication & User Management) - Following DDD Architecture'
     },
     servers: [
       {
@@ -48,18 +45,29 @@ const swaggerOptions = {
       }
     }
   },
-  apis: ['./src/routes/*.js', './src/routes/**/*.js']
+  apis: [
+    './src/presentation/routes/*.js',
+    './src/presentation/controllers/*.js',
+    './src/domain/**/*.js'
+  ]
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Routes
-app.use('/api', routes);
+// Routes - DDD Presentation Layer
+app.use('/api/auth', require('./presentation/routes/auth'));
+app.use('/api/users', require('./presentation/routes/userRoutes'));
+app.use('/api/wrapped', require('./presentation/routes/wrapped'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date() });
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date(),
+    architecture: 'DDD',
+    version: '1.0.0'
+  });
 });
 
 // Error handling
@@ -70,7 +78,9 @@ const PORT = process.env.PORT || 3000;
 
 const server = app.listen(PORT, () => {
   console.log(`User Service is running on port ${PORT}`);
+  console.log(`Architecture: Domain-Driven Design (DDD)`);
   console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
+  console.log(`Features: HATEOAS, Swagger, Middleware, Rate Limiting`);
 });
 
 // Handle graceful shutdown
