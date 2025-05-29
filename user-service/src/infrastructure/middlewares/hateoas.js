@@ -17,9 +17,6 @@ const addHateoasLinks = (req, res, next) => {
       links.user = {
         href: `${baseUrl}/api/users/${data.data.user.id}`
       };
-      links.achievements = {
-        href: `${baseUrl}/api/gamification/achievements`
-      };
       links.wrapped = {
         href: `${baseUrl}/api/wrapped/${data.data.user.id}`
       };

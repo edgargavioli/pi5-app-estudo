@@ -1,7 +1,7 @@
 {
   "name": "user-service",
   "version": "1.0.0",
-  "description": "User Management Service - Handles authentication, user management, and gamification",
+  "description": "User Management Service - Handles authentication and user management",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

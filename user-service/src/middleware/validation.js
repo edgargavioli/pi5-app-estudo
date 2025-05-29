@@ -1,4 +1,5 @@
 const { body, validationResult } = require('express-validator');
+const Joi = require('joi');
 
 const validate = (req, res, next) => {
   const errors = validationResult(req);
@@ -9,6 +10,21 @@ const validate = (req, res, next) => {
 };
 
 const validateRequest = (schema) => {
+  // If it's a Joi schema
+  if (schema && typeof schema.validate === 'function') {
+    return (req, res, next) => {
+      const { error } = schema.validate(req.body);
+      if (error) {
+        return res.status(400).json({
+          status: 'error',
+          message: error.details[0].message
+        });
+      }
+      next();
+    };
+  }
+  
+  // If it's an express-validator array
   return [...schema, validate];
 };
 
@@ -90,17 +106,6 @@ const schemas = {
   updateProfile: [
     body('username').optional().trim().isLength({ min: 2 }).withMessage('Username must be at least 2 characters long'),
     body('email').optional().isEmail().withMessage('Please enter a valid email').normalizeEmail()
-  ],
-  updatePoints: [
-    body('points').isInt({ min: 0 }).withMessage('Points must be a non-negative integer')
-  ],
-  addPoints: [
-    body('points').isInt({ min: 0 }).withMessage('Points must be a non-negative integer'),
-    body('reason').optional().trim().isLength({ min: 1 }).withMessage('Reason is required')
-  ],
-  addAchievement: [
-    body('name').trim().isLength({ min: 1 }).withMessage('Achievement name is required'),
-    body('description').optional().trim().isLength({ min: 1 }).withMessage('Description is required')
   ]
 };
 

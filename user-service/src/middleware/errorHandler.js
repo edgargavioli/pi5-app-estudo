@@ -1,9 +1,45 @@
-function errorHandler(err, req, res, next) {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    status: 'error',
-    message: err.message || 'Internal Server Error'
-  });
+const LoggingService = require('../infrastructure/services/LoggingService');
+
+class AppError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.statusCode = statusCode;
+    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.isOperational = true;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
 }
 
-module.exports = { errorHandler }; 
+const handleError = (error, res) => {
+  // Log the error
+  LoggingService.error('Error occurred', {
+    error: error.message,
+    stack: error.stack,
+    statusCode: error.statusCode
+  });
+
+  // Handle operational errors (expected errors)
+  if (error.isOperational) {
+    return res.status(error.statusCode).json({
+      status: error.status,
+      message: error.message
+    });
+  }
+
+  // Handle programming or unknown errors
+  return res.status(500).json({
+    status: 'error',
+    message: 'Something went wrong'
+  });
+};
+
+const errorHandler = (err, req, res, next) => {
+  handleError(err, res);
+};
+
+module.exports = {
+  AppError,
+  handleError,
+  errorHandler
+}; 
