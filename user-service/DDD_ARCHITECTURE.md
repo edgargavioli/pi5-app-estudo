@@ -184,6 +184,10 @@ class UserRepository {
 - Structured logging format
 - HTTP request logging middleware
 
+#### CanvasService (`src/infrastructure/services/CanvasService.js`)
+- Loads background image buffers or files
+- Generates personalized "wrapped" PNG images overlaying user study stats using node-canvas
+
 #### WrappedService (`src/infrastructure/services/WrappedService.js`)
 - Data aggregation for analytics
 - User statistics calculation
