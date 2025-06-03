@@ -178,6 +178,7 @@ user-service/
 - `GET /api/wrapped/{id}` - Get aggregated user data
 - `GET /api/wrapped/{id}/achievements` - Get user achievements
 - `GET /api/wrapped/{id}/points-history` - Get points history
+- `POST /api/wrapped/{id}/image` - Generate personalized wrapped image (PNG) with optional background upload (`multipart/form-data`)
 
 ### System
 - `GET /health` - Health check endpoint
