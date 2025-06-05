@@ -1,5 +1,5 @@
-import { getChannel } from "../../infrastructure/messaging/rabbitmq";
-import UserPersistence from "../../infrastructure/persistence/user";
+import { getChannel } from "../../infrastructure/messaging/rabbitmq.js";
+import UserPersistence from "../../infrastructure/persistence/user.js";
 
 const USER_QUEUE = process.env.USER_QUEUE;
 const userPersistence = new UserPersistence();

@@ -8,8 +8,6 @@ import promMid from "express-prometheus-middleware";
 import swaggerUi from "swagger-ui-express";
 import swaggerFile from "./config/swagger.json" with { type: "json" };
 
-import routes from "./presentation/routes/routes.js";
-
 dotenv.config();
 
 const app = express();
@@ -28,6 +26,5 @@ app.use(promMid({
     responseLengthBuckets: [515, 1024, 5120, 10240],
 }));
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
-app.use(routes);
 
 export default app;
