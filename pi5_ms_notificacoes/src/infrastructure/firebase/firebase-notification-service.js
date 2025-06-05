@@ -1,4 +1,4 @@
-import initializeFirebaseAdmin from "./firebase-admin";
+import initializeFirebaseAdmin from "./firebase-admin.js";
 
 export default class FirebaseNotificationService {
     constructor() {

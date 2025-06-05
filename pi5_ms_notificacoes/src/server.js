@@ -1,13 +1,17 @@
 import http from "node:http";
-import app from "./app.js"
+import app from "./app.js";
+import { startAllConsumers } from "./aplication/consumer/notification-consumer.js";
 
 const error = (err) => {
-    console.error(`An error has occurred on start server\n ${err.message}`);
+    console.error(`Erro ao iniciar servidor\n ${err.message}`);
     throw err;
 };
 
 const listening = () => {
-    console.log(`Server running on port ${process.env.PORT}`);
+    console.log(`Servidor rodando na porta ${process.env.PORT}`);
+    
+    // Inicia os consumers após o servidor estar rodando
+    startAllConsumers();
 };
 
 const server = http.createServer(app);

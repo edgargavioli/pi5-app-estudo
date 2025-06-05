@@ -3,60 +3,81 @@ import Notification from "../../domain/entities/notification.js";
 
 export default class NotificationPersistence {
     constructor() {
-        this.prisma = prisma();
+        this.prisma = prisma;
     }
 
     async create(notificationData) {
         try {
-            const notification = new Notification(notificationData);
-
             const createdNotification = await this.prisma.notification.create({
-                data: notification,
+                data: {
+                    userId: notificationData.userId,
+                    type: notificationData.type,
+                    entityId: notificationData.entityId,
+                    entityType: notificationData.entityType,
+                    entityData: notificationData.entityData,
+                    scheduledFor: notificationData.scheduledFor,
+                    status: notificationData.status || 'PENDING'
+                }
             });
 
-            return createdNotification;
+            return Notification.fromJson(createdNotification);
         } catch (error) {
             console.error('Error creating notification:', error);
             throw error;
         }
     }
 
-    async getAll() {
+    async findPendingNotifications(currentTime) {
         try {
-            const notifications = await this.prisma.notification.findMany();
-            return notifications.map(notification => new Notification(notification));
+            const notifications = await this.prisma.notification.findMany({
+                where: {
+                    status: 'PENDING',
+                    scheduledFor: {
+                        lte: currentTime
+                    }
+                },
+                include: {
+                    user: true
+                }
+            });
+
+            return notifications.map(notification => Notification.fromJson(notification));
         } catch (error) {
-            console.error('Error fetching all notifications:', error);
+            console.error('Error finding pending notifications:', error);
             throw error;
         }
     }
 
-    async findById(id) {
+    async updateStatus(id, status) {
         try {
-            const notification = await this.prisma.notification.findUnique({
+            return await this.prisma.notification.update({
                 where: { id },
+                data: { status, updatedAt: new Date() }
             });
-
-            if (!notification) {
-                throw new Error(`Notification with id ${id} not found.`);
-            }
-
-            return new Notification(notification);
         } catch (error) {
-            console.error('Error finding notification by id:', error);
+            console.error('Error updating notification status:', error);
             throw error;
         }
     }
 
-    async delete(id) {
+    // Método para limpar notificações antigas
+    async cleanupOldNotifications(daysOld = 30) {
         try {
-            const deletedNotification = await this.prisma.notification.delete({
-                where: { id },
-            });
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
-            return deletedNotification;
+            return await this.prisma.notification.deleteMany({
+                where: {
+                    createdAt: {
+                        lt: cutoffDate
+                    },
+                    status: {
+                        in: ['SENT', 'FAILED']
+                    }
+                }
+            });
         } catch (error) {
-            console.error('Error deleting notification:', error);
+            console.error('Error cleaning up old notifications:', error);
             throw error;
         }
     }

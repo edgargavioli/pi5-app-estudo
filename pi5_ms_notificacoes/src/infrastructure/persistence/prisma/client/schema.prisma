@@ -1,0 +1,37 @@
+// Organiza tudo aqui dentro pra n ter erro
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE")
+}
+
+model notification {
+  id           String   @id @default(cuid())
+  userId       String
+  type         String // EVENT_REMINDER, EVENT_TODAY, STREAK_WARNING, etc
+  entityId     String? // ID do evento ou streak
+  entityType   String // 'event' ou 'streak'
+  entityData   Json // Dados dinâmicos do evento/streak
+  scheduledFor DateTime // Quando deve ser enviada
+  status       String   @default("PENDING") // PENDING, SENT, FAILED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([scheduledFor, status])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  fcmToken  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notifications notification[]
+}
