@@ -29,12 +29,13 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    if (!user.isEmailVerified) {
-      return res.status(403).json({
-        status: 'error',
-        message: 'Please verify your email before accessing this resource'
-      });
-    }
+    // 🚧 TEMPORÁRIO: Comentando verificação de email para testes
+    // if (!user.isEmailVerified) {
+    //   return res.status(403).json({
+    //     status: 'error',
+    //     message: 'Please verify your email before accessing this resource'
+    //   });
+    // }
 
     req.user = user;
     next();

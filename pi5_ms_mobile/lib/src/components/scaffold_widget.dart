@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/components/navigation_widget.dart';
 import 'package:pi5_ms_mobile/src/components/pageview/page_view.dart';
-import 'package:pi5_ms_mobile/src/presentation/materias/materias_config_page.dart';
+import 'package:pi5_ms_mobile/src/components/cronometro_flutuante_widget.dart';
+import 'package:pi5_ms_mobile/src/shared/services/cronometro_service.dart';
+import 'package:pi5_ms_mobile/src/routes/app_routes.dart';
 
 class ScaffoldWidget extends StatefulWidget {
   const ScaffoldWidget({super.key});
@@ -21,38 +23,127 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
     super.dispose();
   }
 
+  void _navegarParaCronometro() {
+    final cronometroService = CronometroService();
+    if (cronometroService.hasActiveSession) {
+      // Navegar para a tela de estudos que gerencia as sessões
+      Navigator.pushNamed(context, AppRoutes.estudos);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('PI5 MS Mobile'),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
         actions: [
           PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
             onSelected: (value) {
-              if (value == 'materia') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ConfigMateriaPage()),
-                );
+              switch (value) {
+                case 'materias':
+                  Navigator.pushNamed(context, AppRoutes.materias);
+                  break;
+                case 'estudos':
+                  Navigator.pushNamed(context, AppRoutes.estudos);
+                  break;
+                case 'perfil':
+                  Navigator.pushNamed(context, AppRoutes.perfil);
+                  break;
+                case 'logout':
+                  _showLogoutDialog();
+                  break;
               }
             },
-            itemBuilder:
-                (BuildContext context) => [
-                  const PopupMenuItem<String>(
-                    value: 'materia',
-                    child: Text('Configurar matérias'),
-                  ),
-                ],
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'materias',
+                child: Row(
+                  children: [
+                    Icon(Icons.library_books),
+                    SizedBox(width: 8),
+                    Text('Matérias'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'estudos',
+                child: Row(
+                  children: [
+                    Icon(Icons.book),
+                    SizedBox(width: 8),
+                    Text('Estudos'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'perfil',
+                child: Row(
+                  children: [
+                    Icon(Icons.person),
+                    SizedBox(width: 8),
+                    Text('Perfil'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout),
+                    SizedBox(width: 8),
+                    Text('Sair'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      body: PageViewWidget(
-        pageController: _pageController,
-        currentIndex: _currentIndex,
+      body: Stack(
+        children: [
+          PageViewWidget(
+            pageController: _pageController,
+            currentIndex: _currentIndex,
+          ),
+          // Cronômetro flutuante
+          CronometroFlutuanteWidget(
+            onTapCronometro: _navegarParaCronometro,
+          ),
+        ],
       ),
       bottomNavigationBar: BottonNavBarWidget(
         pageController: _pageController,
         currentIndex: _currentIndex,
       ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Sair'),
+          content: const Text('Tem certeza que deseja sair da aplicação?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                AppRoutes.logout(context);
+              },
+              child: const Text('Sair'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

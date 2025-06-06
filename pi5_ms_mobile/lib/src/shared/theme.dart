@@ -336,17 +336,55 @@ class MaterialTheme {
   }
 
 
-  ThemeData theme(ColorScheme colorScheme) => ThemeData(
-     useMaterial3: true,
-     brightness: colorScheme.brightness,
-     colorScheme: colorScheme,
-     textTheme: textTheme.apply(
-       bodyColor: colorScheme.onSurface,
-       displayColor: colorScheme.onSurface,
-     ),
-     scaffoldBackgroundColor: colorScheme.surface,
-     canvasColor: colorScheme.surface,
-  );
+  ThemeData theme(ColorScheme colorScheme) {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
+      textTheme: textTheme,
+      appBarTheme: AppBarTheme(
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        elevation: 0,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: TextStyle(
+          color: colorScheme.primary,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+        hintStyle: TextStyle(
+          color: colorScheme.onSurface.withOpacity(0.8),
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: colorScheme.outline,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: colorScheme.outline.withOpacity(0.7),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: colorScheme.primary,
+            width: 2,
+          ),
+        ),
+        filled: true,
+        fillColor: colorScheme.surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+      ),
+    );
+  }
 
   /// Custom Color 1
   static const customColor1 = ExtendedColor(

@@ -1,0 +1,3547 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "API de Provas e Estudos",
+    "description": "Documentação da API de Provas e Estudos"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/materias/": {
+      "get": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Listar todas as matérias",
+        "description": "Retorna uma lista com todas as matérias cadastradas incluindo links HATEOAS",
+        "responses": {
+          "200": {
+            "description": "Lista de matérias retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/Materia"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/Materia"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Criar nova matéria",
+        "description": "Cria uma nova matéria no sistema com links HATEOAS",
+        "responses": {
+          "201": {
+            "description": "Matéria criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Materia"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "provas": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "sessoes": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Materia"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "provas": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "sessoes": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nome",
+                  "disciplina"
+                ],
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "example": "Matemática",
+                    "description": "Nome da matéria"
+                  },
+                  "disciplina": {
+                    "type": "string",
+                    "example": "Exatas",
+                    "description": "Disciplina à qual a matéria pertence"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/materias/{id}": {
+      "get": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Buscar matéria por ID",
+        "description": "Retorna uma matéria específica pelo seu ID incluindo links HATEOAS para recursos relacionados",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da matéria",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matéria encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Materia"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "provas": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "sessoes": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Materia"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "provas": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "sessoes": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Matéria não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Atualizar matéria",
+        "description": "Atualiza os dados de uma matéria existente retornando links HATEOAS",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da matéria",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matéria atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Materia"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Materia"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Matéria não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "example": "Física",
+                    "description": "Nome da matéria"
+                  },
+                  "disciplina": {
+                    "type": "string",
+                    "example": "Exatas",
+                    "description": "Disciplina à qual a matéria pertence"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Deletar matéria",
+        "description": "Remove uma matéria do sistema. ⚠️ ATENÇÃO: Não é possível deletar matérias que possuem provas ou sessões associadas (FK constraint - retorna 409)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da matéria",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Matéria deletada com sucesso"
+          },
+          "404": {
+            "description": "Matéria não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Matéria não encontrada"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Matéria não encontrada"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito - Matéria possui relacionamentos (FK Constraint)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Não é possível deletar a matéria pois ela possui provas ou sessões de estudo associadas"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Não é possível deletar a matéria pois ela possui provas ou sessões de estudo associadas"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "/provas/": {
+      "get": {
+        "tags": [
+          "Provas"
+        ],
+        "summary": "Listar todas as provas",
+        "description": "Retorna uma lista com todas as provas cadastradas incluindo links HATEOAS",
+        "responses": {
+          "200": {
+            "description": "Lista de provas retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/Prova"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/Prova"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Provas"
+        ],
+        "summary": "Criar nova prova",
+        "description": "Cria uma nova prova no sistema com links HATEOAS. ⚠️ ATENÇÃO: O materiaId deve ser de uma matéria existente!",
+        "responses": {
+          "201": {
+            "description": "Prova criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Prova"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "materia": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "sessoes": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Prova"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "materia": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "sessoes": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Matéria não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Matéria não encontrada"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Matéria não encontrada"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "titulo",
+                  "data",
+                  "horario",
+                  "local",
+                  "materiaId",
+                  "pesos"
+                ],
+                "properties": {
+                  "titulo": {
+                    "type": "string",
+                    "example": "Prova de Matemática",
+                    "description": "Título da prova"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "example": "Prova sobre álgebra linear e cálculo",
+                    "description": "Descrição detalhada da prova"
+                  },
+                  "data": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-12-25",
+                    "description": "Data da prova (YYYY-MM-DD)"
+                  },
+                  "horario": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-12-25T10:00:00Z",
+                    "description": "Horário da prova (ISO 8601)"
+                  },
+                  "local": {
+                    "type": "string",
+                    "example": "Sala 101",
+                    "description": "Local onde será realizada a prova"
+                  },
+                  "materiaId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "123e4567-e89b-12d3-a456-426614174000",
+                    "description": "🔗 ID da matéria (deve existir no sistema)"
+                  },
+                  "pesos": {
+                    "type": "object",
+                    "description": "Pesos das diferentes partes da prova",
+                    "required": [
+                      "teoria",
+                      "pratica"
+                    ],
+                    "properties": {
+                      "teoria": {
+                        "type": "number",
+                        "example": 0.7,
+                        "description": "Peso da parte teórica (0.0 a 1.0)"
+                      },
+                      "pratica": {
+                        "type": "number",
+                        "example": 0.3,
+                        "description": "Peso da parte prática (0.0 a 1.0)"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/provas/{id}": {
+      "get": {
+        "tags": [
+          "Provas"
+        ],
+        "summary": "Buscar prova por ID",
+        "description": "Retorna uma prova específica pelo seu ID incluindo links HATEOAS para recursos relacionados",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da prova",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prova encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Prova"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "materia": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "sessoes": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Prova"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "materia": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "sessoes": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Prova não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Provas"
+        ],
+        "summary": "Atualizar prova",
+        "description": "Atualiza os dados de uma prova existente retornando links HATEOAS",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da prova",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prova atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Prova"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Prova"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Prova não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "titulo": {
+                    "type": "string",
+                    "example": "Prova de Física",
+                    "description": "Título da prova"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "example": "Prova sobre mecânica clássica",
+                    "description": "Descrição da prova"
+                  },
+                  "data": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2024-12-30",
+                    "description": "Data da prova"
+                  },
+                  "horario": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-12-30T14:00:00Z",
+                    "description": "Horário da prova"
+                  },
+                  "local": {
+                    "type": "string",
+                    "example": "Sala 102",
+                    "description": "Local da prova"
+                  },
+                  "pesos": {
+                    "type": "object",
+                    "properties": {
+                      "teoria": {
+                        "type": "number",
+                        "example": 0.6
+                      },
+                      "pratica": {
+                        "type": "number",
+                        "example": 0.4
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Provas"
+        ],
+        "summary": "Deletar prova",
+        "description": "Remove uma prova do sistema",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da prova",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Prova deletada com sucesso"
+          },
+          "404": {
+            "description": "Prova não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "/sessoes/": {
+      "get": {
+        "tags": [
+          "Sessões de Estudo"
+        ],
+        "summary": "Listar todas as sessões de estudo",
+        "description": "Retorna uma lista com todas as sessões de estudo cadastradas incluindo links HATEOAS",
+        "responses": {
+          "200": {
+            "description": "Lista de sessões retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/SessaoEstudo"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/SessaoEstudo"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sessões de Estudo"
+        ],
+        "summary": "Criar nova sessão de estudo",
+        "description": "Cria uma nova sessão de estudo no sistema com links HATEOAS. ⚠️ ATENÇÃO: O materiaId deve ser de uma matéria existente!",
+        "responses": {
+          "201": {
+            "description": "Sessão criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SessaoEstudo"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "materia": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "finalizar": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SessaoEstudo"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "materia": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "finalizar": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "materiaId",
+                  "conteudo",
+                  "topicos",
+                  "tempoInicio"
+                ],
+                "properties": {
+                  "materiaId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "123e4567-e89b-12d3-a456-426614174000",
+                    "description": "🔗 ID da matéria (deve existir no sistema)"
+                  },
+                  "provaId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "123e4567-e89b-12d3-a456-426614174001",
+                    "description": "🔗 ID da prova (opcional, se for estudo para prova específica)"
+                  },
+                  "conteudo": {
+                    "type": "string",
+                    "example": "Estudando álgebra linear para o vestibular",
+                    "description": "Descrição do conteúdo estudado"
+                  },
+                  "topicos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "Matrizes",
+                      "Determinantes",
+                      "Sistemas lineares"
+                    ],
+                    "description": "Lista de tópicos estudados"
+                  },
+                  "tempoInicio": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-12-25T14:00:00Z",
+                    "description": "Horário de início da sessão (ISO 8601)"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessoes/{id}": {
+      "get": {
+        "tags": [
+          "Sessões de Estudo"
+        ],
+        "summary": "Buscar sessão por ID",
+        "description": "Retorna uma sessão de estudo específica pelo seu ID incluindo links HATEOAS",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da sessão de estudo",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessão encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SessaoEstudo"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "materia": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "prova": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "finalizar": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SessaoEstudo"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "materia": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "prova": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "finalizar": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sessão não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Sessões de Estudo"
+        ],
+        "summary": "Atualizar sessão de estudo",
+        "description": "Atualiza os dados de uma sessão de estudo existente retornando links HATEOAS",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da sessão de estudo",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessão atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SessaoEstudo"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SessaoEstudo"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sessão não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "conteudo": {
+                    "type": "string",
+                    "example": "Sessão de revisão de física quântica",
+                    "description": "Descrição do conteúdo"
+                  },
+                  "topicos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "Efeito fotoelétrico",
+                      "Princípio da incerteza"
+                    ],
+                    "description": "Tópicos estudados"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Sessões de Estudo"
+        ],
+        "summary": "Deletar sessão de estudo",
+        "description": "Remove uma sessão de estudo do sistema",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da sessão de estudo",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sessão deletada com sucesso"
+          },
+          "404": {
+            "description": "Sessão não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "/sessoes/{id}/finalizar": {
+      "post": {
+        "tags": [
+          "Sessões de Estudo"
+        ],
+        "summary": "Finalizar sessão de estudo",
+        "description": "Finaliza uma sessão de estudo em andamento, definindo o tempo de fim e retornando links HATEOAS",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da sessão de estudo",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessão finalizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SessaoEstudo"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "materia": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SessaoEstudo"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "update": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "delete": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "materia": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Sessão já foi finalizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Sessão já foi finalizada"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Sessão já foi finalizada"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sessão não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Materia": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "uuid"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                  }
+                }
+              },
+              "nome": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Matemática"
+                  }
+                }
+              },
+              "disciplina": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Exatas"
+                  }
+                }
+              },
+              "createdAt": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  }
+                }
+              },
+              "updatedAt": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "Materia"
+        }
+      },
+      "Prova": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "uuid"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174001"
+                  }
+                }
+              },
+              "titulo": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Prova de Matemática"
+                  }
+                }
+              },
+              "descricao": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Prova sobre álgebra linear"
+                  }
+                }
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2024-12-25"
+                  }
+                }
+              },
+              "horario": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2024-12-25T10:00:00Z"
+                  }
+                }
+              },
+              "local": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Sala 101"
+                  }
+                }
+              },
+              "materiaId": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "uuid"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                  }
+                }
+              },
+              "pesos": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "object"
+                  },
+                  "properties": {
+                    "type": "object",
+                    "properties": {
+                      "teoria": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "example": "number"
+                          },
+                          "example": {
+                            "type": "number",
+                            "example": 0.7
+                          }
+                        }
+                      },
+                      "pratica": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "example": "number"
+                          },
+                          "example": {
+                            "type": "number",
+                            "example": 0.3
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "Prova"
+        }
+      },
+      "SessaoEstudo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "uuid"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174002"
+                  }
+                }
+              },
+              "materiaId": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "uuid"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                  }
+                }
+              },
+              "provaId": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "uuid"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174001"
+                  },
+                  "nullable": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              },
+              "conteudo": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Estudo sobre derivadas"
+                  }
+                }
+              },
+              "topicos": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "array"
+                  },
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "example": "string"
+                      }
+                    }
+                  },
+                  "example": {
+                    "type": "array",
+                    "example": [
+                      "Derivadas",
+                      "Integrais",
+                      "Limites"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "tempoInicio": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2024-12-25T14:00:00Z"
+                  }
+                }
+              },
+              "tempoFim": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "format": {
+                    "type": "string",
+                    "example": "date-time"
+                  },
+                  "nullable": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "2024-12-25T16:00:00Z"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "SessaoEstudo"
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Mensagem de erro"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "Error"
+        }
+      },
+      "InternalServerError": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "object"
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "string"
+                  },
+                  "example": {
+                    "type": "string",
+                    "example": "Erro interno do servidor"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "InternalServerError"
+        }
+      }
+    }
+  }
+}

@@ -20,6 +20,8 @@ class InputWidget extends StatelessWidget {
   final GestureTapCallback? onTap;
   final InputDecoration? decoration;
   final Widget? suffixIcon;
+  final String? Function(String?)? validator;
+  final TextInputAction? textInputAction;
 
   const InputWidget({
     super.key,
@@ -42,18 +44,25 @@ class InputWidget extends StatelessWidget {
     this.onTap,
     this.decoration,
     this.suffixIcon,
+    this.validator,
+    this.textInputAction,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: width,
       height: height,
-      child: TextField(
+      child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
         obscureText: obscureText,
-        style: style,
+        style: style ?? TextStyle(
+          color: colorScheme.onSurface,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
         textAlign: textAlign,
         maxLength: maxLength,
         maxLines: maxLines,
@@ -61,8 +70,10 @@ class InputWidget extends StatelessWidget {
         expands: expands,
         readOnly: readOnly,
         onChanged: onChanged,
-        onSubmitted: onSubmitted,
+        onFieldSubmitted: onSubmitted,
         onTap: onTap,
+        validator: validator,
+        textInputAction: textInputAction,
         decoration:
             decoration ??
             InputDecoration(
@@ -70,8 +81,42 @@ class InputWidget extends StatelessWidget {
               hintText: hintText,
               floatingLabelBehavior: FloatingLabelBehavior.always,
               suffixIcon: suffixIcon,
+              hintStyle: TextStyle(
+                color: colorScheme.onSurface.withOpacity(0.8),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+              labelStyle: TextStyle(
+                color: colorScheme.primary,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4.0),
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide(
+                  color: colorScheme.outline,
+                  width: 1.5,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide(
+                  color: colorScheme.outline.withOpacity(0.7),
+                  width: 1.5,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: BorderSide(
+                  color: colorScheme.primary,
+                  width: 2,
+                ),
+              ),
+              filled: true,
+              fillColor: colorScheme.surfaceContainer,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
               ),
             ),
       ),

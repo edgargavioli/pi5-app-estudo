@@ -1,0 +1,82 @@
+{
+   "checksum": "6441d106307b57d31e68d3afdec130d5",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13353201804510843",
+            "date_last_used": "13363841816201228",
+            "guid": "135714ca-91a9-4cee-b584-36d461ebdb4e",
+            "id": "6",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "· GitLab",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://gitlab.com/",
+            "visit_count": 0
+         }, {
+            "date_added": "13343177854033984",
+            "date_last_used": "13393374776962698",
+            "guid": "fff4be76-828a-4ebc-8ce7-34bc0c43db25",
+            "id": "7",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "Logon - Biopark Educação",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://bioparkedu.brightspace.com/d2l/login",
+            "visit_count": 26
+         }, {
+            "date_added": "13343191521791473",
+            "date_last_used": "13393636351000964",
+            "guid": "aa130585-38cf-480c-9ffb-a1d68aed4a42",
+            "id": "8",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "(16) YouTube",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://www.youtube.com/",
+            "visit_count": 145
+         } ],
+         "date_added": "13392173381855235",
+         "date_last_used": "0",
+         "date_modified": "13353201804510843",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Barra de favoritos",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13392173381855237",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Outros favoritos",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13392173381855239",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Favoritos do celular",
+         "source": "unknown",
+         "type": "folder"
+      }
+   },
+   "sync_metadata": "CjEKDgiIgQISCPiVbEKXAQAAEgAqGFo2WkNwN3MrMEtscE5admYvcjlUNWc9PUgDoAYMEq0BCAgSqAEKHHNBWFF6clYveGhiTHU2VFdaT00yVk1HYWkyUT0SJGFhMTMwNTg1LTM4Y2YtNDgwYy05ZmZiLWExZDY4YWVkNGE0MhgAIAAoADDv6uWR9DI4/fbpm7gxQO/q5ZH0MkocMG5JeUdUZGkzNkZXWTdpNFVYWEZGeVczalQwPVofIh3deGZvNWZ0dldZOStjMDQrNXRiZ0dsNFBZUDBBPWX9nIxKwj4CYAUSrAEIBxKnAQocRyttOE9tRzBmWHhzQ2JuYjBPQmY0NGhKdWdzPRIkZmZmNGJlNzYtODI4YS00ZWJjLThjZTctMzRiYzBjNDNkYjI1GAAgACgAMO7ek5XzMjil2aeVuDFA7t6TlfMyShxXdEt5SGtZdkdHaklQWU5Ha0hUZGJnbTRCRmc9Wh4iHHdsbG00eUs1YlRGV0phY2hVSmsvTGhNcndGQT1l5ps0XMI+AmAFEqwBCAYSpwEKHGhNRE1vTnJJNkdVYndlaWRobThsTWVCTitiQT0SJDEzNTcxNGNhLTkxYTktNGNlZS1iNTg0LTM2ZDQ2MWViZGI0ZRgAIAAoADCv28OJqzI4q46Nwd0xQKuOjcHdMUocNWZaVXZIMzVwRUVsYU12MEx1Q2M1TW5CK2xRPVoeIhxVNDQrY2ZpREJkRUtrb2ZmanM3VnE0SThBQlU9ZbXgDZHCPgJgBRKOAQgBEokBChx5eEovNmZ2a2VjcjdrcDVFUXpCNHRXTHBkYkU9EiRjMTNkNGNmMS1hYTU0LTViZmItOWIyZS1hOTkzNDE2MGZmNjAYACAAKAAwwILlmL8wOOqF5Zi/MEDqheWYvzBKHGFSQ1dMZ2hGOWI1SW5xS0lEdnVKL2p2UWtGYz1aAGUAAAAAwj4CYAASjgEIAhKJAQocWWNTVG9udkVTUHdxQ3M0TDJjclZodjY4TDk4PRIkNWU4MDYyNWEtMmYwMy01NjQwLWEwMGEtYTM2YzBlZWY0YmRiGAAgACgAMMCC5Zi/MDiJhuWYvzBAiYblmL8wShxvUFZraHdCUmJWNjVLQ1dSMitJT05IV29PdTg9WgBlAAAAAMI+AmAAEo4BCAMSiQEKHG5qZ0R1ODhlQ3J2WHA4NnBEN2ZIR2NxRnA4OD0SJGU0OWUxODRjLTg4M2QtNWRkMy1hOGRlLWUyZmQ1MzI2YzAwYRgAIAAoADDAguWYvzA4loflmL8wQJaH5Zi/MEoceXpOQjAxY241NEE3Y1JVMHVUKy9QZ21UdFVvPVoAZQAAAADCPgJgADAAOAA=",
+   "version": 1
+}

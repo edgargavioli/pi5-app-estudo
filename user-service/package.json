@@ -23,6 +23,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.10.0",
+    "amqplib": "^0.10.7",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -39,9 +40,7 @@
     "passport-google-oauth20": "^2.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
-    "winston": "^3.11.0",
-    "canvas": "^2.11.0",
-    "multer": "^1.4.4"
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",

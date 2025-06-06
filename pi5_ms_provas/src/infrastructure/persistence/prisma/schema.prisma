@@ -1,0 +1,151 @@
+// Organiza tudo aqui dentro pra n ter erro
+
+generator client {
+    provider = "prisma-client-js"
+    output   = "../../../../node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum TipoProva {
+    VESTIBULAR
+    PROVA
+    CONCURSO_PUBLICO
+    CERTIFICACAO
+}
+
+enum TipoEvento {
+    VESTIBULAR
+    CONCURSO_PUBLICO
+    ENEM
+    CERTIFICACAO
+    PROVA_SIMULADA
+}
+
+enum StatusInscricao {
+    INSCRITO
+    CONFIRMADO
+    CANCELADO
+    REALIZADO
+}
+
+model Materia {
+    id            String         @id @default(uuid())
+    nome          String
+    descricao     String?
+    userId        String         // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
+    provas        Prova[]
+    eventos       Evento[]
+    sessoesEstudo SessaoEstudo[]
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+
+    // Índice para performance em consultas por usuário
+    @@index([userId])
+    @@map("materias")
+}
+
+model Prova {
+    id            String         @id @default(uuid())
+    titulo        String
+    descricao     String?
+    data          DateTime
+    horario       DateTime
+    local         String
+    userId        String         // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
+    materiaId     String
+    materia       Materia        @relation(fields: [materiaId], references: [id])
+    filtros       Json?
+    totalQuestoes Int?           // Número total de questões da prova
+    acertos       Int?           // Número de acertos do usuário
+    sessoesEstudo SessaoEstudo[]
+    sessoes       Sessao[]
+    createdAt     DateTime      @default(now())
+    updatedAt     DateTime      @updatedAt
+
+    // Índice para performance em consultas por usuário
+    @@index([userId])
+    @@map("provas")
+}
+
+model Evento {
+    id              String         @id @default(uuid())
+    titulo          String         // "ENEM 2025", "Vestibular USP 2025"
+    descricao       String?
+    tipo            TipoEvento
+    data            DateTime
+    horario         DateTime
+    local           String
+    userId          String?        // 🔒 Opcional para eventos públicos
+    materiaId       String?        // Opcional, alguns eventos são multi-matéria
+    materia         Materia?       @relation(fields: [materiaId], references: [id])
+    urlInscricao    String?        // Link para inscrição oficial
+    taxaInscricao   Decimal?       // Valor da inscrição
+    dataLimiteInscricao DateTime?  // Data limite para inscrição
+    inscricoes      EventoInscricao[]
+    sessoesEstudo   SessaoEstudo[] // Estudos direcionados para este evento
+    createdAt       DateTime       @default(now())
+    updatedAt       DateTime       @updatedAt
+
+    // Índice para performance em consultas por usuário
+    @@index([userId])
+    @@map("eventos")
+}
+
+model EventoInscricao {
+    id          String           @id @default(uuid())
+    eventoId    String
+    evento      Evento           @relation(fields: [eventoId], references: [id])
+    usuarioId   String           // 🔒 ID do estudante (FK para user-service)
+    status      StatusInscricao  @default(INSCRITO)
+    observacoes String?
+    createdAt   DateTime         @default(now())
+    updatedAt   DateTime         @updatedAt
+
+    @@unique([eventoId, usuarioId])
+    // Índice para performance
+    @@index([usuarioId])
+    @@map("evento_inscricoes")
+}
+
+model SessaoEstudo {
+    id          String    @id @default(uuid())
+    userId      String    // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
+    materiaId   String
+    materia     Materia   @relation(fields: [materiaId], references: [id])
+    provaId     String?
+    prova       Prova?    @relation(fields: [provaId], references: [id])
+    eventoId    String?   // Nova relação com eventos
+    evento      Evento?   @relation(fields: [eventoId], references: [id])
+    conteudo    String
+    topicos     String[]
+    tempoInicio DateTime?
+    tempoFim    DateTime?
+    // Campos para gamificação
+    questoesAcertadas Int?    @default(0)
+    totalQuestoes     Int?    @default(0)
+    finalizada        Boolean @default(false)
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    // Índice para performance em consultas por usuário
+    @@index([userId])
+    @@map("sessoes_estudo")
+}
+
+model Sessao {
+    id        String   @id @default(uuid())
+    data      DateTime
+    duracao   Int
+    userId    String   // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
+    provaId   String
+    prova     Prova    @relation(fields: [provaId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Índice para performance
+    @@index([userId])
+}

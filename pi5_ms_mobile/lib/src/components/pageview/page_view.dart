@@ -27,12 +27,12 @@ class _PageViewWidgetState extends State<PageViewWidget> {
       controller: widget.pageController,
       onPageChanged: (index) => widget.currentIndex.value = index,
       children: <Widget>[
-        HomePage(title: 'P5 MS Mobile'),
-        ProvaslistagemPage(),
-        CronogramaPage(),
-        HistoricoPage(),
-        DesempenhoPage(),
-        UserProfilePageMain(),
+        const InicioPage(),
+        const ProvasListagemPage(),
+        const CronogramaPage(),
+        const HistoricoPage(),
+        const DesempenhoPage(),
+        const PerfilUsuarioPage(),
       ],
     );
   }

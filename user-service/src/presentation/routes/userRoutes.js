@@ -1,16 +1,10 @@
 const express = require('express');
-const router = express.Router();
 const userController = require('../controllers/UserController');
 const { authMiddleware } = require('../../middleware/auth');
 const { validateRequest, schemas } = require('../../middleware/validation');
-const rateLimit = require('express-rate-limit');
+const { userRateLimit } = require('../../middleware/rateLimiter');
 
-// Rate limiting for user operations
-const userRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
-});
+const router = express.Router();
 
 /**
  * @swagger

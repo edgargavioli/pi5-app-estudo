@@ -1,0 +1,1 @@
+UPDATE "User" SET "isEmailVerified" = true WHERE email = 'teste@teste.com'; 
