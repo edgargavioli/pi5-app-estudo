@@ -12,6 +12,15 @@ class UserController {
     this.userRepository = new PrismaUserRepository();
     this.getUserUseCase = new GetUserUseCase(this.userRepository);
     this.updateUserUseCase = new UpdateUserUseCase(this.userRepository);
+
+    // Bind methods to preserve 'this' context
+    this.getUser = this.getUser.bind(this);
+    this.updateUser = this.updateUser.bind(this);
+    this.deleteUser = this.deleteUser.bind(this);
+    this.updateProfileImage = this.updateProfileImage.bind(this);
+    this.getProfileImage = this.getProfileImage.bind(this);
+    this.generateHateoasLinks = this.generateHateoasLinks.bind(this);
+    this.isValidBase64Image = this.isValidBase64Image.bind(this);
   }
 
   /**
@@ -194,4 +203,5 @@ class UserController {
   }
 }
 
+// Exportar uma instância em vez da classe
 module.exports = new UserController(); 
