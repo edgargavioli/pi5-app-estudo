@@ -39,15 +39,30 @@ class _BottonNavBarWidgetState extends State<BottonNavBarWidget> {
               );
             },
             destinations: const [
-              NavigationDestination(icon: Icon(Icons.home), label: ''),
-              NavigationDestination(icon: Icon(Icons.article), label: ''),
+              NavigationDestination(
+                icon: Icon(Icons.home), 
+                label: 'Início',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.article), 
+                label: 'Provas',
+              ),
               NavigationDestination(
                 icon: Icon(Icons.calendar_today),
-                label: '',
+                label: 'Cronograma',
               ),
-              NavigationDestination(icon: Icon(Icons.history), label: ''),
-              NavigationDestination(icon: Icon(Icons.bar_chart), label: ''),
-              NavigationDestination(icon: Icon(Icons.person), label: ''),
+              NavigationDestination(
+                icon: Icon(Icons.history), 
+                label: 'Histórico',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.bar_chart), 
+                label: 'Desempenho',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person), 
+                label: 'Perfil',
+              ),
             ],
           ),
         );

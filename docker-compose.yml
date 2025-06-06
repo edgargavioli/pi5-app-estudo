@@ -1,31 +1,65 @@
 services:
+  # RabbitMQ - Broker Central de Mensageria
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq-broker
+    ports:
+      - "5672:5672"     # AMQP port
+      - "15672:15672"   # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin123
+      - RABBITMQ_DEFAULT_VHOST=/
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - microservices-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # User Service
   user-service:
     build:
       context: ./user-service
       dockerfile: Dockerfile
+    container_name: user-service
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/auth_service?schema=public
-      - JWT_SECRET=your_jwt_secret_key
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-user:5432/auth_service?schema=public
+      - JWT_SECRET=your_jwt_secret_key_super_secure_2024
       - JWT_EXPIRES_IN=24h
       - SMTP_HOST=smtp.gmail.com
       - SMTP_PORT=587
       - SMTP_USER=your_email@gmail.com
       - SMTP_PASS=your_app_password
+      # RabbitMQ Configuration
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - RABBITMQ_EXCHANGE=pi5_events
+      - SERVICE_NAME=user-service
     depends_on:
-      postgres:
+      postgres-user:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     volumes:
       - ./user-service:/app
       - /app/node_modules
     networks:
-      - user-network
+      - microservices-network
+    restart: unless-stopped
 
-  postgres:
-    image: postgres:latest
+  # Postgres para User Service
+  postgres-user:
+    image: postgres:16-alpine
+    container_name: postgres-user
     ports:
       - "5432:5432"
     environment:
@@ -33,18 +67,76 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=auth_service
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-user-data:/var/lib/postgresql/data
     networks:
-      - user-network
+      - microservices-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  # Provas Service
+  provas-service:
+    build:
+      context: ./pi5_ms_provas
+      dockerfile: Dockerfile
+    container_name: provas-service
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE=postgresql://postgres:postgres@postgres-provas:5432/provas_db
+      # JWT Configuration (MESMA SECRET DO USER-SERVICE)
+      - JWT_SECRET=your_jwt_secret_key_super_secure_2024
+      # RabbitMQ Configuration
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - RABBITMQ_EXCHANGE=pi5_events
+      - SERVICE_NAME=provas-service
+      # User Service Integration
+      - USER_SERVICE_URL=http://user-service:3000
+    depends_on:
+      postgres-provas:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./pi5_ms_provas:/usr/src/app
+      - provas-node-modules:/usr/src/app/node_modules
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Postgres para Provas Service
+  postgres-provas:
+    image: postgres:16-alpine
+    container_name: postgres-provas
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=provas_db
+    volumes:
+      - postgres-provas-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
-  postgres-data:
+  postgres-user-data:
+  postgres-provas-data:
+  rabbitmq-data:
+  provas-node-modules:
 
 networks:
-  user-network:
-    driver: bridge 
+  microservices-network:
+    driver: bridge
+    name: pi5-network 
