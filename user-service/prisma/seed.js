@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 async function main() {
   try {
     // Check if we already have users
-  const userCount = await prisma.user.count();
+    const userCount = await prisma.user.count();
     if (userCount > 0) {
       console.log('Database already seeded');
       return;
@@ -18,7 +18,8 @@ async function main() {
         email: 'admin@example.com',
         password: adminPassword,
         name: 'Admin User',
-        points: 1000
+        points: 1000,
+        fcmToken: "token"
       }
     });
 
@@ -39,7 +40,7 @@ async function main() {
         points: 100,
         reason: 'Initial points',
         type: 'ADD'
-  }
+      }
     });
 
     console.log('Database seeded successfully');

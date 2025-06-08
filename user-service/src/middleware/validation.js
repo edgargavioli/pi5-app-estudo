@@ -23,7 +23,7 @@ const validateRequest = (schema) => {
       next();
     };
   }
-  
+
   // If it's an express-validator array
   return [...schema, validate];
 };
@@ -36,12 +36,17 @@ const registerValidation = [
   body('password')
     .isLength({ min: 8 })
     .withMessage('Password must be at least 8 characters long')
-    .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/)
+    .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&|])[A-Za-z\d@$!%*#?&|]{8,}$/)
     .withMessage('Password must contain at least one letter, one number and one special character'),
   body('name')
     .trim()
     .isLength({ min: 2 })
     .withMessage('Name must be at least 2 characters long'),
+  body('fcmToken')
+    .notEmpty()
+    .withMessage('FCM Token is required')
+    .isLength({ min: 1 })
+    .withMessage('FCM Token cannot be empty'),
   validate
 ];
 
@@ -117,4 +122,4 @@ module.exports = {
   refreshTokenValidation,
   validateRequest,
   schemas
-}; 
+};

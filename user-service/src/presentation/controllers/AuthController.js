@@ -1,5 +1,5 @@
 const authService = require('../../infrastructure/services/AuthService');
-const emailService = require('../../infrastructure/services/EmailService');
+// const emailService = require('../../infrastructure/services/EmailService');
 const loggingService = require('../../infrastructure/services/LoggingService');
 const { handleError, AppError } = require('../../middleware/errorHandler');
 
@@ -7,7 +7,7 @@ class AuthController {
   async register(req, res) {
     try {
       const result = await authService.register(req.body);
-      
+
       loggingService.info('User registered successfully', { userId: result.user.id });
 
       res.status(201).json({
@@ -122,36 +122,36 @@ class AuthController {
     }
   }
 
-  async requestPasswordReset(req, res) {
-    try {
-      const { email } = req.body;
-      
-      // Generate password reset token
-      const resetToken = authService.generateToken({ email, type: 'password-reset' }, '1h');
-      
-      // Send password reset email
-      await emailService.sendPasswordResetEmail(email, resetToken);
-      
-      loggingService.info('Password reset requested', { email });
-      
-      res.json({
-        success: true,
-        message: 'Password reset email sent'
-      });
-    } catch (error) {
-      loggingService.error('Password reset request failed', { error: error.message, email: req.body.email });
-      handleError(error, res);
-    }
-  }
+  // async requestPasswordReset(req, res) {
+  //   try {
+  //     const { email } = req.body;
+
+  //     // Generate password reset token
+  //     const resetToken = authService.generateToken({ email, type: 'password-reset' }, '1h');
+
+  //     // Send password reset email
+  //     await emailService.sendPasswordResetEmail(email, resetToken);
+
+  //     loggingService.info('Password reset requested', { email });
+
+  //     res.json({
+  //       success: true,
+  //       message: 'Password reset email sent'
+  //     });
+  //   } catch (error) {
+  //     loggingService.error('Password reset request failed', { error: error.message, email: req.body.email });
+  //     handleError(error, res);
+  //   }
+  // }
 
   async resetPassword(req, res) {
     try {
       const { token, newPassword } = req.body;
-      
+
       const result = await authService.resetPassword(token, newPassword);
-      
+
       loggingService.info('Password reset successfully', { userId: result.user.id });
-      
+
       res.json({
         success: true,
         message: 'Password reset successfully',

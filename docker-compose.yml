@@ -1,8 +1,12 @@
+version: '3.8'
+
 services:
+  # User Service (Autenticação)
   user-service:
     build:
       context: ./user-service
       dockerfile: Dockerfile
+    container_name: user-service
     ports:
       - "3000:3000"
     environment:
@@ -15,36 +19,152 @@ services:
       - SMTP_PORT=587
       - SMTP_USER=your_email@gmail.com
       - SMTP_PASS=your_app_password
+      - RABBITMQ=amqp://admin:admin@rabbitmq:5672
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     volumes:
       - ./user-service:/app
       - /app/node_modules
+      - user-logs:/app/logs
     networks:
-      - user-network
+      - microservices-network
+    restart: unless-stopped
 
-  postgres:
-    image: postgres:latest
+  # Serviço de Notificações
+  notification-service:
+    build:
+      context: ./pi5_ms_notificacoes
+      dockerfile: Dockerfile
+    container_name: notification-service
     ports:
-      - "5432:5432"
+      - "4040:4040"
     environment:
+      - NODE_ENV=development
+      - PORT=4040
+      - DATABASE=postgresql://postgres:postgres@postgres-notifications:5432/notificacoes
+      - RABBITMQ=amqp://admin:admin@rabbitmq:5672
+      - USER_QUEUE=user_created_queue
+      - EVENT_QUEUE=event_created_queue
+      - STREAK_QUEUE=streak_created_queue
+      - FIREBASE=/app/config/firebase-service-account.json
+      - JWTSECRET=your_jwt_secret_key
+      - JWTEXPIRE=24h
+    depends_on:
+      postgres-notifications:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./pi5_ms_notificacoes:/app
+      - /app/node_modules
+      # Monta o arquivo Firebase do diretório correto
+      - D:/Faculdade/pi5-ms-notificacoes.json:/app/config/firebase-service-account.json:ro
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Database para User Service
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgres-user
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=auth_service
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=auth_service
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-user-data:/var/lib/postgresql/data
     networks:
-      - user-network
+      - microservices-network
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  # Database para Notification Service
+  postgres-notifications:
+    image: postgres:15-alpine
+    container_name: postgres-notifications
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=notificacoes
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres-notifications-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ para comunicação entre serviços
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+      - RABBITMQ_DEFAULT_VHOST=/
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  # Adminer para gerenciar databases
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - postgres-notifications
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+# Nginx como API Gateway (removido temporariamente até criar o arquivo de configuração)
+# api-gateway:
+#   image: nginx:alpine
+#   container_name: api-gateway
+#   ports:
+#     - "80:80"
+#   volumes:
+#     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+#   depends_on:
+#     - user-service
+#     - notification-service
+#     - template-service
+#   networks:
+#     - microservices-network
+#   restart: unless-stopped
+
 volumes:
-  postgres-data:
+  postgres-user-data:
+  postgres-notifications-data:
+  rabbitmq-data:
+  user-logs:
 
 networks:
-  user-network:
-    driver: bridge 
+  microservices-network:
+    driver: bridge

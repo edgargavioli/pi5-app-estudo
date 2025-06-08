@@ -19,7 +19,7 @@ router.get('/health', healthController.check);
 router.post('/register', registerLimiter, registerValidation, authController.register);
 router.post('/login', authLimiter, loginValidation, authController.login);
 router.post('/refresh-token', apiLimiter, refreshTokenValidation, authController.refreshToken);
-router.post('/request-password-reset', passwordResetLimiter, passwordResetRequestValidation, authController.requestPasswordReset);
+//router.post('/request-password-reset', passwordResetLimiter, passwordResetRequestValidation, authController.requestPasswordReset);
 router.post('/reset-password', passwordResetLimiter, passwordResetValidation, authController.resetPassword);
 router.get('/verify-email', authController.verifyEmail);
 

@@ -151,7 +151,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\Faculdade\\pi5-app-estudo\\pi5_ms_notificacoes\\src\\infrastructure\\persistence\\prisma\\client",
+      "value": "/app/src/infrastructure/persistence/prisma/client",
       "fromEnvVar": null
     },
     "config": {
@@ -160,12 +160,16 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "linux-musl-openssl-3.0.x",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\Faculdade\\pi5-app-estudo\\pi5_ms_notificacoes\\src\\infrastructure\\persistence\\prisma\\schema.prisma",
+    "sourceFilePath": "/app/src/infrastructure/persistence/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -188,8 +192,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// Organiza tudo aqui dentro pra n ter erro\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"./client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE\")\n}\n\nmodel Notification {\n  id           String   @id @default(cuid())\n  userId       String\n  type         String // EVENT_REMINDER, EVENT_TODAY, STREAK_WARNING, etc\n  entityId     String? // ID do evento ou streak\n  entityType   String // 'event' ou 'streak'\n  entityData   Json // Dados dinâmicos do evento/streak\n  scheduledFor DateTime // Quando deve ser enviada\n  status       String   @default(\"PENDING\") // PENDING, SENT, FAILED\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n\n  user User @relation(fields: [userId], references: [id])\n\n  @@index([scheduledFor, status])\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  fcmToken  String   @unique\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  Notifications Notification[]\n}\n",
-  "inlineSchemaHash": "78b95bfb96146088ed264673ea63fb09e8cf56e9fe0832322200ad48b226c685",
+  "inlineSchema": "// Organiza tudo aqui dentro pra n ter erro\n\ngenerator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./client\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE\")\n}\n\nmodel Notification {\n  id           String   @id @default(cuid())\n  userId       String\n  type         String // EVENT_REMINDER, EVENT_TODAY, STREAK_WARNING, etc\n  entityId     String? // ID do evento ou streak\n  entityType   String // 'event' ou 'streak'\n  entityData   Json // Dados dinâmicos do evento/streak\n  scheduledFor DateTime // Quando deve ser enviada\n  status       String   @default(\"PENDING\") // PENDING, SENT, FAILED\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n\n  user User @relation(fields: [userId], references: [id])\n\n  @@index([scheduledFor, status])\n}\n\nmodel User {\n  id        String   @id @default(cuid())\n  fcmToken  String   @unique\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  Notifications Notification[]\n}\n",
+  "inlineSchemaHash": "704f10caca5bf9e3d26aa7897b9944df2838bdde2c9aa5de239f8643995fad36",
   "copyEngine": true
 }
 
@@ -228,8 +232,8 @@ exports.PrismaClient = PrismaClient
 Object.assign(exports, Prisma)
 
 // file annotations for bundling tools to include these files
-path.join(__dirname, "query_engine-windows.dll.node");
-path.join(process.cwd(), "src/infrastructure/persistence/prisma/client/query_engine-windows.dll.node")
+path.join(__dirname, "libquery_engine-linux-musl-openssl-3.0.x.so.node");
+path.join(process.cwd(), "src/infrastructure/persistence/prisma/client/libquery_engine-linux-musl-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "src/infrastructure/persistence/prisma/client/schema.prisma")
