@@ -11,7 +11,6 @@ export default async function processUserCreated(msg, chanel) {
     }
 
     const messageContent = msg.content.toString();
-
     let messageData;
 
     try {
@@ -23,29 +22,33 @@ export default async function processUserCreated(msg, chanel) {
             return;
         }
 
-        const existingUser = await userPersistence.findByFcmToken(messageData.fcmToken);
-        if (existingUser) {
+        // Verificar se o usuário já existe
+        try {
+            const existingUser = await userPersistence.findByFcmToken(messageData.fcmToken);
             console.log(`User with FCM token ${messageData.fcmToken} already exists, skipping creation.`);
-            chanel.nack(msg, false, false);
+            chanel.ack(msg); // Marcar como processado
             return;
-        } else {
-            const user = await userPersistence.create({
-                fcmToken: messageData.fcmToken,
-            });
+        } catch (error) {
+            // Se não encontrar o usuário (erro esperado), criar um novo
+            console.log(`Creating new user with FCM token ${messageData.fcmToken}`);
         }
 
+        // Criar novo usuário
+        const user = await userPersistence.create({
+            fcmToken: messageData.fcmToken,  // ✅ Direto, não como objeto aninhado
+        });
+
         chanel.ack(msg);
-        console.log(`User with FCM token ${messageData.fcmToken} created successfully.`);
+        console.log(`✅ User with FCM token ${messageData.fcmToken} created successfully.`);
     } catch (error) {
         console.error('Error processing user created message:', error);
         chanel.nack(msg, false, false);
-        return;
     }
 }
 
 export async function startUserConsumer() {
     try {
-        const { chanel } = await getChannel();
+        const chanel = await getChannel();
         await chanel.assertQueue(USER_QUEUE, { durable: true });
         console.log('User consumer started, waiting for messages...');
 

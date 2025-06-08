@@ -1,5 +1,6 @@
-export default class Notification3 {
+export default class Notification {
     constructor(
+        id,
         userId,
         type,
         entityId,
@@ -8,6 +9,7 @@ export default class Notification3 {
         scheduledFor,
         status = 'PENDING'
     ) {
+        this.id = id;
         this.userId = userId;
         this.type = type;
         this.entityId = entityId;
@@ -82,6 +84,7 @@ export default class Notification3 {
 
     static fromJson(json) {
         return new Notification(
+            json.id,
             json.userId,
             json.type,
             json.entityId,
@@ -94,6 +97,7 @@ export default class Notification3 {
 
     toJson() {
         return {
+            id: this.id,
             userId: this.userId,
             type: this.type,
             entityId: this.entityId,

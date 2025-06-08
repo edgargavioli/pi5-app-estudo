@@ -164,7 +164,7 @@ exports.Prisma.NullsOrder = {
 
 
 exports.Prisma.ModelName = {
-  notification: 'notification',
+  Notification: 'Notification',
   User: 'User'
 };
 
