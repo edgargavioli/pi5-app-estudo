@@ -10,10 +10,8 @@ export default function initializeFirebaseAdmin() {
     };
 
     try {
-        const serviceAccount = require(path);
-
         admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
+            credential: admin.credential.cert(path),
         });
 
         console.log('Firebase Admin SDK initialized successfully.');

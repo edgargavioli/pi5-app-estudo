@@ -1,19 +1,23 @@
 export default class User {
     constructor(
-        jcmToken,
+        id,
+        fcmToken,
     ) {
-        this.jcmToken = jcmToken;
+        this.id = id;
+        this.fcmToken = fcmToken;
     }
 
     static fromJson(json) {
         return new User(
-            json.jcmToken,
+            json.id,
+            json.fcmToken,
         );
     }
 
     toJson() {
         return {
-            jcmToken: this.jcmToken,
+            id: this.id,
+            fcmToken: this.fcmToken,
         };
     }
 }

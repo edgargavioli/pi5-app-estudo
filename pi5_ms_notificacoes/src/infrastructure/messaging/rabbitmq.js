@@ -1,6 +1,6 @@
 import amqp from 'amqplib';
 
-const url_connection = process.env.RABBITMQ_URL || 'amqp://localhost';
+const url_connection = process.env.RABBITMQ || 'amqp://localhost';
 
 let rabbitMQConnection = null;
 let chanel = null;

@@ -8,11 +8,11 @@ export default class UserPersistence {
 
     async create(userData) {
         try {
-            const user = new User(userData);
-            const createdUser = await this.prisma.user.create({
-                data: user,
+            return await this.prisma.user.create({
+                data: {
+                    fcmToken: userData.fcmToken, // ✅ Direto, sem objeto aninhado
+                },
             });
-            return createdUser;
         } catch (error) {
             console.error('Error creating user:', error);
             throw error;
@@ -39,9 +39,32 @@ export default class UserPersistence {
                 throw new Error(`User with FCM token ${fcmToken} not found.`);
             }
 
-            return new User(user);
+            return new User(
+                user.id,
+                user.fcmToken
+            );
         } catch (error) {
             console.error('Error finding user by FCM token:', error);
+            throw error;
+        }
+    }
+
+    async findById(id) {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { id: id },
+            });
+
+            if (!user) {
+                throw new Error(`User with ID ${id} not found.`);
+            }
+
+            return new User(
+                user.id,
+                user.fcmToken
+            );
+        } catch (error) {
+            console.error('Error finding user by ID:', error);
             throw error;
         }
     }
