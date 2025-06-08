@@ -2,19 +2,13 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install OpenSSL and other dependencies
+# Install dependencies for building native modules
 RUN apk add --no-cache \
     openssl \
     openssl-dev \
     python3 \
     make \
-    g++ \
-    cairo-dev \
-    pango-dev \
-    libjpeg-turbo-dev \
-    giflib-dev \
-    libpng-dev \
-    build-base
+    g++
 
 # Copy package files
 COPY package*.json ./
@@ -23,20 +17,17 @@ COPY prisma ./prisma/
 # Install dependencies
 RUN npm install
 
-# Generate Prisma Client
+# Generate Prisma client
 RUN npx prisma generate
 
-# Copy the rest of the application
+# Copy source code
 COPY . .
 
 # Create logs directory
 RUN mkdir -p logs
 
-# Make start script executable
-RUN chmod +x start.sh
-
-# Expose the port
+# Expose port
 EXPOSE 3000
 
-# Start the application using the startup script
-CMD ["/bin/sh", "start.sh"] 
+# Use direct commands instead of start.sh
+CMD sh -c "sleep 5 && npx prisma migrate deploy && npx prisma db seed && npm run dev" 

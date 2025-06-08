@@ -87,13 +87,13 @@ class AuthController {
   async verifyEmail(req, res) {
     try {
       const { token } = req.query;
-      const result = await authService.verifyEmail(token);
+      await authService.verifyEmail(token);
 
-      loggingService.info('Email verified successfully', { userId: result.user.id });
+      loggingService.info('Email verified successfully', { token: token.substring(0, 10) + '...' });
 
       res.json({
         status: 'success',
-        data: result,
+        message: 'Email verified successfully',
         _links: {
           login: {
             href: `${req.protocol}://${req.get('host')}/api/auth/login`,
@@ -102,22 +102,100 @@ class AuthController {
         }
       });
     } catch (error) {
-      loggingService.error('Email verification failed', { error: error.message });
+      loggingService.error('Email verification failed', { error: error.message, token: req.query.token?.substring(0, 10) + '...' });
       handleError(error, res);
     }
   }
 
-  async logout(req, res) {
+  /**
+   * 🔍 VALIDAR TOKEN JWT
+   */
+  async validateToken(req, res) {
     try {
-      // In a stateless JWT system, logout is handled client-side
-      // But we can log the event for security monitoring
-      loggingService.info('User logged out', { userId: req.user?.id });
+      // Se chegou até aqui, é porque o middleware validou o token
+      const user = req.user;
+
+      loggingService.info('Token validated successfully', { userId: user.id });
 
       res.json({
-        success: true,
-        message: 'Logged out successfully'
+        status: 'success',
+        valid: true,
+        data: {
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            isEmailVerified: user.isEmailVerified
+          }
+        }
       });
     } catch (error) {
+      loggingService.error('Token validation failed', { error: error.message });
+      handleError(error, res);
+    }
+  }
+
+  /**
+   * 🚪 LOGOUT (invalidar token)
+   */
+  async logout(req, res) {
+    try {
+      const user = req.user;
+
+      loggingService.info('User logged out', { userId: user.id });
+
+      res.json({
+        status: 'success',
+        message: 'Logout realizado com sucesso',
+        _links: {
+          login: {
+            href: `${req.protocol}://${req.get('host')}/api/auth/login`,
+            method: 'POST'
+          }
+        }
+      });
+    } catch (error) {
+      loggingService.error('Logout failed', { error: error.message });
+      handleError(error, res);
+    }
+  }
+
+  /**
+   * 🔄 RENOVAR ACCESS TOKEN
+   */
+  async refreshAccessToken(req, res) {
+    try {
+      // O token de refresh vem no header Authorization
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Refresh token requerido'
+        });
+      }
+
+      const refreshToken = authHeader.split(' ')[1];
+      const result = await authService.refreshAccessToken(refreshToken);
+
+      loggingService.info('Tokens refreshed successfully', { userId: result.user.id });
+
+      res.json({
+        status: 'success',
+        data: {
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+          user: result.user
+        },
+        _links: {
+          profile: {
+            href: `${req.protocol}://${req.get('host')}/api/users/${result.user.id}`,
+            method: 'GET'
+          }
+        }
+      });
+    } catch (error) {
+      loggingService.error('Token refresh failed', { error: error.message });
       handleError(error, res);
     }
   }

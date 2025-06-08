@@ -2,21 +2,7 @@ const express = require('express');
 const router = express.Router();
 const wrappedController = require('../controllers/WrappedController');
 const { authMiddleware } = require('../../middleware/auth');
-const multer = require('multer');
 const { apiLimiter } = require('../../middleware/rateLimiter');
-
-// Configure multer for memory storage and image filtering
-const upload = multer({
-  storage: multer.memoryStorage(),
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only images are allowed.'), false);
-    }
-  }
-});
 
 /**
  * @swagger
@@ -123,24 +109,12 @@ router.get('/:id/points-history', authMiddleware, wrappedController.getUserPoint
 
 /**
  * @swagger
- * /api/wrapped/{id}/image:
- *   post:
- *     summary: Generate wrapped image with custom background
+ * /api/wrapped/{id}/html:
+ *   get:
+ *     summary: Get wrapped as styled HTML page
  *     tags: [Wrapped]
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               background:
- *                 type: string
- *                 format: binary
- *             required:
- *               - background
  *     parameters:
  *       - in: path
  *         name: id
@@ -150,21 +124,54 @@ router.get('/:id/points-history', authMiddleware, wrappedController.getUserPoint
  *         description: User ID
  *     responses:
  *       200:
- *         description: Generated wrapped image (PNG)
+ *         description: Wrapped HTML page
  *         content:
- *           image/png:
+ *           text/html:
  *             schema:
  *               type: string
- *               format: binary
- *       400:
- *         description: Invalid file type or missing file
  *       401:
  *         description: Unauthorized
- *       403:
- *         description: Forbidden
  *       404:
  *         description: User not found
  */
-router.post('/:id/image', authMiddleware, apiLimiter, upload.single('background'), wrappedController.getWrappedImage);
+router.get('/:id/html', authMiddleware, wrappedController.getWrappedHTML);
+
+/**
+ * @swagger
+ * /api/wrapped/{id}/summary:
+ *   get:
+ *     summary: Generate wrapped summary (JSON format - image generation disabled)
+ *     tags: [Wrapped]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: Generated wrapped summary data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 type:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *                 statistics:
+ *                   type: object
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.get('/:id/summary', authMiddleware, apiLimiter, wrappedController.getWrappedImage);
 
 module.exports = router; 

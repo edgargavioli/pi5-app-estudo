@@ -1,21 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/AuthController');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware } = require('../../middleware/auth');
 const {
   registerValidation,
   loginValidation,
   passwordResetRequestValidation,
   passwordResetValidation,
   refreshTokenValidation
-} = require('../middleware/validation');
+} = require('../../middleware/validation');
 const {
   authLimiter,
   passwordResetLimiter,
   registerLimiter,
   apiLimiter,
   rateLimiter
-} = require('../middleware/rateLimiter');
+} = require('../../middleware/rateLimiter');
 const Password = require('../../domain/valueObjects/Password');
 
 // Apply rate limiting to all routes
@@ -288,5 +288,80 @@ router.post('/reset-password', passwordResetLimiter, passwordResetValidation, au
  *         description: Invalid or expired token
  */
 router.get('/verify-email', authController.verifyEmail);
+
+/**
+ * @swagger
+ * /api/auth/validate:
+ *   get:
+ *     summary: Validate JWT token
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 valid:
+ *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Token is invalid or expired
+ */
+router.get('/validate', authMiddleware, authController.validateToken);
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout user (invalidate token)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Logout successful
+ *       401:
+ *         description: Invalid token
+ */
+router.post('/logout', authMiddleware, authController.logout);
+
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Refresh access token using refresh token
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Tokens refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                 refreshToken:
+ *                   type: string
+ *       401:
+ *         description: Invalid refresh token
+ */
+router.post('/refresh', authController.refreshAccessToken);
 
 module.exports = router; 
