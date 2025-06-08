@@ -11,24 +11,25 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(uuid())
-  email             String   @unique
-  password          String
-  name              String
-  points            Int      @default(0)
-  isEmailVerified   Boolean  @default(false)
-  lastLogin         DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  imageBase64       String?  // Base64-encoded profile image
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  fcmToken        String    @unique
+  name            String
+  points          Int       @default(0)
+  isEmailVerified Boolean   @default(false)
+  lastLogin       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  imageBase64     String? // Base64-encoded profile image
 
   // Study-related fields
-  studyPreferences  StudyPreferences?
-  studySessions     StudySession[]
-  studyMaterials    StudyMaterial[]
+  studyPreferences StudyPreferences?
+  studySessions    StudySession[]
+  studyMaterials   StudyMaterial[]
 
   // Relations
-  achievements      Achievement[]
+  achievements       Achievement[]
   pointsTransactions PointsTransaction[]
 
   @@map("users")
@@ -38,52 +39,52 @@ model StudyPreferences {
   id                String   @id @default(uuid())
   userId            String   @unique
   preferredSubjects String[] // Array of subject IDs or names
-  studyDuration     Int      // Preferred study session duration in minutes
-  breakDuration     Int      // Preferred break duration in minutes
-  studySchedule     Json     // JSON object for weekly schedule
+  studyDuration     Int // Preferred study session duration in minutes
+  breakDuration     Int // Preferred break duration in minutes
+  studySchedule     Json // JSON object for weekly schedule
   notifications     Boolean  @default(true)
   theme             String   @default("light")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   // Relations
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("study_preferences")
 }
 
 model StudySession {
-  id          String   @id @default(uuid())
-  userId      String
-  startTime   DateTime
-  endTime     DateTime?
-  duration    Int      // Duration in minutes
-  subject     String
-  notes       String?
-  status      String   // ACTIVE, COMPLETED, CANCELLED
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String    @id @default(uuid())
+  userId    String
+  startTime DateTime
+  endTime   DateTime?
+  duration  Int // Duration in minutes
+  subject   String
+  notes     String?
+  status    String // ACTIVE, COMPLETED, CANCELLED
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   // Relations
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("study_sessions")
 }
 
 model StudyMaterial {
-  id          String   @id @default(uuid())
-  userId      String
-  title       String
-  type        String   // PDF, VIDEO, LINK, NOTE
-  url         String?
-  content     String?
-  subject     String
-  tags        String[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  type      String // PDF, VIDEO, LINK, NOTE
+  url       String?
+  content   String?
+  subject   String
+  tags      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("study_materials")
 }
@@ -97,7 +98,7 @@ model Achievement {
   createdAt   DateTime @default(now())
 
   // Relations
-  user        User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@map("achievements")
 }
@@ -107,11 +108,11 @@ model PointsTransaction {
   userId    String
   points    Int
   reason    String
-  type      String   // ADD, REMOVE
+  type      String // ADD, REMOVE
   createdAt DateTime @default(now())
 
   // Relations
-  user      User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@map("points_transactions")
-} 
+}

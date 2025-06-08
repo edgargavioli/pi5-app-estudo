@@ -15,6 +15,7 @@ export default async function processUserCreated(msg, chanel) {
 
     try {
         messageData = JSON.parse(messageContent);
+        messageData = messageData.data || messageData;
 
         if (!messageData.fcmToken) {
             console.error('FCM token is missing in the message data:', messageData);

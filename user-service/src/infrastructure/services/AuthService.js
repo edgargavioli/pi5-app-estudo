@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const { AppError } = require('../../middleware/errorHandler');
-const EmailService = require('./EmailService');
+const QueueService = require('./QueueService');
 
 const prisma = new PrismaClient();
 
@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 class AuthService {
   async register(userData) {
     try {
-      const { email, password, name } = userData;
+      const { email, password, name, fcmToken } = userData;
 
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
@@ -33,15 +33,25 @@ class AuthService {
           email,
           password: hashedPassword,
           name,
-          isEmailVerified: false
+          fcmToken,
+          isEmailVerified: true
         }
       });
 
-      // Generate verification token
-      const verificationToken = this.generateToken({ userId: user.id, type: 'verification' }, '24h');
-
-      // Send verification email
-      await EmailService.sendVerificationEmail(email, verificationToken);
+      // Publish user created event to queue
+      try {
+        await QueueService.publishUserCreated({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          fcmToken: user.fcmToken,
+          createdAt: user.createdAt
+        });
+      } catch (queueError) {
+        // Log the error but don't fail the registration
+        console.error('Failed to publish user created event:', queueError.message);
+        // You might want to implement a retry mechanism or store failed events for later processing
+      }
 
       // Generate auth tokens
       const accessToken = this.generateToken({ userId: user.id });
@@ -52,6 +62,7 @@ class AuthService {
           id: user.id,
           email: user.email,
           name: user.name,
+          fcmToken: user.fcmToken,
           isEmailVerified: user.isEmailVerified
         },
         accessToken,
@@ -108,7 +119,7 @@ class AuthService {
   async refreshToken(refreshToken) {
     try {
       const decoded = this.verifyToken(refreshToken);
-      
+
       if (decoded.type !== 'refresh') {
         throw new AppError('Invalid refresh token', 401);
       }
@@ -145,7 +156,7 @@ class AuthService {
   async verifyEmail(token) {
     try {
       const decoded = this.verifyToken(token);
-      
+
       if (decoded.type !== 'verification') {
         throw new AppError('Invalid verification token', 400);
       }
@@ -172,7 +183,7 @@ class AuthService {
   async resetPassword(token, newPassword) {
     try {
       const decoded = this.verifyToken(token);
-      
+
       if (decoded.type !== 'password-reset') {
         throw new AppError('Invalid password reset token', 400);
       }
@@ -200,4 +211,4 @@ class AuthService {
   }
 }
 
-module.exports = new AuthService(); 
+module.exports = new AuthService();

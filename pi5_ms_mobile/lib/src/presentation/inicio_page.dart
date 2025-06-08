@@ -1,5 +1,6 @@
 // ignore: file_names
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -11,6 +12,40 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // No Flutter
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print(
+        'Recebeu notificação em foreground: ${message.notification?.title}',
+      );
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(message.notification?.title ?? 'Notificação'),
+            content: Text(
+              message.notification?.body ?? 'Você recebeu uma nova notificação',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('Usuário abriu a notificação: ${message.notification?.title}');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(

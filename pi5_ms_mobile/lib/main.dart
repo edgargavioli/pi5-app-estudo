@@ -4,8 +4,14 @@ import 'package:pi5_ms_mobile/src/presentation/auth/login_page.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/shared/util.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:pi5_ms_mobile/src/infraestructure/firebase_fcm_get.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await getToken();
   runApp(const MyApp());
 }
 

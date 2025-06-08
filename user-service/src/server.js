@@ -7,6 +7,7 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const { errorHandler } = require('./middleware/errorHandler');
 const loggingService = require('./infrastructure/services/LoggingService');
+const QueueService = require('./infrastructure/services/QueueService');
 const prisma = require('./infrastructure/database/config');
 
 const app = express();
@@ -62,8 +63,8 @@ app.use('/api/wrapped', require('./presentation/routes/wrapped'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     timestamp: new Date(),
     architecture: 'DDD',
     version: '1.0.0'
@@ -76,16 +77,27 @@ app.use(errorHandler);
 // Database connection and server start
 const PORT = process.env.PORT || 3000;
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
   console.log(`User Service is running on port ${PORT}`);
   console.log(`Architecture: Domain-Driven Design (DDD)`);
   console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
   console.log(`Features: HATEOAS, Swagger, Middleware, Rate Limiting`);
+
+  // Connect to RabbitMQ
+  try {
+    await QueueService.connect();
+    console.log('✅ Connected to RabbitMQ');
+  } catch (error) {
+    console.error('❌ Failed to connect to RabbitMQ:', error.message);
+    // Don't exit the process, just log the error
+    // The application can still function without the queue
+  }
 });
 
 // Handle graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received. Shutting down gracefully...');
+  await QueueService.disconnect();
   await prisma.$disconnect();
   server.close(() => {
     console.log('Server closed');
@@ -95,6 +107,7 @@ process.on('SIGTERM', async () => {
 
 process.on('SIGINT', async () => {
   console.log('SIGINT received. Shutting down gracefully...');
+  await QueueService.disconnect();
   await prisma.$disconnect();
   server.close(() => {
     console.log('Server closed');
@@ -105,6 +118,7 @@ process.on('SIGINT', async () => {
 // Handle uncaught exceptions
 process.on('uncaughtException', async (error) => {
   console.error('Uncaught Exception:', error);
+  await QueueService.disconnect();
   await prisma.$disconnect();
   process.exit(1);
 });
@@ -112,6 +126,7 @@ process.on('uncaughtException', async (error) => {
 // Handle unhandled promise rejections
 process.on('unhandledRejection', async (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  await QueueService.disconnect();
   await prisma.$disconnect();
   process.exit(1);
-}); 
+});
