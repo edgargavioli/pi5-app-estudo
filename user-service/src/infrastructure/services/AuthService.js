@@ -141,6 +141,44 @@ class AuthService {
     }
   }
 
+  /**
+   * Refresh access token using refresh token
+   * @param {string} refreshToken 
+   * @returns {Promise<{accessToken: string, refreshToken: string, user: Object}>}
+   */
+  async refreshAccessToken(refreshToken) {
+    try {
+      // Verificar o refresh token
+      const decoded = this.verifyToken(refreshToken);
+      
+      // Buscar usuário no banco
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId }
+      });
+
+      if (!user) {
+        throw new AppError('User not found', 404);
+      }
+
+      // Gerar novos tokens
+      const newAccessToken = this.generateToken({ userId: user.id });
+      const newRefreshToken = this.generateToken({ userId: user.id, type: 'refresh' }, '7d');
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          isEmailVerified: user.isEmailVerified
+        }
+      };
+    } catch (error) {
+      throw new AppError('Invalid refresh token', 401);
+    }
+  }
+
   generateToken(payload, expiresIn = process.env.JWT_EXPIRES_IN || '24h') {
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn });
   }
