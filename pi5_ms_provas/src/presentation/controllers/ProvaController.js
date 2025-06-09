@@ -6,6 +6,7 @@ import { ProvaRepository } from '../../infrastructure/persistence/repositories/P
 import { MateriaRepository } from '../../infrastructure/persistence/repositories/MateriaRepository.js';
 import { logger } from '../../application/utils/logger.js';
 import { HateoasConfig } from '../../infrastructure/hateoas/HateoasConfig.js';
+import rabbitMQService from '../../infrastructure/messaging/RabbitMQService.js';
 
 const provaRepository = new ProvaRepository();
 const materiaRepository = new MateriaRepository();
@@ -23,6 +24,10 @@ export class ProvaController {
             logger.info('Iniciando criação de prova', { provaData: req.body });
             const prova = await this.createUseCase.execute(req.body, req.userId);
             logger.info('Prova criada com sucesso', { provaId: prova.id });
+
+            // Publicar evento de exame criado
+            await rabbitMQService.publishExamCreated('prova', prova, req.userId);
+
             const response = HateoasConfig.wrapResponse(prova, req.baseUrl, 'provas', prova.id);
             res.status(201).json(response);
         } catch (error) {
@@ -67,8 +72,16 @@ export class ProvaController {
     async update(req, res) {
         try {
             logger.info('Atualizando prova', { id: req.params.id, provaData: req.body });
+
+            // Buscar dados anteriores para comparação
+            const provaAnterior = await this.getUseCase.execute(req.params.id, req.userId);
+
             const prova = await this.updateUseCase.execute(req.params.id, req.body, req.userId);
             logger.info('Prova atualizada com sucesso', { provaId: prova.id });
+
+            // Publicar evento de exame atualizado
+            await rabbitMQService.publishExamUpdated('prova', prova.id, prova, provaAnterior, req.userId);
+
             const response = HateoasConfig.wrapResponse(prova, req.baseUrl, 'provas', prova.id);
             res.json(response);
         } catch (error) {
@@ -86,8 +99,16 @@ export class ProvaController {
     async delete(req, res) {
         try {
             logger.info('Deletando prova', { id: req.params.id });
+
+            // Buscar dados da prova antes de deletar
+            const provaParaDeletar = await this.getUseCase.execute(req.params.id, req.userId);
+
             await this.deleteUseCase.execute(req.params.id, req.userId);
             logger.info('Prova deletada com sucesso', { id: req.params.id });
+
+            // Publicar evento de exame deletado
+            await rabbitMQService.publishExamDeleted('prova', req.params.id, provaParaDeletar, req.userId);
+
             res.status(204).send();
         } catch (error) {
             logger.error('Erro ao deletar prova', { error: error.message, id: req.params.id });
@@ -113,32 +134,48 @@ export class ProvaController {
 
             // Verificar se a prova tem totalQuestoes definido
             if (!prova.totalQuestoes) {
-                return res.status(400).json({ 
-                    error: 'Esta prova não possui número total de questões definido. Não é possível registrar resultado.' 
+                return res.status(400).json({
+                    error: 'Esta prova não possui número total de questões definido. Não é possível registrar resultado.'
                 });
             }
 
             // Validar se acertos não é maior que total de questões
             if (acertos > prova.totalQuestoes) {
-                return res.status(400).json({ 
-                    error: `Número de acertos (${acertos}) não pode ser maior que o total de questões (${prova.totalQuestoes})` 
+                return res.status(400).json({
+                    error: `Número de acertos (${acertos}) não pode ser maior que o total de questões (${prova.totalQuestoes})`
                 });
             }
 
             if (acertos < 0) {
-                return res.status(400).json({ 
-                    error: 'Número de acertos não pode ser negativo' 
+                return res.status(400).json({
+                    error: 'Número de acertos não pode ser negativo'
                 });
             }
 
+            // Buscar dados anteriores para comparação
+            const provaAnterior = { ...prova };
+
             // Atualizar apenas o campo acertos
             const provaAtualizada = await this.updateUseCase.execute(id, { acertos }, req.userId);
-            
-            logger.info('Resultado da prova registrado com sucesso', { 
-                provaId: id, 
-                acertos, 
+
+            // Publicar evento de prova finalizada (resultado registrado)
+            await rabbitMQService.publishProvaFinalizada({
+                ...provaAtualizada,
+                questoesAcertadas: acertos,
                 totalQuestoes: prova.totalQuestoes,
-                percentual: provaAtualizada.percentualAcerto 
+                percentualAcerto: provaAtualizada.percentualAcerto,
+                materiaId: prova.materiaId,
+                userId: req.userId
+            });
+
+            // Também publicar evento de exame atualizado
+            await rabbitMQService.publishExamUpdated('prova', id, provaAtualizada, provaAnterior, req.userId);
+
+            logger.info('Resultado da prova registrado com sucesso', {
+                provaId: id,
+                acertos,
+                totalQuestoes: prova.totalQuestoes,
+                percentual: provaAtualizada.percentualAcerto
             });
 
             const response = HateoasConfig.wrapResponse(provaAtualizada, req.baseUrl, 'provas', provaAtualizada.id);
@@ -148,4 +185,4 @@ export class ProvaController {
             res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
-} 
+}

@@ -52,7 +52,7 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
 
       // Buscar a prova específica
       final prova = await ProvaService.buscarPorId(widget.provaId);
-      
+
       // Buscar todas as matérias associadas à prova
       List<Materia> materias = [];
       if (prova.materias.isNotEmpty) {
@@ -69,7 +69,7 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
           }
         }
       }
-      
+
       if (mounted) {
         setState(() {
           _prova = prova;
@@ -100,10 +100,7 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.title,
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(widget.title, overflow: TextOverflow.ellipsis),
         centerTitle: true,
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
@@ -122,7 +119,7 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
                     builder: (context) => EditProvaPage(prova: _prova!),
                   ),
                 );
-                
+
                 if (result == true) {
                   _carregarDados(); // Recarregar os dados se houve edição
                 }
@@ -131,9 +128,10 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
             ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
               ? _buildErrorWidget(theme)
               : _buildContent(theme, screenSize),
       floatingActionButton: FloatingActionButton.extended(
@@ -142,11 +140,9 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
         onPressed: () async {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const ConfigMateriaPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const ConfigMateriaPage()),
           );
-          
+
           if (result != null) {
             _carregarDados();
           }
@@ -169,11 +165,7 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
             const SizedBox(height: 16),
             Text(
               'Erro ao carregar dados',
@@ -209,9 +201,10 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
               gauges: [
                 GaugeData(
                   label: "Prova",
-                  valueText: _prova!.titulo.length > 10 
-                      ? '${_prova!.titulo.substring(0, 10)}...' 
-                      : _prova!.titulo,
+                  valueText:
+                      _prova!.titulo.length > 10
+                          ? '${_prova!.titulo.substring(0, 10)}...'
+                          : _prova!.titulo,
                   value: 100,
                   color: theme.colorScheme.primary,
                 ),
@@ -315,7 +308,7 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
                 ),
               ],
             ),
-            
+
             if (_prova!.descricao != null) ...[
               const SizedBox(height: 12),
               Text(
@@ -327,9 +320,9 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
                 maxLines: 3,
               ),
             ],
-            
+
             const SizedBox(height: 16),
-            
+
             // Informações de data, hora e local
             Wrap(
               spacing: 16,
@@ -345,11 +338,7 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
                   '${_prova!.horario.hour.toString().padLeft(2, '0')}:${_prova!.horario.minute.toString().padLeft(2, '0')}',
                   theme,
                 ),
-                _buildInfoChip(
-                  Icons.location_on,
-                  _prova!.local,
-                  theme,
-                ),
+                _buildInfoChip(Icons.location_on, _prova!.local, theme),
               ],
             ),
           ],
@@ -362,17 +351,13 @@ class _MateriasListagemPageState extends State<MateriasListagemPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 16,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 4),
           Flexible(
             child: Text(

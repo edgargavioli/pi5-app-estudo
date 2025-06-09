@@ -167,7 +167,7 @@ class AuthController {
     try {
       // O token de refresh vem no header Authorization
       const authHeader = req.headers.authorization;
-      
+
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({
           status: 'error',
@@ -200,27 +200,27 @@ class AuthController {
     }
   }
 
-  // async requestPasswordReset(req, res) {
-  //   try {
-  //     const { email } = req.body;
+  async requestPasswordReset(req, res) {
+    try {
+      const { email } = req.body;
 
-  //     // Generate password reset token
-  //     const resetToken = authService.generateToken({ email, type: 'password-reset' }, '1h');
+      // Generate password reset token
+      const resetToken = authService.generateToken({ email, type: 'password-reset' }, '1h');
 
-  //     // Send password reset email
-  //     await emailService.sendPasswordResetEmail(email, resetToken);
+      // Send password reset email
+      await emailService.sendPasswordResetEmail(email, resetToken);
 
-  //     loggingService.info('Password reset requested', { email });
+      loggingService.info('Password reset requested', { email });
 
-  //     res.json({
-  //       success: true,
-  //       message: 'Password reset email sent'
-  //     });
-  //   } catch (error) {
-  //     loggingService.error('Password reset request failed', { error: error.message, email: req.body.email });
-  //     handleError(error, res);
-  //   }
-  // }
+      res.json({
+        success: true,
+        message: 'Password reset email sent'
+      });
+    } catch (error) {
+      loggingService.error('Password reset request failed', { error: error.message, email: req.body.email });
+      handleError(error, res);
+    }
+  }
 
   async resetPassword(req, res) {
     try {

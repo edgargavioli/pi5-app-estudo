@@ -3,21 +3,19 @@ import '../shared/services/cronometro_service.dart';
 
 class CronometroFlutuanteWidget extends StatefulWidget {
   final VoidCallback? onTapCronometro;
-  
-  const CronometroFlutuanteWidget({
-    Key? key,
-    this.onTapCronometro,
-  }) : super(key: key);
+
+  const CronometroFlutuanteWidget({super.key, this.onTapCronometro});
 
   @override
-  State<CronometroFlutuanteWidget> createState() => _CronometroFlutuanteWidgetState();
+  State<CronometroFlutuanteWidget> createState() =>
+      _CronometroFlutuanteWidgetState();
 }
 
 class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
   // Posição inicial do widget
   double _x = 16.0; // right: 16
   double _y = 50.0; // top: 50
-  
+
   // Para controlar se está sendo arrastado
   bool _isDragging = false;
 
@@ -27,9 +25,10 @@ class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
       listenable: CronometroService(),
       builder: (context, child) {
         final cronometroService = CronometroService();
-        
+
         // Só mostrar se há sessão ativa E está rodando
-        if (!cronometroService.hasActiveSession || !cronometroService.isRunning) {
+        if (!cronometroService.hasActiveSession ||
+            !cronometroService.isRunning) {
           return const SizedBox.shrink();
         }
 
@@ -50,10 +49,16 @@ class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
                 final screenSize = MediaQuery.of(context).size;
                 final widgetWidth = 180.0; // Largura aproximada do widget
                 final widgetHeight = 40.0; // Altura aproximada do widget
-                
+
                 // Atualizar posição com limites da tela
-                _x = (_x + details.delta.dx).clamp(0.0, screenSize.width - widgetWidth);
-                _y = (_y + details.delta.dy).clamp(0.0, screenSize.height - widgetHeight - 100); // -100 para não cobrir navegação
+                _x = (_x + details.delta.dx).clamp(
+                  0.0,
+                  screenSize.width - widgetWidth,
+                );
+                _y = (_y + details.delta.dy).clamp(
+                  0.0,
+                  screenSize.height - widgetHeight - 100,
+                ); // -100 para não cobrir navegação
               });
             },
             // Quando termina o arraste
@@ -61,7 +66,7 @@ class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
               setState(() {
                 _isDragging = false;
               });
-              
+
               // Opcional: fazer o widget "grudar" nas bordas
               _snapToEdge();
             },
@@ -72,9 +77,10 @@ class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
               curve: Curves.easeOut,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: _isDragging 
-                    ? Theme.of(context).colorScheme.primary.withOpacity(0.8)
-                    : Theme.of(context).colorScheme.primary,
+                color:
+                    _isDragging
+                        ? Theme.of(context).colorScheme.primary.withOpacity(0.8)
+                        : Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -96,15 +102,11 @@ class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
                     ),
                     const SizedBox(width: 4),
                   ],
-                  
+
                   // Ícone do cronômetro (sempre timer já que só aparece quando rodando)
-                  const Icon(
-                    Icons.timer,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+                  const Icon(Icons.timer, color: Colors.white, size: 16),
                   const SizedBox(width: 6),
-                  
+
                   // Tempo atual
                   Text(
                     cronometroService.formatDuration(cronometroService.elapsed),
@@ -115,9 +117,9 @@ class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
                       fontFamily: 'Roboto',
                     ),
                   ),
-                  
+
                   const SizedBox(width: 8),
-                  
+
                   // Botões de controle (só mostrar se não estiver arrastando)
                   if (!_isDragging) ...[
                     Row(
@@ -142,9 +144,9 @@ class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
                             ),
                           ),
                         ),
-                        
+
                         const SizedBox(width: 4),
-                        
+
                         // Botão finalizar sessão
                         GestureDetector(
                           onTap: () {
@@ -181,7 +183,7 @@ class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
     final screenSize = MediaQuery.of(context).size;
     final screenWidth = screenSize.width;
     final widgetWidth = 180.0;
-    
+
     // Se está mais próximo da esquerda, vai para a esquerda
     // Se está mais próximo da direita, vai para a direita
     if (_x < screenWidth / 2) {
@@ -197,86 +199,93 @@ class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
 
   void _finalizarSessao() async {
     final cronometroService = CronometroService();
-    
+
     // Confirmar se realmente quer finalizar
     final confirmar = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Finalizar Sessão'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Deseja ir para a tela de cronometragem para finalizar a sessão?'),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.timer,
-                    color: Theme.of(context).primaryColor,
-                    size: 32,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Finalizar Sessão'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Deseja ir para a tela de cronometragem para finalizar a sessão?',
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    cronometroService.formatDuration(cronometroService.elapsed),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.timer,
+                        color: Theme.of(context).primaryColor,
+                        size: 32,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        cronometroService.formatDuration(
+                          cronometroService.elapsed,
+                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).primaryColor,
                         ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Tempo atual da sessão',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: Colors.blue, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Você será redirecionado para a tela de cronometragem onde poderá salvar observações e finalizar a sessão.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue.shade700,
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tempo atual da sessão',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
                   ),
-                ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.blue, size: 16),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Você será redirecionado para a tela de cronometragem onde poderá salvar observações e finalizar a sessão.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancelar'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Ir para Cronometragem'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Ir para Cronometragem'),
-          ),
-        ],
-      ),
     );
 
     if (confirmar == true) {
@@ -316,14 +325,11 @@ class _CronometroFlutuanteWidgetState extends State<CronometroFlutuanteWidget> {
                   ),
                 );
               },
-              child: const Text(
-                'Parar',
-                style: TextStyle(color: Colors.red),
-              ),
+              child: const Text('Parar', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
       },
     );
   }
-} 
+}

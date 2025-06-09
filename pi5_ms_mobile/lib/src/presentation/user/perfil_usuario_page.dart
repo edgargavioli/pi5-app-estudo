@@ -84,9 +84,9 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage> {
           _carregandoGamificacao = false;
           _carregandoUsuario = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao carregar dados: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao carregar dados: $e')));
       }
     }
   }
@@ -108,14 +108,14 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage> {
       );
 
       final resultado = await UserService.atualizarUsuario(usuarioAtualizado);
-      
+
       if (mounted) {
         setState(() {
           _usuario = resultado;
           _editando = false;
           _carregandoUsuario = false;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Perfil atualizado com sucesso!')),
         );
@@ -123,9 +123,9 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _carregandoUsuario = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao atualizar perfil: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao atualizar perfil: $e')));
       }
     }
   }
@@ -144,10 +144,7 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage> {
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   child: Text(
                     _usuario?.nome?.substring(0, 1).toUpperCase() ?? 'U',
-                    style: const TextStyle(
-                      fontSize: 40,
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(fontSize: 40, color: Colors.white),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -268,7 +265,7 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -278,10 +275,7 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage> {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
@@ -381,7 +375,8 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage> {
                                   ),
                                   _buildStatRow(
                                     'Tempo Total de Estudo',
-                                    _estatisticasGamificacao['tempoTotalFormatado'] ?? '0min',
+                                    _estatisticasGamificacao['tempoTotalFormatado'] ??
+                                        '0min',
                                     Icons.timer,
                                   ),
                                   _buildStatRow(
@@ -427,18 +422,10 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage> {
         children: [
           Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 14),
-            ),
-          ),
+          Expanded(child: Text(label, style: const TextStyle(fontSize: 14))),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
         ],
       ),

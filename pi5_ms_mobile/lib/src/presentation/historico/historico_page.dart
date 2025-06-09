@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart';
-import '../../shared/models/prova_model.dart';
-import '../../shared/models/evento_model.dart';
-import '../../shared/services/cronograma_service.dart';
 import '../../shared/services/evento_service.dart';
 
 class HistoricoPage extends StatefulWidget {
@@ -65,11 +61,7 @@ class _HistoricoPageState extends State<HistoricoPage> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.event,
-                  color: colorScheme.primary,
-                  size: 24,
-                ),
+                Icon(Icons.event, color: colorScheme.primary, size: 24),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -83,19 +75,12 @@ class _HistoricoPageState extends State<HistoricoPage> {
             ),
             if (evento.descricao != null) ...[
               const SizedBox(height: 8),
-              Text(
-                evento.descricao!,
-                style: textTheme.bodyMedium,
-              ),
+              Text(evento.descricao!, style: textTheme.bodyMedium),
             ],
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(
-                  Icons.access_time,
-                  color: colorScheme.secondary,
-                  size: 16,
-                ),
+                Icon(Icons.access_time, color: colorScheme.secondary, size: 16),
                 const SizedBox(width: 4),
                 Text(
                   _formatarData(evento.data),
@@ -112,12 +97,13 @@ class _HistoricoPageState extends State<HistoricoPage> {
   }
 
   Widget _buildEventosDodia() {
-    final eventosDodia = _eventos.where((evento) {
-      final eventoData = DateTime.parse(evento.data);
-      return eventoData.year == _selectedDay!.year &&
-          eventoData.month == _selectedDay!.month &&
-          eventoData.day == _selectedDay!.day;
-    }).toList();
+    final eventosDodia =
+        _eventos.where((evento) {
+          final eventoData = DateTime.parse(evento.data);
+          return eventoData.year == _selectedDay!.year &&
+              eventoData.month == _selectedDay!.month &&
+              eventoData.day == _selectedDay!.day;
+        }).toList();
 
     if (eventosDodia.isEmpty) {
       return Center(
@@ -131,9 +117,7 @@ class _HistoricoPageState extends State<HistoricoPage> {
     }
 
     return Column(
-      children: [
-        ...eventosDodia.map((evento) => _buildEventoCard(evento)),
-      ],
+      children: [...eventosDodia.map((evento) => _buildEventoCard(evento))],
     );
   }
 
@@ -234,7 +218,8 @@ class _HistoricoPageState extends State<HistoricoPage> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       child: Column(
                         children: [
-                          if (!_isLoading && _selectedDay != null) _buildEventosDodia(),
+                          if (!_isLoading && _selectedDay != null)
+                            _buildEventosDodia(),
                         ],
                       ),
                     ),

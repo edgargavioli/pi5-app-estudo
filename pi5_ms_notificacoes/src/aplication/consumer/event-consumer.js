@@ -3,6 +3,8 @@ import NotificationPersistence from "../../infrastructure/persistence/notificati
 import UserPersistence from "../../infrastructure/persistence/user.js";
 
 const EVENT_QUEUE = process.env.EVENT_QUEUE || 'event.created';
+const EVENT_UPDATED_QUEUE = process.env.EVENT_UPDATED_QUEUE || 'event.updated';
+const EVENT_DELETED_QUEUE = process.env.EVENT_DELETED_QUEUE || 'event.deleted';
 const notificationPersistence = new NotificationPersistence();
 const userPersistence = new UserPersistence();
 
@@ -64,6 +66,33 @@ async function createEventNotifications(fcmToken, eventData) {
     });
 }
 
+async function updateEventNotifications(fcmToken, eventData) {
+    // Verificar se o usuário existe usando o fcmToken
+    let user;
+    try {
+        user = await userPersistence.findByFcmToken(fcmToken);
+    } catch (error) {
+        console.error(`User with FCM token ${fcmToken} not found, skipping notification update`);
+        return;
+    }
+
+    // Remover notificações pendentes antigas do evento
+    await notificationPersistence.deleteByEntityId(eventData.id.toString());
+
+    // Criar novas notificações com os dados atualizados
+    await createEventNotifications(fcmToken, eventData);
+}
+
+async function deleteEventNotifications(eventId) {
+    try {
+        // Remover todas as notificações relacionadas ao evento
+        await notificationPersistence.deleteByEntityId(eventId.toString());
+        console.log(`Notifications deleted for event ${eventId}`);
+    } catch (error) {
+        console.error(`Error deleting notifications for event ${eventId}:`, error);
+    }
+}
+
 export default async function processEventCreated(msg, chanel) {
     if (msg === null) {
         console.error('Received null message, skipping processing.');
@@ -92,18 +121,88 @@ export default async function processEventCreated(msg, chanel) {
     }
 }
 
+export async function processEventUpdated(msg, chanel) {
+    if (msg === null) {
+        console.error('Received null message, skipping processing.');
+        return;
+    }
+
+    const messageContent = msg.content.toString();
+    let messageData;
+
+    try {
+        messageData = JSON.parse(messageContent);
+
+        if (!messageData.fcmToken || !messageData.eventData) {
+            console.error('Message missing required data, skipping processing.');
+            chanel.nack(msg, false, false);
+            return;
+        }
+
+        await updateEventNotifications(messageData.fcmToken, messageData.eventData);
+        console.log(`Event notifications updated for user with FCM token ${messageData.fcmToken}`);
+
+        chanel.ack(msg);
+    } catch (error) {
+        console.error('Error processing event updated message:', error);
+        chanel.nack(msg, false, false);
+    }
+}
+
+export async function processEventDeleted(msg, chanel) {
+    if (msg === null) {
+        console.error('Received null message, skipping processing.');
+        return;
+    }
+
+    const messageContent = msg.content.toString();
+    let messageData;
+
+    try {
+        messageData = JSON.parse(messageContent);
+
+        if (!messageData.eventId) {
+            console.error('Message missing eventId, skipping processing.');
+            chanel.nack(msg, false, false);
+            return;
+        }
+
+        await deleteEventNotifications(messageData.eventId);
+        console.log(`Event notifications deleted for event ${messageData.eventId}`);
+
+        chanel.ack(msg);
+    } catch (error) {
+        console.error('Error processing event deleted message:', error);
+        chanel.nack(msg, false, false);
+    }
+}
+
 export async function startEventConsumer() {
     try {
         const chanel = await getChannel();
-        await chanel.assertQueue(EVENT_QUEUE, { durable: true });
-        console.log('Event consumer started, waiting for messages...');
 
+        // Consumer para eventos criados
+        await chanel.assertQueue(EVENT_QUEUE, { durable: true });
         chanel.consume(EVENT_QUEUE, async (msg) => {
             await processEventCreated(msg, chanel);
         }, { noAck: false });
 
+        // Consumer para eventos editados
+        await chanel.assertQueue(EVENT_UPDATED_QUEUE, { durable: true });
+        chanel.consume(EVENT_UPDATED_QUEUE, async (msg) => {
+            await processEventUpdated(msg, chanel);
+        }, { noAck: false });
+
+        // Consumer para eventos excluídos
+        await chanel.assertQueue(EVENT_DELETED_QUEUE, { durable: true });
+        chanel.consume(EVENT_DELETED_QUEUE, async (msg) => {
+            await processEventDeleted(msg, chanel);
+        }, { noAck: false });
+
+        console.log('Event consumers started, waiting for messages...');
+
     } catch (error) {
-        console.error('Error starting event consumer:', error);
+        console.error('Error starting event consumers:', error);
         setTimeout(startEventConsumer, 10000);
     }
 }

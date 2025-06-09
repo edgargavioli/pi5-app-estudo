@@ -6,7 +6,6 @@ import '../../shared/models/prova_model.dart';
 import '../../shared/models/evento_model.dart';
 import '../../shared/services/cronograma_service.dart';
 
-
 import '../estudos/sessoes_estudo_page.dart';
 import '../estudos/criar_sessao_page.dart';
 import 'criar_evento_page.dart';
@@ -22,7 +21,6 @@ class _CronogramaPageState extends State<CronogramaPage> {
   // Eventos carregados da API (provas e sessões)
   Map<DateTime, List<dynamic>> _eventos = {};
 
-  
   // get normalized date (year-month-day)
   DateTime _normalize(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
@@ -46,7 +44,6 @@ class _CronogramaPageState extends State<CronogramaPage> {
       // Carregar eventos do mês atual
       final eventos = await CronogramaService.obterEventosDoMes(_focusedDay);
 
-      
       if (mounted) {
         setState(() {
           _eventos = eventos;
@@ -58,7 +55,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
         setState(() {
           _isLoading = false;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao carregar cronograma: $e')),
         );
@@ -74,7 +71,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -92,13 +89,13 @@ class _CronogramaPageState extends State<CronogramaPage> {
               ),
             ),
             Divider(thickness: 1, height: 1, color: colorScheme.outline),
-            
+
             if (_isLoading)
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: CircularProgressIndicator(color: colorScheme.primary),
               ),
-            
+
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -111,7 +108,8 @@ class _CronogramaPageState extends State<CronogramaPage> {
                         firstDay: DateTime.utc(2020, 1, 1),
                         lastDay: DateTime.utc(2030, 12, 31),
                         focusedDay: _focusedDay,
-                        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                        selectedDayPredicate:
+                            (day) => isSameDay(_selectedDay, day),
                         onDaySelected: (selectedDay, focusedDay) {
                           setState(() {
                             _selectedDay = selectedDay;
@@ -135,7 +133,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
                           ),
                           outsideDaysVisible: false,
                           weekendTextStyle: TextStyle(
-                            color: colorScheme.error, 
+                            color: colorScheme.error,
                             fontSize: 12,
                           ),
                           defaultTextStyle: TextStyle(
@@ -143,7 +141,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
                             color: colorScheme.onSurface,
                           ),
                           holidayTextStyle: TextStyle(
-                            color: colorScheme.error, 
+                            color: colorScheme.error,
                             fontSize: 12,
                           ),
                           cellMargin: EdgeInsets.zero,
@@ -171,19 +169,22 @@ class _CronogramaPageState extends State<CronogramaPage> {
                             color: colorScheme.primary,
                             size: 16,
                           ),
-                          headerPadding: const EdgeInsets.symmetric(vertical: 2),
+                          headerPadding: const EdgeInsets.symmetric(
+                            vertical: 2,
+                          ),
                           leftChevronMargin: const EdgeInsets.only(left: 4),
                           rightChevronMargin: const EdgeInsets.only(right: 4),
                         ),
                         calendarFormat: CalendarFormat.month,
                         calendarBuilders: CalendarBuilders(
                           dowBuilder: (context, day) {
-                            if (day.weekday == DateTime.sunday || day.weekday == DateTime.saturday) {
+                            if (day.weekday == DateTime.sunday ||
+                                day.weekday == DateTime.saturday) {
                               return Center(
                                 child: Text(
                                   day.weekday == DateTime.sunday ? 'D' : 'S',
                                   style: TextStyle(
-                                    color: colorScheme.error, 
+                                    color: colorScheme.error,
                                     fontSize: 11,
                                   ),
                                 ),
@@ -193,50 +194,60 @@ class _CronogramaPageState extends State<CronogramaPage> {
                           },
                           markerBuilder: (context, day, events) {
                             if (events.isEmpty) return null;
-                            
+
                             return Positioned(
                               bottom: 1,
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
-                                children: events.take(3).map((event) {
-                                  Color cor = colorScheme.primary;
-                                  if (event is Prova) {
-                                    cor = colorScheme.error;
-                                  } else if (event is SessaoEstudo) {
-                                    cor = colorScheme.secondary;
-                                  } else if (event is Evento) {
-                                    cor = colorScheme.tertiary;
-                                  }
-                                  
-                                  return Container(
-                                    margin: const EdgeInsets.symmetric(horizontal: 0.5),
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      color: cor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  );
-                                }).toList(),
+                                children:
+                                    events.take(3).map((event) {
+                                      Color cor = colorScheme.primary;
+                                      if (event is Prova) {
+                                        cor = colorScheme.error;
+                                      } else if (event is SessaoEstudo) {
+                                        cor = colorScheme.secondary;
+                                      } else if (event is Evento) {
+                                        cor = colorScheme.tertiary;
+                                      }
+
+                                      return Container(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 0.5,
+                                        ),
+                                        width: 6,
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          color: cor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      );
+                                    }).toList(),
                               ),
                             );
                           },
                         ),
                       ),
                     ),
-                    
+
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
                       child: Row(
                         children: [
                           Expanded(
                             child: SizedBox(
                               height: 48,
                               child: ButtonWidget(
-                                text: _selectedDay != null 
-                                    ? 'Nova sessão'
-                                    : 'Selecione um dia',
-                                onPressed: _selectedDay != null ? _criarSessaoParaDia : null,
+                                text:
+                                    _selectedDay != null
+                                        ? 'Nova sessão'
+                                        : 'Selecione um dia',
+                                onPressed:
+                                    _selectedDay != null
+                                        ? _criarSessaoParaDia
+                                        : null,
                                 color: colorScheme.primary,
                                 textStyle: TextStyle(
                                   fontFamily: 'Roboto',
@@ -252,10 +263,14 @@ class _CronogramaPageState extends State<CronogramaPage> {
                             child: SizedBox(
                               height: 48,
                               child: ButtonWidget(
-                                text: _selectedDay != null 
-                                    ? 'Novo evento'
-                                    : 'Selecione um dia',
-                                onPressed: _selectedDay != null ? _criarEventoParaDia : null,
+                                text:
+                                    _selectedDay != null
+                                        ? 'Novo evento'
+                                        : 'Selecione um dia',
+                                onPressed:
+                                    _selectedDay != null
+                                        ? _criarEventoParaDia
+                                        : null,
                                 color: colorScheme.tertiary,
                                 textStyle: TextStyle(
                                   fontFamily: 'Roboto',
@@ -269,7 +284,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
                         ],
                       ),
                     ),
-                    
+
                     if (_selectedDay != null) _buildEventosDodia(),
                   ],
                 ),
@@ -284,9 +299,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const SessoesEstudoPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const SessoesEstudoPage()),
           );
         },
         icon: Icon(Icons.manage_search, color: colorScheme.onSecondary),
@@ -302,12 +315,9 @@ class _CronogramaPageState extends State<CronogramaPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final eventos = _getEventosParaDia(_selectedDay!);
-    
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8.0,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -323,7 +333,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
             ),
           ),
           const SizedBox(height: 8),
-          
+
           if (eventos.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -337,7 +347,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
             )
           else
             ...eventos.map((evento) => _buildEventoCard(evento)),
-          
+
           const SizedBox(height: 12),
         ],
       ),
@@ -347,7 +357,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
   Widget _buildEventoCard(dynamic evento) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     String titulo, subtitulo, horario;
     Color corCard, corIcone;
     IconData icone;
@@ -362,9 +372,10 @@ class _CronogramaPageState extends State<CronogramaPage> {
     } else if (evento is SessaoEstudo) {
       titulo = evento.conteudo;
       subtitulo = 'Sessão de Estudo';
-      horario = evento.tempoInicio != null 
-          ? DateFormat('HH:mm').format(evento.tempoInicio!)
-          : 'Não iniciada';
+      horario =
+          evento.tempoInicio != null
+              ? DateFormat('HH:mm').format(evento.tempoInicio!)
+              : 'Não iniciada';
       corCard = colorScheme.primaryContainer;
       corIcone = colorScheme.primary;
       icone = Icons.school;
@@ -379,7 +390,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
       titulo = 'Evento';
       subtitulo = '';
       horario = '';
-      corCard = colorScheme.surfaceVariant;
+      corCard = colorScheme.surfaceContainerHighest;
       corIcone = colorScheme.onSurfaceVariant;
       icone = Icons.event;
     }
@@ -446,9 +457,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
     final resultado = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) => CriarSessaoPage(
-          dataInicial: _selectedDay,
-        ),
+        builder: (context) => CriarSessaoPage(dataInicial: _selectedDay),
       ),
     );
 
@@ -469,9 +478,7 @@ class _CronogramaPageState extends State<CronogramaPage> {
     final resultado = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) => CriarEventoPage(
-          dataInicial: _selectedDay,
-        ),
+        builder: (context) => CriarEventoPage(dataInicial: _selectedDay),
       ),
     );
 

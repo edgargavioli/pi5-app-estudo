@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # User Service (Autenticação)
   # RabbitMQ - Broker Central de Mensageria
   rabbitmq:
     image: rabbitmq:3.12-management
@@ -44,9 +43,8 @@ services:
       - SMTP_USER=your_email@gmail.com
       - SMTP_PASS=your_app_password
       # RabbitMQ Configuration
-      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - RABBITMQ=amqp://admin:admin123@rabbitmq-broker:5672/
       - RABBITMQ_EXCHANGE=pi5_events
-      - SERVICE_NAME=user-service
     depends_on:
       postgres-user:
         condition: service_healthy
@@ -60,6 +58,27 @@ services:
       - microservices-network
     restart: unless-stopped
 
+  # Postgres para User Service
+  postgres-user:
+    image: postgres:16-alpine
+    container_name: postgres-user
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=auth_service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   # Serviço de Notificações
   notification-service:
     build:
@@ -71,13 +90,13 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=4040
-      - DATABASE=postgresql://postgres:postgres@postgres-notifications:5432/notificacoes
-      - RABBITMQ=amqp://admin:admin@rabbitmq:5672
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-notifications:5432/notificacoes
+      - RABBITMQ=amqp://admin:admin123@rabbitmq-broker:5672/
       - USER_QUEUE=user_created_queue
       - EVENT_QUEUE=event_created_queue
       - STREAK_QUEUE=streak_created_queue
       - FIREBASE=/app/config/firebase-service-account.json
-      - JWTSECRET=your_jwt_secret_key
+      - JWTSECRET=your_jwt_secret_key_super_secure_2024
       - JWTEXPIRE=24h
     depends_on:
       postgres-notifications:
@@ -93,19 +112,18 @@ services:
       - microservices-network
     restart: unless-stopped
 
-  # Postgres para User Service
-  postgres-user:
+  # Postgres para Notifications Service
+  postgres-notifications:
     image: postgres:16-alpine
-    container_name: postgres-user
+    container_name: postgres-notifications
     ports:
-      - "5432:5432"
+      - "5434:5432"
     environment:
       - POSTGRES_DB=notificacoes
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
       - postgres-notifications-data:/var/lib/postgresql/data
-      - postgres-user-data:/var/lib/postgresql/data
     networks:
       - microservices-network
     healthcheck:
@@ -126,14 +144,11 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - DATABASE=postgresql://postgres:postgres@postgres-provas:5432/provas_db
-      # JWT Configuration (MESMA SECRET DO USER-SERVICE)
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-provas:5432/provas_db
       - JWT_SECRET=your_jwt_secret_key_super_secure_2024
-      # RabbitMQ Configuration
-      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672/
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq-broker:5672/
       - RABBITMQ_EXCHANGE=pi5_events
       - SERVICE_NAME=provas-service
-      # User Service Integration
       - USER_SERVICE_URL=http://user-service:3000
     depends_on:
       postgres-provas:
@@ -161,36 +176,12 @@ services:
       - postgres-provas-data:/var/lib/postgresql/data
     networks:
       - microservices-network
-    restart: unless-stopped
-      - microservices-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
-  # RabbitMQ para comunicação entre serviços
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: rabbitmq
-    environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=admin
-      - RABBITMQ_DEFAULT_VHOST=/
-    ports:
-      - "5672:5672"   # AMQP port
-      - "15672:15672" # Management UI
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    networks:
-      - microservices-network
-    restart: unless-stopped
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
 
   # Adminer para gerenciar databases
   adminer:
@@ -199,35 +190,22 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      - postgres-user
       - postgres-notifications
+      - postgres-provas
     networks:
       - microservices-network
     restart: unless-stopped
 
-# Nginx como API Gateway (removido temporariamente até criar o arquivo de configuração)
-# api-gateway:
-#   image: nginx:alpine
-#   container_name: api-gateway
-#   ports:
-#     - "80:80"
-#   volumes:
-#     - ./nginx.conf:/etc/nginx/nginx.conf:ro
-#   depends_on:
-#     - user-service
-#     - notification-service
-#     - template-service
-#   networks:
-#     - microservices-network
-#   restart: unless-stopped
-
 volumes:
   postgres-user-data:
+  postgres-notifications-data:
   postgres-provas-data:
   rabbitmq-data:
   provas-node-modules:
+  user-logs:
 
 networks:
   microservices-network:
     driver: bridge
-    name: pi5-network 
+    name: pi5-network

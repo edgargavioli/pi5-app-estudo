@@ -2,15 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'cache_service.dart';
-import 'gamificacao_service.dart';
-import '../models/user_model.dart';
-import '../models/auth_result.dart';
-import '../../config/api_config.dart';
 
 class AuthService {
   // 🌐 URL DO USER-SERVICE
   static const String _userServiceUrl = 'http://localhost:3000/api';
-  
+
   // 🔑 CHAVES PARA ARMAZENAMENTO LOCAL
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
@@ -35,10 +31,10 @@ class AuthService {
   Future<void> initialize() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       _accessToken = prefs.getString(_accessTokenKey);
       _refreshToken = prefs.getString(_refreshTokenKey);
-      
+
       final userDataJson = prefs.getString(_userDataKey);
       if (userDataJson != null) {
         final userData = json.decode(userDataJson);
@@ -67,27 +63,27 @@ class AuthService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          'email': email,
-          'password': password,
-        }),
+        body: json.encode({'email': email, 'password': password}),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         // Salvar tokens
         _accessToken = data['data']['accessToken'];
         _refreshToken = data['data']['refreshToken'];
-        
+
         // Salvar dados do usuário
         _currentUser = AuthUser.fromJson(data['data']['user']);
-        
+
         // Persistir dados
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_accessTokenKey, _accessToken!);
         await prefs.setString(_refreshTokenKey, _refreshToken!);
-        await prefs.setString(_userDataKey, json.encode(_currentUser!.toJson()));
+        await prefs.setString(
+          _userDataKey,
+          json.encode(_currentUser!.toJson()),
+        );
 
         return AuthResult.success(
           message: 'Login realizado com sucesso',
@@ -104,7 +100,11 @@ class AuthService {
   }
 
   /// 📝 REGISTRO
-  Future<AuthResult> register(String name, String email, String password) async {
+  Future<AuthResult> register(
+    String name,
+    String email,
+    String password,
+  ) async {
     try {
       final response = await http.post(
         Uri.parse('$_userServiceUrl/auth/register'),
@@ -112,28 +112,27 @@ class AuthService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          'name': name,
-          'email': email,
-          'password': password,
-        }),
+        body: json.encode({'name': name, 'email': email, 'password': password}),
       );
 
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
-        
+
         // Salvar tokens
         _accessToken = data['data']['accessToken'];
         _refreshToken = data['data']['refreshToken'];
-        
+
         // Salvar dados do usuário
         _currentUser = AuthUser.fromJson(data['data']['user']);
-        
+
         // Persistir dados
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_accessTokenKey, _accessToken!);
         await prefs.setString(_refreshTokenKey, _refreshToken!);
-        await prefs.setString(_userDataKey, json.encode(_currentUser!.toJson()));
+        await prefs.setString(
+          _userDataKey,
+          json.encode(_currentUser!.toJson()),
+        );
 
         return AuthResult.success(
           message: 'Registro realizado com sucesso',
@@ -157,12 +156,12 @@ class AuthService {
       await prefs.remove(_accessTokenKey);
       await prefs.remove(_refreshTokenKey);
       await prefs.remove(_userDataKey);
-      
+
       // Limpar estado
       _accessToken = null;
       _refreshToken = null;
       _currentUser = null;
-      
+
       // Limpar cache
       CacheService.clear();
     } catch (e) {
@@ -182,26 +181,24 @@ class AuthService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({
-          'refreshToken': _refreshToken,
-        }),
+        body: json.encode({'refreshToken': _refreshToken}),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         // Atualizar tokens
         _accessToken = data['data']['accessToken'];
         _refreshToken = data['data']['refreshToken'];
-        
+
         // Persistir novos tokens
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_accessTokenKey, _accessToken!);
         await prefs.setString(_refreshTokenKey, _refreshToken!);
-        
+
         return true;
       }
-      
+
       return false;
     } catch (e) {
       print('❌ Erro ao renovar tokens: $e');
@@ -259,7 +256,8 @@ class AuthUser {
       nome: json['name'],
       email: json['email'],
       isEmailVerified: json['isEmailVerified'] ?? false,
-      lastLogin: json['lastLogin'] != null ? DateTime.parse(json['lastLogin']) : null,
+      lastLogin:
+          json['lastLogin'] != null ? DateTime.parse(json['lastLogin']) : null,
     );
   }
 
@@ -281,9 +279,7 @@ class AuthResult {
   final AuthUser? user;
 
   AuthResult.success({required this.user, required this.message})
-      : success = true;
+    : success = true;
 
-  AuthResult.error(this.message)
-      : success = false,
-        user = null;
-} 
+  AuthResult.error(this.message) : success = false, user = null;
+}

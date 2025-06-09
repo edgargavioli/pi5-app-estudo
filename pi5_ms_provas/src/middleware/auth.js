@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtorken';
+import jwt from 'jsonwebtoken';
 import axios from 'axios';
 
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3000';

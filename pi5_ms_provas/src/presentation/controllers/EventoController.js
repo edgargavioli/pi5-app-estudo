@@ -5,6 +5,7 @@ import { DeleteEventoUseCase } from '../../application/use-cases/evento/DeleteEv
 import { EventoRepository } from '../../infrastructure/persistence/repositories/EventoRepository.js';
 import { logger } from '../../application/utils/logger.js';
 import { HateoasConfig } from '../../infrastructure/hateoas/HateoasConfig.js';
+import rabbitMQService from '../../infrastructure/messaging/RabbitMQService.js';
 
 const eventoRepository = new EventoRepository();
 
@@ -21,6 +22,10 @@ export class EventoController {
             logger.info('Iniciando criação de evento', { eventoData: req.body });
             const evento = await this.createUseCase.execute(req.body, req.userId);
             logger.info('Evento criado com sucesso', { eventoId: evento.id });
+
+            // Publicar evento de criação
+            await rabbitMQService.publishEntityCreated('evento', evento, req.userId);
+
             const response = HateoasConfig.wrapResponse(evento, req.baseUrl, 'eventos', evento.id);
             res.status(201).json(response);
         } catch (error) {
@@ -65,8 +70,16 @@ export class EventoController {
     async update(req, res) {
         try {
             logger.info('Atualizando evento', { id: req.params.id, eventoData: req.body });
+
+            // Buscar dados anteriores para comparação
+            const eventoAnterior = await this.getUseCase.execute(req.params.id, req.userId);
+
             const evento = await this.updateUseCase.execute(req.params.id, req.body, req.userId);
             logger.info('Evento atualizado com sucesso', { eventoId: evento.id });
+
+            // Publicar evento de atualização
+            await rabbitMQService.publishEntityUpdated('evento', evento.id, evento, eventoAnterior, req.userId);
+
             const response = HateoasConfig.wrapResponse(evento, req.baseUrl, 'eventos', evento.id);
             res.json(response);
         } catch (error) {
@@ -84,8 +97,16 @@ export class EventoController {
     async delete(req, res) {
         try {
             logger.info('Deletando evento', { id: req.params.id });
+
+            // Buscar dados do evento antes de deletar
+            const eventoParaDeletar = await this.getUseCase.execute(req.params.id, req.userId);
+
             await this.deleteUseCase.execute(req.params.id, req.userId);
             logger.info('Evento deletado com sucesso', { id: req.params.id });
+
+            // Publicar evento de exclusão
+            await rabbitMQService.publishEntityDeleted('evento', req.params.id, eventoParaDeletar, req.userId);
+
             res.status(204).send();
         } catch (error) {
             logger.error('Erro ao deletar evento', { error: error.message, id: req.params.id });
@@ -95,4 +116,4 @@ export class EventoController {
             res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
-} 
+}

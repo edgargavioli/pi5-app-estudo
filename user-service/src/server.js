@@ -32,21 +32,6 @@ app.use(morgan('combined'));
 // Logging middleware
 app.use(logger.logRequest.bind(logger));
 
-// API Routes
-app.use('/api/auth', require('./presentation/routes/authRoutes'));
-app.use('/api/users', require('./presentation/routes/userRoutes'));
-app.use('/api/wrapped', require('./presentation/routes/wrapped'));
-
-// Health check endpoint simples (em vez de rota separada)
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    version: '1.0.0'
-  });
-});
-
 // Swagger Documentation
 const swaggerOptions = {
   definition: {
@@ -77,12 +62,22 @@ const swaggerOptions = {
 const specs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
-// Routes - DDD Presentation Layer
-app.use('/api/auth', require('./presentation/routes/auth'));
+// API Routes - CORRIGIDO: removidas duplicatas
+app.use('/api/auth', require('./presentation/routes/authRoutes'));
 app.use('/api/users', require('./presentation/routes/userRoutes'));
 app.use('/api/wrapped', require('./presentation/routes/wrapped'));
 
 // Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: '1.0.0'
+  });
+});
+
+// Health check endpoint alternativo
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',

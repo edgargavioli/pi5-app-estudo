@@ -26,7 +26,7 @@ class _CronometragemPageState extends State<CronometragemPage> {
   final CronometroService _cronometroService = CronometroService();
   bool _isFinalizando = false;
   DateTime? _tempoInicioLocal;
-  
+
   // Dados das estatísticas
   Duration _melhorTempo = Duration.zero;
   int _sequencia = 0;
@@ -38,28 +38,32 @@ class _CronometragemPageState extends State<CronometragemPage> {
   void initState() {
     super.initState();
     _tempoInicioLocal = widget.sessao.tempoInicio;
-    
+
     // Carregar estatísticas
     _carregarEstatisticas();
-    
+
     // Se a sessão já foi finalizada, não fazer nada com cronômetro
     if (widget.sessao.tempoFim != null) {
       return;
     }
-    
+
     // Verificar se já há uma sessão ativa no cronômetro global para esta sessão específica
-    if (_cronometroService.hasActiveSession && _cronometroService.sessaoId == widget.sessao.id) {
+    if (_cronometroService.hasActiveSession &&
+        _cronometroService.sessaoId == widget.sessao.id) {
       // Já está rodando para esta sessão - manter como está
       print('>> Cronômetro já ativo para esta sessão: ${widget.sessao.id}');
       return;
     }
-    
+
     // Se há uma sessão ativa para outra sessão, parar ela primeiro
-    if (_cronometroService.hasActiveSession && _cronometroService.sessaoId != widget.sessao.id) {
-      print('>> Parando cronômetro de outra sessão: ${_cronometroService.sessaoId}');
+    if (_cronometroService.hasActiveSession &&
+        _cronometroService.sessaoId != widget.sessao.id) {
+      print(
+        '>> Parando cronômetro de outra sessão: ${_cronometroService.sessaoId}',
+      );
       _cronometroService.stopCronometro();
     }
-    
+
     // NÃO iniciar automaticamente o cronômetro - deixar para o usuário apertar play
     print('>> Sessão carregada mas cronômetro não iniciado automaticamente');
   }
@@ -67,12 +71,13 @@ class _CronometragemPageState extends State<CronometragemPage> {
   Materia _getMateria() {
     return widget.materias.firstWhere(
       (m) => m.id == widget.sessao.materiaId,
-      orElse: () => Materia(
-        id: '',
-        nome: 'Matéria Desconhecida',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
+      orElse:
+          () => Materia(
+            id: '',
+            nome: 'Matéria Desconhecida',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
     );
   }
 
@@ -101,19 +106,20 @@ class _CronometragemPageState extends State<CronometragemPage> {
 
   void _startTimer() {
     if (_cronometroService.isRunning) return;
-    
+
     // Se a sessão ainda não foi iniciada, iniciar agora
     if (_tempoInicioLocal == null) {
       _iniciarSessao();
       return;
     }
-    
+
     // Se já há uma sessão ativa para esta sessão, apenas retomar
-    if (_cronometroService.hasActiveSession && _cronometroService.sessaoId == widget.sessao.id) {
+    if (_cronometroService.hasActiveSession &&
+        _cronometroService.sessaoId == widget.sessao.id) {
       _cronometroService.resumeCronometro();
       return;
     }
-    
+
     // Iniciar cronômetro do zero (não calcular tempo desde _tempoInicioLocal)
     // O CronometroService já vai recuperar tempo salvo se existir
     final materia = _getMateria();
@@ -141,17 +147,17 @@ class _CronometragemPageState extends State<CronometragemPage> {
       );
 
       await SessaoService.atualizarSessao(widget.sessao.id, sessaoAtualizada);
-      
+
       // Atualizar o tempo local
       _tempoInicioLocal = agora;
-      
+
       // Iniciar cronômetro global
       final materia = _getMateria();
       _cronometroService.startCronometro(
         sessaoId: widget.sessao.id,
         materiaNome: materia.nome,
       );
-      
+
       setState(() {});
     } catch (e) {
       if (mounted) {
@@ -178,16 +184,19 @@ class _CronometragemPageState extends State<CronometragemPage> {
     print('>> _isFinalizando: $_isFinalizando');
     print('>> _tempoInicioLocal: $_tempoInicioLocal');
     print('>> Cronômetro ativo: ${_cronometroService.hasActiveSession}');
-    print('>> ID da sessão: ${_cronometroService.sessaoId} vs ${widget.sessao.id}');
-    
+    print(
+      '>> ID da sessão: ${_cronometroService.sessaoId} vs ${widget.sessao.id}',
+    );
+
     setState(() => _isFinalizando = true);
 
     try {
       // Usar o tempo do cronômetro se estiver ativo, caso contrário calcular manualmente
       Duration duracaoReal;
       DateTime tempoFimReal;
-      
-      if (_cronometroService.hasActiveSession && _cronometroService.sessaoId == widget.sessao.id) {
+
+      if (_cronometroService.hasActiveSession &&
+          _cronometroService.sessaoId == widget.sessao.id) {
         // Usar o tempo exato do cronômetro
         duracaoReal = _cronometroService.elapsed;
         tempoFimReal = _tempoInicioLocal!.add(duracaoReal);
@@ -214,13 +223,15 @@ class _CronometragemPageState extends State<CronometragemPage> {
         updatedAt: DateTime.now(),
       );
 
-      print('>> Salvando sessão - Início: $_tempoInicioLocal, Fim: $tempoFimReal, Duração: $duracaoReal');
+      print(
+        '>> Salvando sessão - Início: $_tempoInicioLocal, Fim: $tempoFimReal, Duração: $duracaoReal',
+      );
 
       await SessaoService.atualizarSessao(widget.sessao.id, sessaoAtualizada);
 
       // Atualizar estatísticas com a duração real
       await EstatisticasService.atualizarEstatisticas(duracaoReal);
-      
+
       // Recarregar estatísticas atualizadas
       await _carregarEstatisticas();
 
@@ -230,10 +241,12 @@ class _CronometragemPageState extends State<CronometragemPage> {
       if (mounted) {
         // Sempre voltar para a lista de sessões quando finalizar
         Navigator.pop(context, true);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Sessão finalizada - Duração: ${_formatarDuracao(duracaoReal)}'),
+            content: Text(
+              'Sessão finalizada - Duração: ${_formatarDuracao(duracaoReal)}',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -254,8 +267,8 @@ class _CronometragemPageState extends State<CronometragemPage> {
 
   String _formatarDuracao(Duration duracao) {
     return '${duracao.inHours.toString().padLeft(2, '0')}:'
-           '${(duracao.inMinutes % 60).toString().padLeft(2, '0')}:'
-           '${(duracao.inSeconds % 60).toString().padLeft(2, '0')}';
+        '${(duracao.inMinutes % 60).toString().padLeft(2, '0')}:'
+        '${(duracao.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
   @override
@@ -279,23 +292,30 @@ class _CronometragemPageState extends State<CronometragemPage> {
                 listenable: _cronometroService,
                 builder: (context, child) {
                   Duration elapsed;
-                  
+
                   if (sessaoFinalizada && _tempoInicioLocal != null) {
                     // Sessão finalizada - usar tempo total da sessão
-                    elapsed = widget.sessao.tempoFim!.difference(_tempoInicioLocal!);
+                    elapsed = widget.sessao.tempoFim!.difference(
+                      _tempoInicioLocal!,
+                    );
                     print('>> Sessão finalizada - elapsed: $elapsed');
-                  } else if (_cronometroService.hasActiveSession && _cronometroService.sessaoId == widget.sessao.id) {
+                  } else if (_cronometroService.hasActiveSession &&
+                      _cronometroService.sessaoId == widget.sessao.id) {
                     // Cronômetro ativo para esta sessão - usar tempo do cronômetro
                     elapsed = _cronometroService.elapsed;
-                    print('>> Cronômetro ativo - elapsed: $elapsed (service: ${_cronometroService.elapsed})');
+                    print(
+                      '>> Cronômetro ativo - elapsed: $elapsed (service: ${_cronometroService.elapsed})',
+                    );
                   } else {
                     // Se não há cronômetro ativo, mostrar zero
                     elapsed = Duration.zero;
                     print('>> Cronômetro não ativo - elapsed: zero');
                   }
-                  
-                  final isRunning = _cronometroService.isRunning && _cronometroService.sessaoId == widget.sessao.id;
-                  
+
+                  final isRunning =
+                      _cronometroService.isRunning &&
+                      _cronometroService.sessaoId == widget.sessao.id;
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -308,15 +328,15 @@ class _CronometragemPageState extends State<CronometragemPage> {
                         ),
                       ),
                       const SizedBox(height: 40),
-                      
+
                       // session time
                       Center(
                         child: Text(
-                          sessaoFinalizada 
-                              ? 'Tempo Total' 
-                              : sessaoNaoIniciada 
-                                  ? 'Pronto para Iniciar'
-                                  : 'Tempo de sessão',
+                          sessaoFinalizada
+                              ? 'Tempo Total'
+                              : sessaoNaoIniciada
+                              ? 'Pronto para Iniciar'
+                              : 'Tempo de sessão',
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 24,
@@ -338,7 +358,7 @@ class _CronometragemPageState extends State<CronometragemPage> {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      
+
                       // Recordes e estatísticas
                       if (!_loadingStats) ...[
                         Center(
@@ -351,7 +371,8 @@ class _CronometragemPageState extends State<CronometragemPage> {
                                   fontFamily: 'Roboto',
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -362,14 +383,15 @@ class _CronometragemPageState extends State<CronometragemPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                _melhorTempo > Duration.zero 
+                                _melhorTempo > Duration.zero
                                     ? _formatarDuracao(_melhorTempo)
                                     : 'Nenhum recorde ainda',
                                 style: TextStyle(
                                   fontFamily: 'Roboto',
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                             ],
@@ -382,7 +404,7 @@ class _CronometragemPageState extends State<CronometragemPage> {
                           ),
                         ),
                       ],
-                      
+
                       const SizedBox(height: 50),
                       // controls
                       Row(
@@ -394,9 +416,12 @@ class _CronometragemPageState extends State<CronometragemPage> {
                             style: ElevatedButton.styleFrom(
                               elevation: 4,
                               shadowColor: Colors.black26,
-                              backgroundColor: isRunning
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.outlineVariant,
+                              backgroundColor:
+                                  isRunning
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(
+                                        context,
+                                      ).colorScheme.outlineVariant,
                               minimumSize: const Size(85, 85),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -416,9 +441,12 @@ class _CronometragemPageState extends State<CronometragemPage> {
                             style: ElevatedButton.styleFrom(
                               elevation: 4,
                               shadowColor: Colors.black26,
-                              backgroundColor: !isRunning
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.outlineVariant,
+                              backgroundColor:
+                                  !isRunning
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(
+                                        context,
+                                      ).colorScheme.outlineVariant,
                               minimumSize: const Size(85, 85),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -438,7 +466,8 @@ class _CronometragemPageState extends State<CronometragemPage> {
                             style: ElevatedButton.styleFrom(
                               elevation: 4,
                               shadowColor: Colors.black26,
-                              backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.errorContainer,
                               minimumSize: const Size(85, 85),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -448,7 +477,10 @@ class _CronometragemPageState extends State<CronometragemPage> {
                             child: Icon(
                               Icons.close,
                               size: 24,
-                              color: Theme.of(context).colorScheme.onErrorContainer,
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
                             ),
                           ),
                         ],
@@ -464,9 +496,10 @@ class _CronometragemPageState extends State<CronometragemPage> {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: sessaoNaoIniciada
-                                  ? Colors.grey.withOpacity(0.1)
-                                  : isRunning 
+                              color:
+                                  sessaoNaoIniciada
+                                      ? Colors.grey.withOpacity(0.1)
+                                      : isRunning
                                       ? Colors.green.withOpacity(0.1)
                                       : Colors.orange.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20),
@@ -477,12 +510,13 @@ class _CronometragemPageState extends State<CronometragemPage> {
                                 Icon(
                                   sessaoNaoIniciada
                                       ? Icons.schedule
-                                      : isRunning 
-                                          ? Icons.play_circle
-                                          : Icons.pause_circle,
-                                  color: sessaoNaoIniciada
-                                      ? Colors.grey
-                                      : isRunning 
+                                      : isRunning
+                                      ? Icons.play_circle
+                                      : Icons.pause_circle,
+                                  color:
+                                      sessaoNaoIniciada
+                                          ? Colors.grey
+                                          : isRunning
                                           ? Colors.green
                                           : Colors.orange,
                                   size: 20,
@@ -491,13 +525,14 @@ class _CronometragemPageState extends State<CronometragemPage> {
                                 Text(
                                   sessaoNaoIniciada
                                       ? 'Não iniciada'
-                                      : isRunning 
-                                          ? 'Em andamento'
-                                          : 'Pausada',
+                                      : isRunning
+                                      ? 'Em andamento'
+                                      : 'Pausada',
                                   style: TextStyle(
-                                    color: sessaoNaoIniciada
-                                        ? Colors.grey
-                                        : isRunning 
+                                    color:
+                                        sessaoNaoIniciada
+                                            ? Colors.grey
+                                            : isRunning
                                             ? Colors.green
                                             : Colors.orange,
                                     fontWeight: FontWeight.w500,
@@ -513,7 +548,8 @@ class _CronometragemPageState extends State<CronometragemPage> {
                         if (!sessaoNaoIniciada)
                           Center(
                             child: ElevatedButton(
-                              onPressed: _isFinalizando ? null : _finalizarSessao,
+                              onPressed:
+                                  _isFinalizando ? null : _finalizarSessao,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
                                 foregroundColor: Colors.white,
@@ -522,36 +558,40 @@ class _CronometragemPageState extends State<CronometragemPage> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
-                              child: _isFinalizando
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
+                              child:
+                                  _isFinalizando
+                                      ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                      : const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.stop),
+                                          SizedBox(width: 8),
+                                          Text('Finalizar Sessão'),
+                                        ],
                                       ),
-                                    )
-                                  : const Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.stop),
-                                        SizedBox(width: 8),
-                                        Text('Finalizar Sessão'),
-                                      ],
-                                    ),
                             ),
                           ),
                       ],
-                      
+
                       const SizedBox(height: 120),
-                      if (!isRunning && elapsed > Duration.zero && !sessaoFinalizada)
+                      if (!isRunning &&
+                          elapsed > Duration.zero &&
+                          !sessaoFinalizada)
                         Align(
                           alignment: Alignment.centerRight,
                           child: SizedBox(
                             width: 56,
                             height: 56,
                             child: FloatingActionButton(
-                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
                               onPressed: () {
                                 showModalBottomSheet(
                                   context: context,
@@ -561,17 +601,18 @@ class _CronometragemPageState extends State<CronometragemPage> {
                                       top: Radius.circular(24),
                                     ),
                                   ),
-                                  builder: (context) => FractionallySizedBox(
-                                    heightFactor: 0.85,
-                                    child: SaveSessionSheet(
-                                      elapsedTime: elapsed,
-                                      materia: materia,
-                                      sequencia: _sequencia,
-                                      nivel: _nivel,
-                                      xp: _xpAtual,
-                                      onSave: _finalizarSessao,
-                                    ),
-                                  ),
+                                  builder:
+                                      (context) => FractionallySizedBox(
+                                        heightFactor: 0.85,
+                                        child: SaveSessionSheet(
+                                          elapsedTime: elapsed,
+                                          materia: materia,
+                                          sequencia: _sequencia,
+                                          nivel: _nivel,
+                                          xp: _xpAtual,
+                                          onSave: _finalizarSessao,
+                                        ),
+                                      ),
                                 );
                               },
                               child: const Icon(
@@ -613,24 +654,26 @@ class SaveSessionSheet extends StatefulWidget {
   final int nivel;
   final int xp;
   final VoidCallback onSave;
-  
+
   const SaveSessionSheet({
-    Key? key, 
+    super.key,
     required this.elapsedTime,
     required this.materia,
     required this.sequencia,
     required this.nivel,
     required this.xp,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   State<SaveSessionSheet> createState() => _SaveSessionSheetState();
 }
 
 class _SaveSessionSheetState extends State<SaveSessionSheet> {
-  final TextEditingController _questoesRespondidasController = TextEditingController();
-  final TextEditingController _questoesAcertadasController = TextEditingController();
+  final TextEditingController _questoesRespondidasController =
+      TextEditingController();
+  final TextEditingController _questoesAcertadasController =
+      TextEditingController();
   bool _isSaving = false;
 
   @override
@@ -639,22 +682,22 @@ class _SaveSessionSheetState extends State<SaveSessionSheet> {
         '${widget.elapsedTime.inHours.toString().padLeft(2, '0')}:'
         '${(widget.elapsedTime.inMinutes % 60).toString().padLeft(2, '0')}:'
         '${(widget.elapsedTime.inSeconds % 60).toString().padLeft(2, '0')}';
-    
+
     // For the progress indicator, assuming 3 hours is the goal
     double progressValue = widget.elapsedTime.inSeconds / (3 * 60 * 60);
     if (progressValue > 1.0) progressValue = 1.0;
-    
+
     // Calcular XP ganho baseado no tempo
     final minutosEstudo = widget.elapsedTime.inMinutes;
     int xpGanho = (minutosEstudo * 2).clamp(10, 200);
-    
+
     // Bonus por sequência
     if (widget.sequencia >= 7) {
       xpGanho = (xpGanho * 1.5).round();
     } else if (widget.sequencia >= 3) {
       xpGanho = (xpGanho * 1.2).round();
     }
-    
+
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -936,19 +979,28 @@ class _SaveSessionSheetState extends State<SaveSessionSheet> {
               height: 40, // added fixed height
               child: ButtonWidget(
                 text: _isSaving ? 'Salvando...' : 'Salvar',
-                onPressed: _isSaving ? null : () async {
-                  setState(() => _isSaving = true);
-                  
-                  // Aqui você pode processar os dados dos exercícios
-                  final questoesRespondidas = int.tryParse(_questoesRespondidasController.text) ?? 0;
-                  final questoesAcertadas = int.tryParse(_questoesAcertadasController.text) ?? 0;
-                  
-                  print('Questões respondidas: $questoesRespondidas');
-                  print('Questões acertadas: $questoesAcertadas');
-                  
-                  // Chamar a função de salvar da página pai
-                  widget.onSave();
-                },
+                onPressed:
+                    _isSaving
+                        ? null
+                        : () async {
+                          setState(() => _isSaving = true);
+
+                          // Aqui você pode processar os dados dos exercícios
+                          final questoesRespondidas =
+                              int.tryParse(
+                                _questoesRespondidasController.text,
+                              ) ??
+                              0;
+                          final questoesAcertadas =
+                              int.tryParse(_questoesAcertadasController.text) ??
+                              0;
+
+                          print('Questões respondidas: $questoesRespondidas');
+                          print('Questões acertadas: $questoesAcertadas');
+
+                          // Chamar a função de salvar da página pai
+                          widget.onSave();
+                        },
                 color: Theme.of(context).colorScheme.primary,
                 textStyle: const TextStyle(
                   color: Colors.white,
@@ -967,4 +1019,4 @@ class _SaveSessionSheetState extends State<SaveSessionSheet> {
       ),
     );
   }
-} 
+}
