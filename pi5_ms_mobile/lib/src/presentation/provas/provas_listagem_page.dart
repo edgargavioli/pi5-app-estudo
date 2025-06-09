@@ -25,7 +25,7 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
   int? _selectedIndex;
   List<Prova> _provas = [];
   List<Prova> _provasFiltradas = [];
-  List<SessaoEstudo> _todasSessoes = [];
+  final List<SessaoEstudo> _todasSessoes = [];
   bool _isLoading = true;
   String? _error;
 
@@ -96,10 +96,7 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
   }
 
   Future<void> _recarregarTudo() async {
-    await Future.wait([
-      _carregarProvas(),
-      _carregarEstatisticasGamificacao(),
-    ]);
+    await Future.wait([_carregarProvas(), _carregarEstatisticasGamificacao()]);
   }
 
   void _filtrarProvas(String query) {
@@ -107,11 +104,15 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
       if (query.isEmpty) {
         _provasFiltradas = _provas;
       } else {
-        _provasFiltradas = _provas.where((prova) {
-          return prova.titulo.toLowerCase().contains(query.toLowerCase()) ||
-                 prova.local.toLowerCase().contains(query.toLowerCase()) ||
-                 (prova.descricao?.toLowerCase().contains(query.toLowerCase()) ?? false);
-        }).toList();
+        _provasFiltradas =
+            _provas.where((prova) {
+              return prova.titulo.toLowerCase().contains(query.toLowerCase()) ||
+                  prova.local.toLowerCase().contains(query.toLowerCase()) ||
+                  (prova.descricao?.toLowerCase().contains(
+                        query.toLowerCase(),
+                      ) ??
+                      false);
+            }).toList();
       }
       _selectedIndex = null;
     });
@@ -128,9 +129,9 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao deletar prova: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao deletar prova: $e')));
       }
     }
   }
@@ -138,11 +139,9 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
   Future<void> _adicionarProva() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const AdicionarProvaPage(),
-      ),
+      MaterialPageRoute(builder: (context) => const AdicionarProvaPage()),
     );
-    
+
     if (result == true) {
       _carregarProvas(); // Recarregar a lista se uma nova prova foi criada
     }
@@ -160,7 +159,7 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
     if (minutos == 0) return '0min';
     final horas = minutos ~/ 60;
     final mins = minutos % 60;
-    
+
     if (horas > 0) {
       return '${horas}h ${mins}min';
     } else {
@@ -197,32 +196,45 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
                 // Gauges de gamificação
                 Container(
                   height: 32,
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: _carregandoGamificacao
-                      ? const Center(child: CircularProgressIndicator())
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildCompactGauge(
-                              "Tempo",
-                              _estatisticasGamificacao['tempoTotalFormatado'] ?? '0min',
-                              (_estatisticasGamificacao['tempoTotalMinutos'] ?? 0).toDouble() / 180, // Max 3h para 100%
-                              Theme.of(context).colorScheme.primary
-                            ),
-                            _buildCompactGauge(
-                              "Nível ${_estatisticasGamificacao['nivel'] ?? 1}",
-                              "${_estatisticasGamificacao['xpTotal'] ?? 0}xp",
-                              (_estatisticasGamificacao['progressoNivel'] ?? 0.0).toDouble(),
-                              Colors.amberAccent
-                            ),
-                            _buildCompactGauge(
-                              "Desempenho",
-                              "${(_estatisticasGamificacao['desempenhoMedio'] ?? 0.0).toStringAsFixed(0)}%",
-                              ((_estatisticasGamificacao['desempenhoMedio'] ?? 0.0) / 100).clamp(0.0, 1.0),
-                              Theme.of(context).colorScheme.primary
-                            ),
-                          ],
-                        ),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  child:
+                      _carregandoGamificacao
+                          ? const Center(child: CircularProgressIndicator())
+                          : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildCompactGauge(
+                                "Tempo",
+                                _estatisticasGamificacao['tempoTotalFormatado'] ??
+                                    '0min',
+                                (_estatisticasGamificacao['tempoTotalMinutos'] ??
+                                            0)
+                                        .toDouble() /
+                                    180, // Max 3h para 100%
+                                Theme.of(context).colorScheme.primary,
+                              ),
+                              _buildCompactGauge(
+                                "Nível ${_estatisticasGamificacao['nivel'] ?? 1}",
+                                "${_estatisticasGamificacao['xpTotal'] ?? 0}xp",
+                                (_estatisticasGamificacao['progressoNivel'] ??
+                                        0.0)
+                                    .toDouble(),
+                                Colors.amberAccent,
+                              ),
+                              _buildCompactGauge(
+                                "Desempenho",
+                                "${(_estatisticasGamificacao['desempenhoMedio'] ?? 0.0).toStringAsFixed(0)}%",
+                                ((_estatisticasGamificacao['desempenhoMedio'] ??
+                                            0.0) /
+                                        100)
+                                    .clamp(0.0, 1.0),
+                                Theme.of(context).colorScheme.primary,
+                              ),
+                            ],
+                          ),
                 ),
                 const SizedBox(height: 4),
                 SearchBarWidget(
@@ -232,10 +244,9 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
                   hintText: 'Pesquisar provas...',
                 ),
                 const SizedBox(height: 4),
-                if (_provas.isNotEmpty && _provas.length < 4) _buildPromotionalCard(),
-                Expanded(
-                  child: _buildContent(),
-                ),
+                if (_provas.isNotEmpty && _provas.length < 4)
+                  _buildPromotionalCard(),
+                Expanded(child: _buildContent()),
               ],
             ),
           ),
@@ -288,9 +299,7 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
 
   Widget _buildContent() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
@@ -337,13 +346,15 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              _provas.isEmpty ? 'Nenhuma prova cadastrada' : 'Nenhuma prova encontrada',
+              _provas.isEmpty
+                  ? 'Nenhuma prova cadastrada'
+                  : 'Nenhuma prova encontrada',
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              _provas.isEmpty 
+              _provas.isEmpty
                   ? 'Adicione sua primeira prova usando o botão em destaque abaixo'
                   : 'Tente ajustar os termos da busca',
               style: Theme.of(context).textTheme.bodyMedium,
@@ -361,13 +372,14 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
         itemCount: _provasFiltradas.length,
         itemBuilder: (context, index) {
           final prova = _provasFiltradas[index];
-          
+
           return CardWidget(
             title: prova.titulo,
             icon: Icons.article,
-            color: _selectedIndex == index
-                ? Theme.of(context).colorScheme.primaryContainer
-                : null,
+            color:
+                _selectedIndex == index
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
             trailing: Container(
               constraints: const BoxConstraints(maxWidth: 100),
               child: Column(
@@ -377,10 +389,9 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
                 children: [
                   Text(
                     _formatarData(prova.data),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
-                      height: 1.1,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(fontSize: 10, height: 1.1),
                     textAlign: TextAlign.right,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -408,7 +419,7 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
                   builder: (context) => DetalhesProvaPage(prova: prova),
                 ),
               );
-              
+
               if (resultado == true) {
                 _carregarProvas(); // Recarregar se houve mudanças
               }
@@ -439,14 +450,18 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
                 gradient: LinearGradient(
                   colors: [
                     Theme.of(context).colorScheme.primaryContainer,
-                    Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withOpacity(0.7),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1 + (value * 0.1)),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.1 + (value * 0.1)),
                     blurRadius: 8,
                     spreadRadius: value,
                   ),
@@ -478,15 +493,25 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
                           children: [
                             Text(
                               'Nova Prova',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
                               ),
                             ),
                             Text(
                               'Toque para adicionar',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
+                                    .withOpacity(0.8),
                               ),
                             ),
                           ],
@@ -513,10 +538,11 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
         decoration: BoxDecoration(
-          color: prova.percentualAcerto! >= 70 
-              ? Colors.green 
-              : prova.percentualAcerto! >= 50 
-                  ? Colors.orange 
+          color:
+              prova.percentualAcerto! >= 70
+                  ? Colors.green
+                  : prova.percentualAcerto! >= 50
+                  ? Colors.orange
                   : Colors.red,
           borderRadius: BorderRadius.circular(8),
         ),
@@ -597,23 +623,27 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
                 final prova = _provasFiltradas[_selectedIndex!];
                 final confirm = await showDialog<bool>(
                   context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Confirmar exclusão'),
-                    content: Text('Deseja realmente excluir a prova "${prova.titulo}"?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Cancelar'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Theme.of(context).colorScheme.error,
+                  builder:
+                      (context) => AlertDialog(
+                        title: const Text('Confirmar exclusão'),
+                        content: Text(
+                          'Deseja realmente excluir a prova "${prova.titulo}"?',
                         ),
-                        child: const Text('Excluir'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Cancelar'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            style: TextButton.styleFrom(
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.error,
+                            ),
+                            child: const Text('Excluir'),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
                 );
 
                 if (confirm == true) {
@@ -631,28 +661,30 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
               backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
               onPressed: () async {
                 final prova = _provasFiltradas[_selectedIndex!];
-                
+
                 if (prova.totalQuestoes == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Esta prova não possui número total de questões definido. Não é possível registrar resultado.'),
+                      content: Text(
+                        'Esta prova não possui número total de questões definido. Não é possível registrar resultado.',
+                      ),
                       backgroundColor: Colors.orange,
                     ),
                   );
                   return;
                 }
-                
+
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => RegistrarResultadoPage(prova: prova),
                   ),
                 );
-                
+
                 if (result != null) {
                   _carregarProvas();
                 }
-                
+
                 setState(() {
                   _selectedIndex = null;
                 });
@@ -671,11 +703,11 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
                     builder: (context) => EditProvaPage(prova: prova),
                   ),
                 );
-                
+
                 if (result == true) {
                   _carregarProvas();
                 }
-                
+
                 setState(() {
                   _selectedIndex = null;
                 });
@@ -713,10 +745,15 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
     );
   }
 
-  Widget _buildCompactGauge(String label, String valueText, double value, Color color) {
+  Widget _buildCompactGauge(
+    String label,
+    String valueText,
+    double value,
+    Color color,
+  ) {
     // Garantir que o valor esteja entre 0.0 e 1.0
     final clampedValue = value.clamp(0.0, 1.0);
-    
+
     return Expanded(
       child: Container(
         height: 32,
@@ -780,4 +817,3 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
     );
   }
 }
-

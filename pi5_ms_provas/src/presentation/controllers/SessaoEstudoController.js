@@ -7,6 +7,7 @@ import { GetAllSessoesEstudoUseCase } from '../../application/use-cases/sessao-e
 import { SessaoEstudoRepository } from '../../infrastructure/persistence/repositories/SessaoEstudoRepository.js';
 import { HateoasConfig } from '../../infrastructure/hateoas/HateoasConfig.js';
 import { logger } from '../../application/utils/logger.js';
+import rabbitMQService from '../../infrastructure/messaging/RabbitMQService.js';
 
 export class SessaoEstudoController {
     constructor() {
@@ -23,25 +24,34 @@ export class SessaoEstudoController {
         try {
             // 🔒 userId já foi validado pelo jwtValidationMiddleware
             const userId = req.userId;
-            
-            logger.info('Iniciando criação de sessão de estudo', { 
+
+            logger.info('Iniciando criação de sessão de estudo', {
                 sessaoData: req.body,
-                userId 
+                userId
             });
-            
+
             const sessao = await this.createUseCase.execute(req.body, userId);
-            
-            logger.info('Sessão de estudo criada com sucesso', { 
+
+            logger.info('Sessão de estudo criada com sucesso', {
                 sessaoId: sessao.id,
-                userId 
+                userId
             });
-            
+
+            // Publicar evento de sessão criada
+            await rabbitMQService.publishSessaoCriada({
+                ...sessao,
+                userId
+            });
+
+            // Publicar evento genérico de entidade criada
+            await rabbitMQService.publishEntityCreated('sessao', sessao, userId);
+
             const response = HateoasConfig.wrapResponse(sessao, req.baseUrl, 'sessoes', sessao.id);
             res.status(201).json(response);
         } catch (error) {
-            logger.error('Erro ao criar sessão de estudo', { 
+            logger.error('Erro ao criar sessão de estudo', {
                 error: error.message,
-                userId: req.userId 
+                userId: req.userId
             });
             if (error.message.includes('validação')) {
                 return res.status(400).json({ error: error.message });
@@ -54,22 +64,22 @@ export class SessaoEstudoController {
         try {
             // 🔒 Listar apenas sessões do usuário autenticado
             const userId = req.userId;
-            
+
             logger.info('Listando sessões de estudo do usuário', { userId });
-            
+
             const sessoes = await this.getAllUseCase.execute(userId, req.query);
-            
-            logger.info('Sessões listadas com sucesso', { 
+
+            logger.info('Sessões listadas com sucesso', {
                 total: sessoes.length,
-                userId 
+                userId
             });
-            
+
             const response = HateoasConfig.wrapCollectionResponse(sessoes, req.baseUrl, 'sessoes');
             res.json(response);
         } catch (error) {
-            logger.error('Erro ao listar sessões de estudo', { 
+            logger.error('Erro ao listar sessões de estudo', {
                 error: error.message,
-                userId: req.userId 
+                userId: req.userId
             });
             res.status(500).json({ error: 'Erro interno do servidor' });
         }
@@ -80,21 +90,21 @@ export class SessaoEstudoController {
             // 🔒 Buscar apenas se pertence ao usuário
             const userId = req.userId;
             const sessaoId = req.params.id;
-            
-            logger.info('Buscando sessão de estudo por ID', { 
+
+            logger.info('Buscando sessão de estudo por ID', {
                 sessaoId,
-                userId 
+                userId
             });
-            
+
             const sessao = await this.getUseCase.execute(sessaoId, userId);
-            
+
             const response = HateoasConfig.wrapResponse(sessao, req.baseUrl, 'sessoes', sessao.id);
             res.json(response);
         } catch (error) {
-            logger.error('Erro ao buscar sessão de estudo', { 
-                error: error.message, 
+            logger.error('Erro ao buscar sessão de estudo', {
+                error: error.message,
                 sessaoId: req.params.id,
-                userId: req.userId 
+                userId: req.userId
             });
             if (error.message.includes('não encontrada') || error.message.includes('Acesso negado')) {
                 return res.status(404).json({ error: 'Sessão não encontrada' });
@@ -108,27 +118,33 @@ export class SessaoEstudoController {
             // 🔒 Atualizar apenas se pertence ao usuário
             const userId = req.userId;
             const sessaoId = req.params.id;
-            
-            logger.info('Atualizando sessão de estudo', { 
+
+            logger.info('Atualizando sessão de estudo', {
                 sessaoId,
                 userId,
-                sessaoData: req.body 
+                sessaoData: req.body
             });
-            
+
+            // Buscar dados anteriores para comparação
+            const sessaoAnterior = await this.getUseCase.execute(sessaoId, userId);
+
             const sessao = await this.updateUseCase.execute(sessaoId, req.body, userId);
-            
-            logger.info('Sessão de estudo atualizada com sucesso', { 
+
+            logger.info('Sessão de estudo atualizada com sucesso', {
                 sessaoId,
-                userId 
+                userId
             });
-            
+
+            // Publicar evento de entidade atualizada
+            await rabbitMQService.publishEntityUpdated('sessao', sessaoId, sessao, sessaoAnterior, userId);
+
             const response = HateoasConfig.wrapResponse(sessao, req.baseUrl, 'sessoes', sessao.id);
             res.json(response);
         } catch (error) {
-            logger.error('Erro ao atualizar sessão de estudo', { 
-                error: error.message, 
+            logger.error('Erro ao atualizar sessão de estudo', {
+                error: error.message,
                 sessaoId: req.params.id,
-                userId: req.userId 
+                userId: req.userId
             });
             if (error.message.includes('não encontrada') || error.message.includes('Acesso negado')) {
                 return res.status(404).json({ error: 'Sessão não encontrada' });
@@ -145,25 +161,31 @@ export class SessaoEstudoController {
             // 🔒 Deletar apenas se pertence ao usuário
             const userId = req.userId;
             const sessaoId = req.params.id;
-            
-            logger.info('Deletando sessão de estudo', { 
+
+            logger.info('Deletando sessão de estudo', {
                 sessaoId,
-                userId 
+                userId
             });
-            
+
+            // Buscar dados da sessão antes de deletar
+            const sessaoParaDeletar = await this.getUseCase.execute(sessaoId, userId);
+
             await this.deleteUseCase.execute(sessaoId, userId);
-            
-            logger.info('Sessão de estudo deletada com sucesso', { 
+
+            logger.info('Sessão de estudo deletada com sucesso', {
                 sessaoId,
-                userId 
+                userId
             });
-            
+
+            // Publicar evento de entidade deletada
+            await rabbitMQService.publishEntityDeleted('sessao', sessaoId, sessaoParaDeletar, userId);
+
             res.status(204).send();
         } catch (error) {
-            logger.error('Erro ao deletar sessão de estudo', { 
-                error: error.message, 
+            logger.error('Erro ao deletar sessão de estudo', {
+                error: error.message,
                 sessaoId: req.params.id,
-                userId: req.userId 
+                userId: req.userId
             });
             if (error.message.includes('não encontrada') || error.message.includes('Acesso negado')) {
                 return res.status(404).json({ error: 'Sessão não encontrada' });
@@ -177,27 +199,39 @@ export class SessaoEstudoController {
             // 🔒 Finalizar apenas se pertence ao usuário
             const userId = req.userId;
             const sessaoId = req.params.id;
-            
-            logger.info('Finalizando sessão de estudo', { 
+
+            logger.info('Finalizando sessão de estudo', {
                 sessaoId,
                 userId,
-                dadosFinalizacao: req.body 
+                dadosFinalizacao: req.body
             });
-            
+
+            // Buscar dados anteriores para comparação
+            const sessaoAnterior = await this.getUseCase.execute(sessaoId, userId);
+
             const sessao = await this.finalizarUseCase.execute(sessaoId, req.body, userId);
-            
-            logger.info('Sessão de estudo finalizada com sucesso', { 
+
+            logger.info('Sessão de estudo finalizada com sucesso', {
                 sessaoId,
-                userId 
+                userId
             });
-            
+
+            // Publicar evento de sessão finalizada
+            await rabbitMQService.publishSessaoFinalizada({
+                ...sessao,
+                userId
+            });
+
+            // Publicar evento genérico de entidade atualizada
+            await rabbitMQService.publishEntityUpdated('sessao', sessaoId, sessao, sessaoAnterior, userId);
+
             const response = HateoasConfig.wrapResponse(sessao, req.baseUrl, 'sessoes', sessao.id);
             res.json(response);
         } catch (error) {
-            logger.error('Erro ao finalizar sessão de estudo', { 
-                error: error.message, 
+            logger.error('Erro ao finalizar sessão de estudo', {
+                error: error.message,
                 sessaoId: req.params.id,
-                userId: req.userId 
+                userId: req.userId
             });
             if (error.message.includes('não encontrada') || error.message.includes('Acesso negado')) {
                 return res.status(404).json({ error: 'Sessão não encontrada' });
@@ -208,4 +242,4 @@ export class SessaoEstudoController {
             res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }
-} 
+}

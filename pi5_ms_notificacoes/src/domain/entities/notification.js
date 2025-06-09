@@ -1,4 +1,4 @@
-export default class Notification {
+export default class Notification3 {
     constructor(
         id,
         userId,
@@ -26,6 +26,16 @@ export default class Notification {
                 return this.generateEventReminderContent();
             case 'EVENT_TODAY':
                 return this.generateEventTodayContent();
+            case 'EVENT_CREATED':
+                return this.generateEventCreatedContent();
+            case 'EXAM_WEEK_REMINDER':
+                return this.generateExamWeekReminderContent();
+            case 'EXAM_REMINDER':
+                return this.generateExamReminderContent();
+            case 'EXAM_TODAY':
+                return this.generateExamTodayContent();
+            case 'EXAM_CREATED':
+                return this.generateExamCreatedContent();
             case 'STREAK_WARNING':
                 return this.generateStreakWarningContent();
             case 'STREAK_EXPIRED':
@@ -50,6 +60,42 @@ export default class Notification {
         return {
             title: `Hoje é o dia!`,
             body: `O evento ${this.entityData.name} acontece hoje às ${this.entityData.time}`
+        };
+    }
+
+    generateEventCreatedContent() {
+        return {
+            title: `📅 Novo evento criado`,
+            body: `${this.entityData.name} foi adicionado para ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
+        };
+    }
+
+    generateExamWeekReminderContent() {
+        return {
+            title: `📚 Prova se aproximando`,
+            body: `A prova de ${this.entityData.subject} acontecerá em 1 semana - ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
+        };
+    }
+
+    generateExamReminderContent() {
+        const daysDiff = this.getDaysDifference(this.entityData.date);
+        return {
+            title: `⏰ Lembrete: Prova em ${daysDiff} dias`,
+            body: `Prova de ${this.entityData.subject} - ${new Date(this.entityData.date).toLocaleDateString('pt-BR')} às ${this.entityData.time}`
+        };
+    }
+
+    generateExamTodayContent() {
+        return {
+            title: `🎯 Prova hoje!`,
+            body: `Hoje é o dia da prova de ${this.entityData.subject} às ${this.entityData.time}. Boa sorte!`
+        };
+    }
+
+    generateExamCreatedContent() {
+        return {
+            title: `📋 Nova prova cadastrada`,
+            body: `Prova de ${this.entityData.subject} agendada para ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
         };
     }
 

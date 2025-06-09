@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 import '../models/evento_model.dart';
 import 'api_service.dart';
@@ -37,7 +36,10 @@ class EventoService {
     }
   }
 
-  static Future<Evento> atualizarEvento(String id, Map<String, dynamic> eventoData) async {
+  static Future<Evento> atualizarEvento(
+    String id,
+    Map<String, dynamic> eventoData,
+  ) async {
     try {
       final data = await ApiService.put('$baseUrl/$id', eventoData);
       return Evento.fromJson(data['data']);
@@ -65,8 +67,10 @@ class EventoService {
       final ultimoDoMes = DateTime(data.year, data.month + 1, 0);
 
       return eventos.where((evento) {
-        return evento.data.isAfter(primeiroDoMes.subtract(const Duration(days: 1))) &&
-               evento.data.isBefore(ultimoDoMes.add(const Duration(days: 1)));
+        return evento.data.isAfter(
+              primeiroDoMes.subtract(const Duration(days: 1)),
+            ) &&
+            evento.data.isBefore(ultimoDoMes.add(const Duration(days: 1)));
       }).toList();
     } catch (e) {
       log('Erro no EventoService.obterEventosDoMes: $e');
@@ -79,8 +83,8 @@ class EventoService {
       final eventos = await listarEventos();
       return eventos.where((evento) {
         return evento.data.year == data.year &&
-               evento.data.month == data.month &&
-               evento.data.day == data.day;
+            evento.data.month == data.month &&
+            evento.data.day == data.day;
       }).toList();
     } catch (e) {
       log('Erro no EventoService.obterEventosDoDia: $e');
@@ -95,9 +99,10 @@ class EventoService {
       final limite = agora.add(Duration(days: dias));
 
       return eventos
-          .where((evento) =>
-              evento.data.isAfter(agora) &&
-              evento.data.isBefore(limite))
+          .where(
+            (evento) =>
+                evento.data.isAfter(agora) && evento.data.isBefore(limite),
+          )
           .toList()
         ..sort((a, b) => a.data.compareTo(b.data));
     } catch (e) {
@@ -105,4 +110,4 @@ class EventoService {
       throw Exception('Erro ao carregar próximos eventos: $e');
     }
   }
-} 
+}

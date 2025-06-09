@@ -21,7 +21,7 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
   DateTimeRange? _rangeMateria;
   String? _selectedExam;
   List<BarChartGroupData> _weeklyData = [];
-  List<BarChartGroupData> _monthlyData = [];
+  final List<BarChartGroupData> _monthlyData = [];
 
   @override
   void initState() {
@@ -34,22 +34,26 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
     try {
       // Carregar estatísticas
       final stats = await GamificacaoService.obterEstatisticasCompletas();
-      
+
       // Carregar sessões para gráficos
       final sessoes = await SessaoService.listarSessoes();
-      
+
       // Processar dados para gráficos semanais
       final Map<int, double> horasPorDia = {};
       final agora = DateTime.now();
-      
+
       for (var sessao in sessoes) {
         if (sessao.tempoInicio != null && sessao.tempoFim != null) {
           final dia = sessao.tempoInicio!.weekday;
-          final horas = sessao.tempoFim!.difference(sessao.tempoInicio!).inHours.toDouble();
+          final horas =
+              sessao.tempoFim!
+                  .difference(sessao.tempoInicio!)
+                  .inHours
+                  .toDouble();
           horasPorDia[dia] = (horasPorDia[dia] ?? 0) + horas;
         }
       }
-      
+
       // Criar dados do gráfico semanal
       _weeklyData = List.generate(7, (i) {
         return BarChartGroupData(
@@ -74,9 +78,9 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
       if (mounted) {
         setState(() {
           _carregando = false;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro ao carregar dados: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Erro ao carregar dados: $e')));
         });
       }
     }
@@ -86,8 +90,13 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: data.fold(0.0, (max, group) => 
-          group.barRods.first.toY > max ? group.barRods.first.toY : max) + 1,
+        maxY:
+            data.fold(
+              0.0,
+              (max, group) =>
+                  group.barRods.first.toY > max ? group.barRods.first.toY : max,
+            ) +
+            1,
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -105,9 +114,10 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                final labels = isWeekly 
-                  ? ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
-                  : List.generate(30, (i) => (i + 1).toString());
+                final labels =
+                    isWeekly
+                        ? ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+                        : List.generate(30, (i) => (i + 1).toString());
                 return Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
@@ -235,7 +245,10 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
                                     _carregarDados();
                                   }
                                 },
-                                icon: const Icon(Icons.calendar_today, size: 18),
+                                icon: const Icon(
+                                  Icons.calendar_today,
+                                  size: 18,
+                                ),
                                 label: Text(
                                   _rangeDia == null
                                       ? 'Selecionar período'
@@ -294,9 +307,8 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
                                 // TODO: implementar exportação PDF
                               },
                               color: Theme.of(context).colorScheme.primary,
-                              textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: Colors.white,
-                              ),
+                              textStyle: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(color: Colors.white),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -312,41 +324,56 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
                                   showDialog(
                                     context: context,
                                     barrierDismissible: false,
-                                    builder: (context) => const Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
+                                    builder:
+                                        (context) => const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
                                   );
 
                                   final authService = AuthService();
                                   final currentUser = authService.currentUser;
-                                  
+
                                   if (currentUser == null) {
                                     Navigator.pop(context);
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Erro: Usuário não autenticado')),
+                                      const SnackBar(
+                                        content: Text(
+                                          'Erro: Usuário não autenticado',
+                                        ),
+                                      ),
                                     );
                                     return;
                                   }
 
-                                  final wrappedUrl = 'http://localhost:3000/api/wrapped/${currentUser.id}/html';
-                                  
+                                  final wrappedUrl =
+                                      'http://localhost:3000/api/wrapped/${currentUser.id}/html';
+
                                   Navigator.pop(context);
-                                  
+
                                   final uri = Uri.parse(wrappedUrl);
                                   if (await canLaunchUrl(uri)) {
-                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                    await launchUrl(
+                                      uri,
+                                      mode: LaunchMode.externalApplication,
+                                    );
                                   } else {
                                     throw 'Não foi possível abrir o wrapped';
                                   }
                                 } catch (e) {
                                   Navigator.pop(context);
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Erro ao gerar wrapped: $e')),
+                                    SnackBar(
+                                      content: Text(
+                                        'Erro ao gerar wrapped: $e',
+                                      ),
+                                    ),
                                   );
                                 }
                               },
                               color: const Color(0xFF667eea),
-                              textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              textStyle: Theme.of(
+                                context,
+                              ).textTheme.labelLarge?.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),

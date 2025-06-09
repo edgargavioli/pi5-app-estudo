@@ -22,7 +22,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
   DateTime? _dataSelecionada;
   TimeOfDay? _horarioSelecionado;
   List<Materia> _materias = [];
-  List<String> _materiasSelecionadasIds = [];
+  final List<String> _materiasSelecionadasIds = [];
   bool _isLoading = false;
   bool _isCreatingMateria = false;
 
@@ -39,9 +39,9 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
         _materias = materias;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar matérias: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao carregar matérias: $e')));
     }
   }
 
@@ -59,7 +59,10 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
             return AlertDialog(
               title: Row(
                 children: [
-                  Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary),
+                  Icon(
+                    Icons.add_circle,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   const Text('Nova Matéria'),
                 ],
@@ -83,11 +86,26 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                         prefixIcon: Icon(Icons.category),
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'Exatas', child: Text('Exatas')),
-                        DropdownMenuItem(value: 'Humanas', child: Text('Humanas')),
-                        DropdownMenuItem(value: 'Biológicas', child: Text('Biológicas')),
-                        DropdownMenuItem(value: 'Línguas', child: Text('Línguas')),
-                        DropdownMenuItem(value: 'Outras', child: Text('Outras')),
+                        DropdownMenuItem(
+                          value: 'Exatas',
+                          child: Text('Exatas'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Humanas',
+                          child: Text('Humanas'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Biológicas',
+                          child: Text('Biológicas'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Línguas',
+                          child: Text('Línguas'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Outras',
+                          child: Text('Outras'),
+                        ),
                       ],
                       onChanged: (value) {
                         setStateDialog(() {
@@ -100,77 +118,93 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
               ),
               actions: [
                 TextButton(
-                  onPressed: _isCreatingMateria ? null : () {
-                    Navigator.of(context).pop(false);
-                  },
+                  onPressed:
+                      _isCreatingMateria
+                          ? null
+                          : () {
+                            Navigator.of(context).pop(false);
+                          },
                   child: const Text('Cancelar'),
                 ),
                 ElevatedButton(
-                  onPressed: _isCreatingMateria ? null : () async {
-                    if (nomeMateria.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Por favor, insira o nome da matéria')),
-                      );
-                      return;
-                    }
+                  onPressed:
+                      _isCreatingMateria
+                          ? null
+                          : () async {
+                            if (nomeMateria.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Por favor, insira o nome da matéria',
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
 
-                    setStateDialog(() {
-                      _isCreatingMateria = true;
-                    });
+                            setStateDialog(() {
+                              _isCreatingMateria = true;
+                            });
 
-                    try {
-                      // Criar objeto Materia
-                      final novaMateria = Materia(
-                        id: '', // Será preenchido pela API
-                        nome: nomeMateria.text.trim(),
-                        disciplina: categoriaSelecionada ?? 'Outras',
-                        descricao: categoriaSelecionada ?? 'Outras',
-                        createdAt: DateTime.now(),
-                        updatedAt: DateTime.now(),
-                      );
-                      
-                      final materiaCreated = await MateriaService.criarMateria(novaMateria);
-                      
-                      // Adicionar à lista local
-                      setState(() {
-                        _materias.add(materiaCreated);
-                        // Selecionar automaticamente a nova matéria
-                        _materiasSelecionadasIds.add(materiaCreated.id);
-                      });
-                      
-                      if (mounted) {
-                        Navigator.of(context).pop(true);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Matéria "${materiaCreated.nome}" criada e selecionada!'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Erro ao criar matéria: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    } finally {
-                      if (mounted) {
-                        setStateDialog(() {
-                          _isCreatingMateria = false;
-                        });
-                      }
-                    }
-                  },
-                  child: _isCreatingMateria
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Criar'),
+                            try {
+                              // Criar objeto Materia
+                              final novaMateria = Materia(
+                                id: '', // Será preenchido pela API
+                                nome: nomeMateria.text.trim(),
+                                disciplina: categoriaSelecionada ?? 'Outras',
+                                descricao: categoriaSelecionada ?? 'Outras',
+                                createdAt: DateTime.now(),
+                                updatedAt: DateTime.now(),
+                              );
+
+                              final materiaCreated =
+                                  await MateriaService.criarMateria(
+                                    novaMateria,
+                                  );
+
+                              // Adicionar à lista local
+                              setState(() {
+                                _materias.add(materiaCreated);
+                                // Selecionar automaticamente a nova matéria
+                                _materiasSelecionadasIds.add(materiaCreated.id);
+                              });
+
+                              if (mounted) {
+                                Navigator.of(context).pop(true);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Matéria "${materiaCreated.nome}" criada e selecionada!',
+                                    ),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Erro ao criar matéria: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            } finally {
+                              if (mounted) {
+                                setStateDialog(() {
+                                  _isCreatingMateria = false;
+                                });
+                              }
+                            }
+                          },
+                  child:
+                      _isCreatingMateria
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Text('Criar'),
                 ),
               ],
             );
@@ -240,7 +274,11 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
         totalQuestoes = int.tryParse(totalQuestoesController.text);
         if (totalQuestoes == null || totalQuestoes <= 0) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Total de questões deve ser um número válido maior que zero')),
+            const SnackBar(
+              content: Text(
+                'Total de questões deve ser um número válido maior que zero',
+              ),
+            ),
           );
           return;
         }
@@ -249,7 +287,8 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
       final novaProva = Prova(
         id: '', // Será gerado pelo backend
         titulo: nomeController.text,
-        descricao: descricaoController.text.isEmpty ? null : descricaoController.text,
+        descricao:
+            descricaoController.text.isEmpty ? null : descricaoController.text,
         data: dataProva,
         horario: dataHorario,
         local: localController.text,
@@ -261,19 +300,19 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
       );
 
       await ProvaService.criarProva(novaProva);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Prova criada com sucesso!')),
         );
-        
+
         Navigator.of(context).pop(true); // Indica que uma prova foi criada
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao criar prova: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao criar prova: $e')));
       }
     } finally {
       if (mounted) {
@@ -301,7 +340,9 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
 
     if (_horarioSelecionado == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecione o horário da prova')),
+        const SnackBar(
+          content: Text('Por favor, selecione o horário da prova'),
+        ),
       );
       return false;
     }
@@ -315,7 +356,9 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
 
     if (_materiasSelecionadasIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecione pelo menos uma matéria')),
+        const SnackBar(
+          content: Text('Por favor, selecione pelo menos uma matéria'),
+        ),
       );
       return false;
     }
@@ -348,7 +391,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                 ),
               ),
               const Divider(height: 32),
-              
+
               InputWidget(
                 labelText: 'Nome da prova',
                 controller: nomeController,
@@ -359,7 +402,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               InputWidget(
                 labelText: 'Descrição (opcional)',
                 controller: descricaoController,
@@ -371,7 +414,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               InputWidget(
                 labelText: 'Data da prova',
                 controller: dataProvaController,
@@ -385,7 +428,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // Campo de horário
               TextField(
                 readOnly: true,
@@ -395,13 +438,14 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.access_time_outlined),
                   suffixIcon: const Icon(Icons.access_time),
-                  hintText: _horarioSelecionado != null
-                      ? _horarioSelecionado!.format(context)
-                      : 'Selecione o horário',
+                  hintText:
+                      _horarioSelecionado != null
+                          ? _horarioSelecionado!.format(context)
+                          : 'Selecione o horário',
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               InputWidget(
                 labelText: 'Local da prova',
                 controller: localController,
@@ -412,7 +456,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               InputWidget(
                 labelText: 'Total de questões (opcional)',
                 controller: totalQuestoesController,
@@ -425,7 +469,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // Seleção múltipla de matérias
               Card(
                 child: Padding(
@@ -443,9 +487,8 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                           const SizedBox(width: 8),
                           Text(
                             'Matérias da Prova',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -457,7 +500,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       if (_materias.isEmpty)
                         Container(
                           padding: const EdgeInsets.all(24),
@@ -471,7 +514,10 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.info_outline, color: Colors.grey[600]),
+                                  Icon(
+                                    Icons.info_outline,
+                                    color: Colors.grey[600],
+                                  ),
                                   const SizedBox(width: 8),
                                   Text(
                                     'Nenhuma matéria disponível',
@@ -486,16 +532,20 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                         )
                       else
                         _buildMateriasSelection(),
-                      
+
                       if (_materiasSelecionadasIds.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.3),
                             ),
                           ),
                           child: Row(
@@ -521,7 +571,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 80), // Espaço para o botão flutuante
             ],
           ),
@@ -531,19 +581,20 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
         heroTag: "adicionar_prova_save_fab",
         onPressed: _isLoading ? null : _criarProva,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        child: _isLoading
-            ? SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
+        child:
+            _isLoading
+                ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    strokeWidth: 2,
+                  ),
+                )
+                : Icon(
+                  Icons.check,
                   color: Theme.of(context).colorScheme.onPrimary,
-                  strokeWidth: 2,
                 ),
-              )
-            : Icon(
-                Icons.check,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
       ),
     );
   }
@@ -555,9 +606,10 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: _isCreatingMateria 
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.7)
-              : Theme.of(context).colorScheme.surface,
+          color:
+              _isCreatingMateria
+                  ? Theme.of(context).colorScheme.primary.withOpacity(0.7)
+                  : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: Theme.of(context).colorScheme.primary,
@@ -568,7 +620,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (_isCreatingMateria) 
+            if (_isCreatingMateria)
               SizedBox(
                 width: 16,
                 height: 16,
@@ -589,9 +641,10 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
-                color: _isCreatingMateria 
-                    ? Theme.of(context).colorScheme.onPrimary
-                    : Theme.of(context).colorScheme.primary,
+                color:
+                    _isCreatingMateria
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.primary,
               ),
             ),
           ],
@@ -604,7 +657,8 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
     // Agrupar matérias por categoria
     final Map<String, List<Materia>> materiasPorCategoria = {};
     for (final materia in _materias) {
-      final categoria = materia.categoria.isNotEmpty ? materia.categoria : 'Outras';
+      final categoria =
+          materia.categoria.isNotEmpty ? materia.categoria : 'Outras';
       materiasPorCategoria.putIfAbsent(categoria, () => []).add(materia);
     }
 
@@ -615,8 +669,9 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
         ...materiasPorCategoria.entries.map((entry) {
           final categoria = entry.key;
           final materias = entry.value;
-          final isFirstCategory = materiasPorCategoria.entries.first.key == categoria;
-          
+          final isFirstCategory =
+              materiasPorCategoria.entries.first.key == categoria;
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -643,7 +698,10 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: _getCategoriaColor(categoria).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
@@ -660,7 +718,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                   ],
                 ),
               ),
-              
+
               // Chips das matérias + chip criar nova matéria (na primeira categoria)
               Wrap(
                 spacing: 8,
@@ -668,10 +726,12 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                 children: [
                   // Incluir o chip de criar nova matéria apenas na primeira categoria
                   if (isFirstCategory) _buildCreateMateriaChip(),
-                  
+
                   // Chips das matérias desta categoria
                   ...materias.map((materia) {
-                    final isSelected = _materiasSelecionadasIds.contains(materia.id);
+                    final isSelected = _materiasSelecionadasIds.contains(
+                      materia.id,
+                    );
                     return GestureDetector(
                       onTap: () {
                         setState(() {
@@ -684,25 +744,35 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
-                          color: isSelected 
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.surface,
+                          color:
+                              isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: isSelected 
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.outline,
+                            color:
+                                isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.outline,
                             width: isSelected ? 2 : 1,
                           ),
-                          boxShadow: isSelected ? [
-                            BoxShadow(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ] : null,
+                          boxShadow:
+                              isSelected
+                                  ? [
+                                    BoxShadow(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary.withOpacity(0.3),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                  : null,
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -718,10 +788,18 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                             Text(
                               materia.nome,
                               style: TextStyle(
-                                color: isSelected 
-                                    ? Theme.of(context).colorScheme.onPrimary
-                                    : Theme.of(context).colorScheme.onSurface,
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                color:
+                                    isSelected
+                                        ? Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary
+                                        : Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
+                                fontWeight:
+                                    isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w500,
                                 fontSize: 13,
                               ),
                             ),
@@ -729,23 +807,21 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ],
           );
-        }).toList(),
-        
+        }),
+
         // Se não há matérias, mostrar apenas o chip de criar nova matéria
-        if (materiasPorCategoria.isEmpty) 
+        if (materiasPorCategoria.isEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 16),
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: [
-                _buildCreateMateriaChip(),
-              ],
+              children: [_buildCreateMateriaChip()],
             ),
           ),
       ],
