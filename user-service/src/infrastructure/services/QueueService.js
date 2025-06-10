@@ -6,7 +6,8 @@ class QueueService {
     this.connection = null;
     this.channel = null;
     this.queues = {
-      USER_CREATED: 'user_created_queue'
+      USER_CREATED: 'user_created_queue',
+      FCM_TOKEN_UPDATED: 'fcm_token_updated_queue'
     };
   }
 
@@ -19,6 +20,10 @@ class QueueService {
       // Declare queues to ensure they exist
       await this.channel.assertQueue(this.queues.USER_CREATED, {
         durable: true // Messages will survive broker restart
+      });
+
+      await this.channel.assertQueue(this.queues.FCM_TOKEN_UPDATED, {
+        durable: true
       });
 
       LoggingService.info('Connected to RabbitMQ successfully');
@@ -84,6 +89,52 @@ class QueueService {
       LoggingService.error('Failed to publish user created message', {
         error: error.message,
         userId: userData.id
+      });
+      throw error;
+    }
+  }
+
+  async publishFcmTokenUpdated(userId, fcmToken, oldFcmToken = null) {
+    try {
+      if (!this.channel) {
+        await this.connect();
+      }
+
+      const message = {
+        eventType: 'FCM_TOKEN_UPDATED',
+        timestamp: new Date().toISOString(),
+        data: {
+          userId: userId,
+          fcmToken: fcmToken,
+          oldFcmToken: oldFcmToken,
+          updatedAt: new Date().toISOString()
+        }
+      };
+
+      const messageBuffer = Buffer.from(JSON.stringify(message));
+
+      const published = this.channel.sendToQueue(
+        this.queues.FCM_TOKEN_UPDATED,
+        messageBuffer,
+        {
+          persistent: true
+        }
+      );
+
+      if (published) {
+        LoggingService.info('FCM token updated message published successfully', {
+          userId: userId,
+          queue: this.queues.FCM_TOKEN_UPDATED
+        });
+      } else {
+        throw new Error('Failed to publish FCM token updated message to queue');
+      }
+
+      return published;
+    } catch (error) {
+      LoggingService.error('Failed to publish FCM token updated message', {
+        error: error.message,
+        userId: userId
       });
       throw error;
     }

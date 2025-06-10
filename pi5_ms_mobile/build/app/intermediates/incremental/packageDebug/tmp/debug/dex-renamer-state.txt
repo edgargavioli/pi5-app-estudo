@@ -1,8 +1,11 @@
-#Sat May 24 17:18:20 BRT 2025
+#Tue Jun 10 17:26:45 BRT 2025
+path.4=classes1000.dex
 path.3=1/classes.dex
 path.2=0/classes.dex
 path.1=0/classes.dex
+path.5=classes2.dex
 path.0=classes.dex
+base.4=D\:\\Faculdade\\pi5-app-estudo\\pi5_ms_mobile\\build\\app\\intermediates\\desugar_lib_dex\\debug\\l8DexDesugarLibDebug\\classes1000.dex
 base.3=D\:\\Faculdade\\pi5-app-estudo\\pi5_ms_mobile\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
 base.2=D\:\\Faculdade\\pi5-app-estudo\\pi5_ms_mobile\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.1=D\:\\Faculdade\\pi5-app-estudo\\pi5_ms_mobile\\build\\app\\intermediates\\dex\\debug\\mergeLibDexDebug\\0\\classes.dex
@@ -11,3 +14,6 @@ renamed.3=classes4.dex
 renamed.2=classes3.dex
 renamed.1=classes2.dex
 renamed.0=classes.dex
+renamed.5=classes6.dex
+renamed.4=classes5.dex
+base.5=D\:\\Faculdade\\pi5-app-estudo\\pi5_ms_mobile\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex

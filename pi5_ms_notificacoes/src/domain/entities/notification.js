@@ -1,4 +1,4 @@
-export default class Notification3 {
+export default class Notification {
     constructor(
         id,
         userId,
@@ -36,6 +36,10 @@ export default class Notification3 {
                 return this.generateExamTodayContent();
             case 'EXAM_CREATED':
                 return this.generateExamCreatedContent();
+            case 'SESSION_CREATED':
+                return this.generateSessionCreatedContent();
+            case 'SESSION_FINISHED':
+                return this.generateSessionFinishedContent();
             case 'STREAK_WARNING':
                 return this.generateStreakWarningContent();
             case 'STREAK_EXPIRED':
@@ -73,7 +77,7 @@ export default class Notification3 {
     generateExamWeekReminderContent() {
         return {
             title: `📚 Prova se aproximando`,
-            body: `A prova de ${this.entityData.subject} acontecerá em 1 semana - ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
+            body: `A prova de ${this.entityData.name} acontecerá em 1 semana - ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
         };
     }
 
@@ -81,21 +85,36 @@ export default class Notification3 {
         const daysDiff = this.getDaysDifference(this.entityData.date);
         return {
             title: `⏰ Lembrete: Prova em ${daysDiff} dias`,
-            body: `Prova de ${this.entityData.subject} - ${new Date(this.entityData.date).toLocaleDateString('pt-BR')} às ${this.entityData.time}`
+            body: `Prova de ${this.entityData.name} - ${new Date(this.entityData.date).toLocaleDateString('pt-BR')} às ${this.entityData.time}`
         };
     }
 
     generateExamTodayContent() {
         return {
             title: `🎯 Prova hoje!`,
-            body: `Hoje é o dia da prova de ${this.entityData.subject} às ${this.entityData.time}. Boa sorte!`
+            body: `Hoje é o dia da prova de ${this.entityData.name} às ${this.entityData.time}. Boa sorte!`
         };
     }
 
     generateExamCreatedContent() {
         return {
             title: `📋 Nova prova cadastrada`,
-            body: `Prova de ${this.entityData.subject} agendada para ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
+            body: `Prova de ${this.entityData.name} agendada para ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
+        };
+    }
+
+    generateSessionCreatedContent() {
+        return {
+            title: `🎯 Sessão de estudo iniciada`,
+            body: `Sessão de ${this.entityData.name} começou agora. Boa sorte!`
+        };
+    }
+
+    generateSessionFinishedContent() {
+        const score = this.entityData.score ? ` - Pontuação: ${this.entityData.score}%` : '';
+        return {
+            title: `✅ Sessão concluída`,
+            body: `Parabéns! Você finalizou a sessão de ${this.entityData.name}${score}`
         };
     }
 

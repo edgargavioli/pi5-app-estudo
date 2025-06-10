@@ -3,7 +3,7 @@ import '../../components/card_widget.dart';
 import '../../shared/services/auth_service.dart';
 import '../../shared/services/gamificacao_service.dart';
 import '../../shared/services/user_service.dart';
-import '../../shared/models/user_model.dart' as user_model;
+import '../../shared/models/user_model.dart';
 
 class PerfilUsuarioPage extends StatefulWidget {
   const PerfilUsuarioPage({super.key});
@@ -22,7 +22,7 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage> {
   late TextEditingController _cursoController;
   late TextEditingController _instituicaoController;
   late TextEditingController _semestreController;
-  user_model.User? _usuario;
+  UserModel? _usuario;
 
   @override
   void initState() {
@@ -96,7 +96,7 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage> {
 
     setState(() => _carregandoUsuario = true);
     try {
-      final usuarioAtualizado = user_model.User(
+      final usuarioAtualizado = UserModel(
         id: _usuario!.id,
         nome: _nomeController.text,
         email: _emailController.text,

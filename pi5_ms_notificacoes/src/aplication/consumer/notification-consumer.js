@@ -4,6 +4,7 @@ import { startStreakConsumer } from './streaks-consumer.js';
 import NotificationScheduler from '../../infrastructure/services/notification-scheduler.js';
 import { startSessionConsumer } from './session-consumer.js';
 import { startExamConsumer } from './exam-consumer.js';
+import { startFcmTokenConsumer } from './fcm-token-consumer.js';
 
 export async function startAllConsumers() {
     try {
@@ -15,6 +16,7 @@ export async function startAllConsumers() {
         await startStreakConsumer();
         await startSessionConsumer();
         await startExamConsumer();
+        await startFcmTokenConsumer();
 
         // Inicia o scheduler de notificações
         const scheduler = new NotificationScheduler();

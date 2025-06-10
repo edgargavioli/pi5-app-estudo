@@ -1,5 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/routes/app_routes.dart';
+import 'package:pi5_ms_mobile/src/services/firebase_notification_service.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/shared/util.dart';
 import 'package:pi5_ms_mobile/src/shared/services/cronometro_service.dart';
@@ -8,6 +10,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FirebaseNotificationService.initialize();
 
   // 🔐 INICIALIZAR SERVIÇOS CRÍTICOS
   try {

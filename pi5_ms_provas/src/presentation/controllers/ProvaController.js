@@ -25,8 +25,16 @@ export class ProvaController {
             const prova = await this.createUseCase.execute(req.body, req.userId);
             logger.info('Prova criada com sucesso', { provaId: prova.id });
 
-            // Publicar evento de exame criado
-            await rabbitMQService.publishExamCreated('prova', prova, req.userId);
+            // Publicar evento de exame criado - CORRIGIDO
+            try {
+                await rabbitMQService.publishExamCreated('prova', prova, req.userId);
+                logger.info('📤 Evento de prova criada publicado', { provaId: prova.id });
+            } catch (eventError) {
+                logger.error('❌ Erro ao publicar evento de prova criada', {
+                    provaId: prova.id,
+                    error: eventError.message
+                });
+            }
 
             const response = HateoasConfig.wrapResponse(prova, req.baseUrl, 'provas', prova.id);
             res.status(201).json(response);
@@ -79,8 +87,16 @@ export class ProvaController {
             const prova = await this.updateUseCase.execute(req.params.id, req.body, req.userId);
             logger.info('Prova atualizada com sucesso', { provaId: prova.id });
 
-            // Publicar evento de exame atualizado
-            await rabbitMQService.publishExamUpdated('prova', prova.id, prova, provaAnterior, req.userId);
+            // Publicar evento de exame atualizado - CORRIGIDO
+            try {
+                await rabbitMQService.publishExamUpdated('prova', prova.id, prova, provaAnterior, req.userId);
+                logger.info('📤 Evento de prova atualizada publicado', { provaId: prova.id });
+            } catch (eventError) {
+                logger.error('❌ Erro ao publicar evento de prova atualizada', {
+                    provaId: prova.id,
+                    error: eventError.message
+                });
+            }
 
             const response = HateoasConfig.wrapResponse(prova, req.baseUrl, 'provas', prova.id);
             res.json(response);
@@ -106,8 +122,16 @@ export class ProvaController {
             await this.deleteUseCase.execute(req.params.id, req.userId);
             logger.info('Prova deletada com sucesso', { id: req.params.id });
 
-            // Publicar evento de exame deletado
-            await rabbitMQService.publishExamDeleted('prova', req.params.id, provaParaDeletar, req.userId);
+            // Publicar evento de exame deletado - CORRIGIDO
+            try {
+                await rabbitMQService.publishExamDeleted('prova', req.params.id, provaParaDeletar, req.userId);
+                logger.info('📤 Evento de prova deletada publicado', { provaId: req.params.id });
+            } catch (eventError) {
+                logger.error('❌ Erro ao publicar evento de prova deletada', {
+                    provaId: req.params.id,
+                    error: eventError.message
+                });
+            }
 
             res.status(204).send();
         } catch (error) {
