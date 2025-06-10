@@ -3,14 +3,20 @@
 echo "Waiting for database to be ready..."
 sleep 5
 
-echo "Creating initial migration..."
-npx prisma migrate dev --name init --create-only
+echo "Generating Prisma client..."
+npx prisma generate
 
-echo "Applying migrations..."
+echo "Installing dependencies..."
+npm install
+
+echo "Generating Prisma client..."
+npx prisma generate
+
+echo "Deploying migrations..."
 npx prisma migrate deploy
 
-echo "Running seed..."
+echo "Seeding database..."
 npx prisma db seed
 
 echo "Starting application..."
-npm run dev 
+npm run dev

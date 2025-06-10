@@ -1,16 +1,10 @@
 const express = require('express');
-const router = express.Router();
 const userController = require('../controllers/UserController');
 const { authMiddleware } = require('../../middleware/auth');
 const { validateRequest, schemas } = require('../../middleware/validation');
-const rateLimit = require('express-rate-limit');
+const { userRateLimit } = require('../../middleware/rateLimiter');
 
-// Rate limiting for user operations
-const userRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
-});
+const router = express.Router();
 
 /**
  * @swagger
@@ -278,4 +272,76 @@ router.post('/:id/image', authMiddleware, userRateLimit, userController.updatePr
  */
 router.get('/:id/image', authMiddleware, userRateLimit, userController.getProfileImage);
 
-module.exports = router; 
+/**
+ * @swagger
+ * /api/users/{id}/fcm-token:
+ *   patch:
+ *     summary: Update user FCM token for push notifications
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fcmToken
+ *             properties:
+ *               fcmToken:
+ *                 type: string
+ *                 description: Firebase Cloud Messaging token for push notifications
+ *                 example: "foHKBFb7RoyIMBiRrmZp5X:APA91bGhMUSZbfsHMiqXX7ECYYSTVpmxnn3D2crjtE4OjT4qdgahxfKkuWZJBU74KWdvUxOP_BcfzHZb2-9q7EVWNVyWzwb8S37gLTB9n17r4EbRFgGXJNA"
+ *     responses:
+ *       200:
+ *         description: FCM token updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/HATEOASResponse'
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "FCM token updated successfully"
+ *                     data:
+ *                       type: object
+ *                       properties:
+ *                         fcmToken:
+ *                           type: string
+ *                           description: Updated FCM token
+ *       400:
+ *         description: Bad request - invalid FCM token format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "fail"
+ *                 message:
+ *                   type: string
+ *                   example: "FCM token is required and must be a valid string"
+ *       401:
+ *         description: Unauthorized - invalid or missing JWT token
+ *       403:
+ *         description: Forbidden - can only update own FCM token
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch('/:id/fcm-token', authMiddleware, userRateLimit, userController.updateFcmToken);
+
+module.exports = router;

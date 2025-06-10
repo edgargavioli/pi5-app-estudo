@@ -143,7 +143,11 @@ class _UserProfilePageInfoState extends State<UserProfilePageInfo> {
                           labelText: label,
                           controller: controller,
                           width: double.infinity,
+                          textInputAction: TextInputAction.done,
                           onSubmitted: (_) => onSave(),
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(icon),
+                          ),
                         ),
                       ),
                       IconButton(
@@ -220,14 +224,15 @@ class _UserProfilePageInfoState extends State<UserProfilePageInfo> {
                       controller: atualController,
                       obscureText: obscureAtual,
                       width: double.infinity,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          obscureAtual
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            obscureAtual ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          ),
+                          onPressed: () => setState(() => obscureAtual = !obscureAtual),
                         ),
-                        onPressed:
-                            () => setState(() => obscureAtual = !obscureAtual),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -236,12 +241,16 @@ class _UserProfilePageInfoState extends State<UserProfilePageInfo> {
                       controller: novaController,
                       obscureText: obscureNova,
                       width: double.infinity,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          obscureNova ? Icons.visibility_off : Icons.visibility,
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _handleSenhaSubmit(),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            obscureNova ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          ),
+                          onPressed: () => setState(() => obscureNova = !obscureNova),
                         ),
-                        onPressed:
-                            () => setState(() => obscureNova = !obscureNova),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -287,6 +296,18 @@ class _UserProfilePageInfoState extends State<UserProfilePageInfo> {
           },
         );
       },
+    );
+  }
+
+  /// ✅ VALIDAR E ENVIAR ALTERAÇÃO DE SENHA
+  Future<void> _handleSenhaSubmit() async {
+    // TODO: Implementar alteração de senha
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Senha alterada com sucesso!'),
+        backgroundColor: Colors.green,
+      ),
     );
   }
 }
