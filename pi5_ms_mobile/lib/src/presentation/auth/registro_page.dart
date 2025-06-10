@@ -11,7 +11,8 @@ class SignupPage extends StatefulWidget {
   State<SignupPage> createState() => _SignupPageState();
 }
 
-class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateMixin {
+class _SignupPageState extends State<SignupPage>
+    with SingleTickerProviderStateMixin {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
@@ -19,7 +20,8 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   late AnimationController _controller;
   late Animation<double> _breathingAnimation;
 
@@ -37,10 +39,7 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
     _breathingAnimation = Tween<double>(
       begin: 1.0,
       end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -78,7 +77,7 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
               duration: const Duration(seconds: 2),
             ),
           );
-          
+
           // Navegar para home
           Navigator.pushReplacementNamed(context, '/home');
         }
@@ -161,10 +160,7 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return Transform.scale(
-          scale: _breathingAnimation.value,
-          child: child,
-        );
+        return Transform.scale(scale: _breathingAnimation.value, child: child);
       },
       child: child,
     );
@@ -180,7 +176,9 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
           child: SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top,
+                minHeight:
+                    MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top,
               ),
               child: IntrinsicHeight(
                 child: Form(
@@ -197,7 +195,9 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
                               height: 260,
                               decoration: const BoxDecoration(
                                 image: DecorationImage(
-                                  image: AssetImage('assets/images/login_header.png'),
+                                  image: AssetImage(
+                                    'assets/images/login_header.png',
+                                  ),
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -224,7 +224,10 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
                                         child: IconButton(
                                           icon: Icon(
                                             Icons.arrow_back_ios,
-                                            color: Theme.of(context).colorScheme.onPrimary,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimary,
                                           ),
                                           onPressed: () {
                                             Navigator.pop(context);
@@ -234,13 +237,17 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
                                       Align(
                                         alignment: Alignment.topRight,
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
                                               'Meu Estudo',
                                               style: TextStyle(
-                                                color: Theme.of(context).colorScheme.onPrimary,
+                                                color:
+                                                    Theme.of(
+                                                      context,
+                                                    ).colorScheme.onPrimary,
                                                 fontSize: 18,
                                                 fontFamily: 'Roboto',
                                                 fontWeight: FontWeight.w400,
@@ -313,8 +320,11 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
                                   prefixIcon: const Icon(Icons.lock_outline),
                                   suffixIcon: IconButton(
                                     icon: Icon(
-                                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                                      color: Theme.of(context).colorScheme.primary,
+                                      _obscurePassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     ),
                                     onPressed: () {
                                       setState(() {
@@ -336,12 +346,16 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
                                   prefixIcon: const Icon(Icons.lock_outline),
                                   suffixIcon: IconButton(
                                     icon: Icon(
-                                      _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                                      color: Theme.of(context).colorScheme.primary,
+                                      _obscureConfirmPassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     ),
                                     onPressed: () {
                                       setState(() {
-                                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                                        _obscureConfirmPassword =
+                                            !_obscureConfirmPassword;
                                       });
                                     },
                                   ),
@@ -352,20 +366,23 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
                               ElevatedButton(
                                 onPressed: _isLoading ? null : _handleRegister,
                                 style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
-                                child: _isLoading
-                                    ? const CircularProgressIndicator()
-                                    : const Text(
-                                        'Criar Conta',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
+                                child:
+                                    _isLoading
+                                        ? const CircularProgressIndicator()
+                                        : const Text(
+                                          'Criar Conta',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
                               ),
                               const SizedBox(height: 16),
                               TextButton(
@@ -379,9 +396,7 @@ class _SignupPageState extends State<SignupPage> with SingleTickerProviderStateM
                                 },
                                 child: const Text(
                                   'Já tem uma conta? Faça login',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                  ),
+                                  style: TextStyle(fontSize: 14),
                                 ),
                               ),
                             ],

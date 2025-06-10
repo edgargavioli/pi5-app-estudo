@@ -1,4 +1,4 @@
-class User {
+class UserModel {
   final String id;
   final String? nome;
   final String? email;
@@ -12,7 +12,7 @@ class User {
   final DateTime updatedAt;
   final String? imageBase64;
 
-  User({
+  UserModel({
     required this.id,
     this.nome,
     this.email,
@@ -27,8 +27,8 @@ class User {
     this.imageBase64,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
       id: json['id'] as String,
       nome: json['name'] as String?,
       email: json['email'] as String?,
@@ -37,7 +37,10 @@ class User {
       semestre: json['semestre'] as int?,
       points: json['points'] as int? ?? 0,
       isEmailVerified: json['isEmailVerified'] as bool? ?? false,
-      lastLogin: json['lastLogin'] != null ? DateTime.parse(json['lastLogin'] as String) : null,
+      lastLogin:
+          json['lastLogin'] != null
+              ? DateTime.parse(json['lastLogin'] as String)
+              : null,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       imageBase64: json['imageBase64'] as String?,
@@ -61,10 +64,11 @@ class User {
     };
   }
 
-  User copyWith({
+  /// Cria uma cópia do usuário com campos opcionalmente atualizados
+  UserModel copyWith({
     String? id,
-    String? nome,
     String? email,
+    String? nome,
     String? curso,
     String? instituicao,
     int? semestre,
@@ -75,10 +79,10 @@ class User {
     DateTime? updatedAt,
     String? imageBase64,
   }) {
-    return User(
+    return UserModel(
       id: id ?? this.id,
-      nome: nome ?? this.nome,
       email: email ?? this.email,
+      nome: nome ?? this.nome,
       curso: curso ?? this.curso,
       instituicao: instituicao ?? this.instituicao,
       semestre: semestre ?? this.semestre,
@@ -90,4 +94,4 @@ class User {
       imageBase64: imageBase64 ?? this.imageBase64,
     );
   }
-} 
+}

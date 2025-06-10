@@ -8,18 +8,26 @@ const EXAM_DELETED_QUEUE = process.env.EXAM_DELETED_QUEUE || 'exam.deleted';
 const notificationPersistence = new NotificationPersistence();
 const userPersistence = new UserPersistence();
 
-async function createExamNotifications(fcmToken, examData) {
-    // Verificar se o usuário existe usando o fcmToken
+async function createExamNotifications(userId, examData) {
+    // Usar diretamente o userId do evento
+    console.log(`Creating exam notifications for user: ${userId}`);
+
     let user;
     try {
-        user = await userPersistence.findByFcmToken(fcmToken);
+        user = await userPersistence.findById(userId);
+        if (!user) {
+            console.error(`User ${userId} not found, skipping notification creation`);
+            return;
+        }
     } catch (error) {
-        console.error(`User with FCM token ${fcmToken} not found, skipping notification creation`);
+        console.error(`Error finding user ${userId}, skipping notification creation:`, error);
         return;
     }
 
-    const examDate = new Date(examData.date);
+    const examDate = new Date(examData.data || examData.date);
     const now = new Date();
+
+    console.log(`📅 Exam date: ${examDate}, Now: ${now}`);
 
     // Notificação 1 semana antes
     const oneWeekBefore = new Date(examDate);
@@ -29,11 +37,12 @@ async function createExamNotifications(fcmToken, examData) {
         await notificationPersistence.create({
             userId: user.id,
             type: 'EXAM_WEEK_REMINDER',
-            entityId: examData.id.toString(),
+            entityId: examData.id?.toString() || examData.examId?.toString(),
             entityType: 'exam',
             entityData: examData,
             scheduledFor: oneWeekBefore
         });
+        console.log(`📅 Scheduled week reminder for ${oneWeekBefore}`);
     }
 
     // Notificação 3 dias antes
@@ -44,11 +53,12 @@ async function createExamNotifications(fcmToken, examData) {
         await notificationPersistence.create({
             userId: user.id,
             type: 'EXAM_REMINDER',
-            entityId: examData.id.toString(),
+            entityId: examData.id?.toString() || examData.examId?.toString(),
             entityType: 'exam',
             entityData: examData,
             scheduledFor: threeDaysBefore
         });
+        console.log(`📅 Scheduled 3-day reminder for ${threeDaysBefore}`);
     }
 
     // Notificação no dia da prova
@@ -59,22 +69,24 @@ async function createExamNotifications(fcmToken, examData) {
         await notificationPersistence.create({
             userId: user.id,
             type: 'EXAM_TODAY',
-            entityId: examData.id.toString(),
+            entityId: examData.id?.toString() || examData.examId?.toString(),
             entityType: 'exam',
             entityData: examData,
             scheduledFor: dayOfExam
         });
+        console.log(`📅 Scheduled day-of reminder for ${dayOfExam}`);
     }
 
     // Notificação imediata (criada agora)
     await notificationPersistence.create({
         userId: user.id,
         type: 'EXAM_CREATED',
-        entityId: examData.id.toString(),
+        entityId: examData.id?.toString() || examData.examId?.toString(),
         entityType: 'exam',
         entityData: examData,
         scheduledFor: now
     });
+    console.log(`📅 Scheduled immediate notification`);
 }
 
 async function updateExamNotifications(fcmToken, examData) {
@@ -110,23 +122,29 @@ export async function processExamCreated(msg, chanel) {
     }
 
     const messageContent = msg.content.toString();
+    console.log('📥 Raw exam message received:', messageContent);
+
     let messageData;
 
     try {
         messageData = JSON.parse(messageContent);
+        console.log('📥 Parsed exam message:', JSON.stringify(messageData, null, 2));
 
-        if (!messageData.fcmToken || !messageData.examData) {
-            console.error('Message missing required data, skipping processing.');
+        // Extrair dados do evento (pode estar em data.data ou diretamente em data)
+        const eventData = messageData.data || messageData;
+
+        if (!eventData.userId || !eventData.examData) {
+            console.error('Message missing required data, skipping processing.', eventData);
             chanel.nack(msg, false, false);
             return;
         }
 
-        await createExamNotifications(messageData.fcmToken, messageData.examData);
-        console.log(`Exam notifications scheduled for user with FCM token ${messageData.fcmToken}`);
+        await createExamNotifications(eventData.userId, eventData.examData);
+        console.log(`✅ Exam notifications scheduled for user ${eventData.userId}`);
 
         chanel.ack(msg);
     } catch (error) {
-        console.error('Error processing exam created message:', error);
+        console.error('❌ Error processing exam created message:', error);
         chanel.nack(msg, false, false);
     }
 }

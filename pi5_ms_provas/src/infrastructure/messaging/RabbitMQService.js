@@ -257,13 +257,18 @@ class RabbitMQService {
       data: {
         examType,
         examId: examData.id,
-        examData,
+        examData: {
+          name: examData.titulo,
+          description: examData.descricao,
+          date: examData.data || new Date().toISOString(),
+        },
         userId: userId || examData.userId || 'user-default',
         action: 'CREATED'
       }
     };
 
-    return this.publish(this.routingKeys.EXAM_CREATED, event);
+    // Usar a fila diretamente, não o routing key
+    return this.publish(this.queues.EXAM_CREATED, event);
   }
 
   /**
@@ -281,7 +286,7 @@ class RabbitMQService {
       }
     };
 
-    return this.publish(this.routingKeys.EXAM_UPDATED, event);
+    return this.publish(this.queues.EXAM_UPDATED, event);
   }
 
   /**
@@ -376,13 +381,16 @@ class RabbitMQService {
   /**
    * Publica uma mensagem genérica
    */
-  async publish(routingKey, message, options = {}) {
+  async publish(queueName, message, options = {}) {
     if (!this.isConnected || !this.channel) {
-      logger.warn('⚠️ RabbitMQ não conectado, pulando publicação', { routingKey });
+      logger.warn('⚠️ RabbitMQ não conectado, pulando publicação', { queueName });
       return false;
     }
 
     try {
+      // Garantir que a fila existe
+      await this.channel.assertQueue(queueName, { durable: true });
+
       const messageBuffer = Buffer.from(JSON.stringify({
         ...message,
         timestamp: new Date().toISOString(),
@@ -396,16 +404,16 @@ class RabbitMQService {
         ...options
       };
 
-      const published = this.channel.publish(
-        this.config.exchange,
-        routingKey,
+      // Enviar diretamente para a fila
+      const published = this.channel.sendToQueue(
+        queueName,
         messageBuffer,
         publishOptions
       );
 
       if (published) {
         logger.info('📤 Evento publicado', {
-          routingKey,
+          queueName,
           messageId: JSON.parse(messageBuffer.toString()).messageId
         });
       }
@@ -413,7 +421,7 @@ class RabbitMQService {
       return published;
     } catch (error) {
       logger.error('❌ Erro ao publicar evento', {
-        routingKey,
+        queueName,
         error: error.message
       });
       return false;

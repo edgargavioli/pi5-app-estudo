@@ -4,9 +4,9 @@ import 'auth_service.dart';
 
 class ApiService {
   // 🌐 URLs DOS MICROSERVIÇOS
-  static const String _userServiceUrl = 'http://localhost:3000';
-  static const String _provasServiceUrl = 'http://localhost:3001';
-  
+  static const String _userServiceUrl = 'http://10.0.2.2:3000';
+  static const String _provasServiceUrl = 'http://10.0.2.2:3001';
+
   // 🔐 INSTÂNCIA DO SERVIÇO DE AUTENTICAÇÃO
   static final AuthService _authService = AuthService();
 
@@ -27,14 +27,14 @@ class ApiService {
   /// 🌐 OBTER URL BASE BASEADO NO ENDPOINT
   static String _getBaseUrl(String endpoint) {
     // Endpoints do user-service
-    if (endpoint.startsWith('/api/auth/') || 
+    if (endpoint.startsWith('/api/auth/') ||
         endpoint.startsWith('/api/users/') ||
         endpoint.startsWith('/api/gamificacao/')) {
       return _userServiceUrl;
     }
-    
+
     // Endpoints do provas-service
-    if (endpoint.startsWith('/materias') || 
+    if (endpoint.startsWith('/materias') ||
         endpoint.startsWith('/provas') ||
         endpoint.startsWith('/sessoes') ||
         endpoint.startsWith('/eventos')) {
@@ -56,11 +56,14 @@ class ApiService {
   }
 
   /// 📥 GET REQUEST
-  static Future<Map<String, dynamic>> get(String endpoint, {bool needsAuth = true}) async {
+  static Future<Map<String, dynamic>> get(
+    String endpoint, {
+    bool needsAuth = true,
+  }) async {
     try {
       final baseUrl = _getBaseUrl(endpoint);
       final headers = _getHeaders(needsAuth: needsAuth);
-      
+
       final response = await http.get(
         Uri.parse('$baseUrl$endpoint'),
         headers: headers,
@@ -98,7 +101,7 @@ class ApiService {
     try {
       final baseUrl = _getBaseUrl(endpoint);
       final headers = _getHeaders(needsAuth: needsAuth);
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl$endpoint'),
         headers: headers,
@@ -138,7 +141,7 @@ class ApiService {
     try {
       final baseUrl = _getBaseUrl(endpoint);
       final headers = _getHeaders(needsAuth: needsAuth);
-      
+
       final response = await http.put(
         Uri.parse('$baseUrl$endpoint'),
         headers: headers,
@@ -173,7 +176,7 @@ class ApiService {
     try {
       final baseUrl = _getBaseUrl(endpoint);
       final headers = _getHeaders(needsAuth: needsAuth);
-      
+
       final response = await http.delete(
         Uri.parse('$baseUrl$endpoint'),
         headers: headers,
@@ -211,7 +214,7 @@ class ApiService {
     try {
       final baseUrl = _getBaseUrl(endpoint);
       final headers = _getHeaders(needsAuth: needsAuth);
-      
+
       final response = await http.patch(
         Uri.parse('$baseUrl$endpoint'),
         headers: headers,
@@ -250,7 +253,7 @@ class ApiService {
       return json.decode(response.body) as Map<String, dynamic>;
     } else {
       String message = 'Erro ${response.statusCode}';
-      
+
       try {
         final errorData = json.decode(response.body);
         if (errorData['error'] != null) {
@@ -261,7 +264,7 @@ class ApiService {
       } catch (e) {
         message = response.body.isNotEmpty ? response.body : message;
       }
-      
+
       throw ApiException(message, response.statusCode);
     }
   }
@@ -270,7 +273,7 @@ class ApiService {
   static void _handleDeleteResponse(http.Response response) {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       String message = 'Erro ${response.statusCode}';
-      
+
       try {
         final errorData = json.decode(response.body);
         if (errorData['error'] != null) {
@@ -281,7 +284,7 @@ class ApiService {
       } catch (e) {
         message = response.body.isNotEmpty ? response.body : message;
       }
-      
+
       throw ApiException(message, response.statusCode);
     }
   }
@@ -296,4 +299,4 @@ class ApiException implements Exception {
 
   @override
   String toString() => message;
-} 
+}

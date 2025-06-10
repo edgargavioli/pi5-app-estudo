@@ -346,7 +346,7 @@ class _DesempenhoPageState extends State<DesempenhoPage> {
                                   }
 
                                   final wrappedUrl =
-                                      'http://localhost:3000/api/wrapped/${currentUser.id}/html';
+                                      'http://10.0.2.2:3000/api/wrapped/${currentUser.id}/html';
 
                                   Navigator.pop(context);
 

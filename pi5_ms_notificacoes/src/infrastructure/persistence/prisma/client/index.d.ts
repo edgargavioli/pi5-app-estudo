@@ -3531,7 +3531,7 @@ export namespace Prisma {
   }
 
   export type UserCreateInput = {
-    id?: string
+    id: string
     fcmToken: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -3539,7 +3539,7 @@ export namespace Prisma {
   }
 
   export type UserUncheckedCreateInput = {
-    id?: string
+    id: string
     fcmToken: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -3563,7 +3563,7 @@ export namespace Prisma {
   }
 
   export type UserCreateManyInput = {
-    id?: string
+    id: string
     fcmToken: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -4002,14 +4002,14 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutNotificationsInput = {
-    id?: string
+    id: string
     fcmToken: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
-    id?: string
+    id: string
     fcmToken: string
     createdAt?: Date | string
     updatedAt?: Date | string

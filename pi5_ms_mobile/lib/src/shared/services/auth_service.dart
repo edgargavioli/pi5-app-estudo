@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:pi5_ms_mobile/src/infraestructure/firebase_fcm_get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'cache_service.dart';
 
 class AuthService {
   // 🌐 URL DO USER-SERVICE
-  static const String _userServiceUrl = 'http://localhost:3000/api';
+  static const String _userServiceUrl = 'http://10.0.2.2:3000/api';
 
   // 🔑 CHAVES PARA ARMAZENAMENTO LOCAL
   static const String _accessTokenKey = 'access_token';
@@ -46,6 +47,9 @@ class AuthService {
         final isValid = await _validateToken();
         if (!isValid) {
           await logout(); // Token inválido, fazer logout
+        } else {
+          // 📱 VERIFICAR E ATUALIZAR FCM TOKEN NA INICIALIZAÇÃO
+          await _checkAndUpdateFcmToken();
         }
       }
     } catch (e) {
@@ -85,6 +89,9 @@ class AuthService {
           json.encode(_currentUser!.toJson()),
         );
 
+        // 📱 VERIFICAR E ATUALIZAR FCM TOKEN APÓS LOGIN
+        await _checkAndUpdateFcmToken();
+
         return AuthResult.success(
           message: 'Login realizado com sucesso',
           user: _currentUser!,
@@ -112,7 +119,12 @@ class AuthService {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: json.encode({'name': name, 'email': email, 'password': password}),
+        body: json.encode({
+          'name': name,
+          'email': email,
+          'password': password,
+          'fcmToken': await getToken(),
+        }),
       );
 
       if (response.statusCode == 201) {
@@ -134,9 +146,15 @@ class AuthService {
           json.encode(_currentUser!.toJson()),
         );
 
+        // 📱 SALVAR FCM TOKEN APÓS REGISTRO (já foi enviado no registro)
+        final fcmToken = await getToken();
+        if (fcmToken != null) {
+          await saveCurrentFcmToken(fcmToken);
+        }
+
         return AuthResult.success(
           message: 'Registro realizado com sucesso',
-          user: data['data']['user'],
+          user: AuthUser.fromJson(data['data']['user']),
         );
       } else {
         final error = json.decode(response.body);
@@ -145,6 +163,53 @@ class AuthService {
     } catch (e) {
       print('❌ Erro no registro: $e');
       return AuthResult.error('Erro inesperado ao fazer registro');
+    }
+  }
+
+  /// 📱 VERIFICAR E ATUALIZAR FCM TOKEN (função centralizada)
+  Future<void> _checkAndUpdateFcmToken() async {
+    try {
+      print('🔍 Iniciando verificação de FCM token...');
+
+      // Verificar se usuário está autenticado
+      if (!isAuthenticated) {
+        print('📱 Usuário não está logado, pulando verificação de FCM token');
+        return;
+      }
+
+      print('✅ Usuário autenticado: ${_currentUser?.id}');
+
+      // Obter FCM token atual do Firebase
+      final currentFcmToken = await getToken();
+      print('📱 FCM Token atual: ${currentFcmToken?.substring(0, 20)}...');
+
+      if (currentFcmToken != null) {
+        // Verificar se o token mudou comparando com o token salvo
+        final tokenChanged = await hasTokenChanged(currentFcmToken);
+        print('🔄 Token mudou: $tokenChanged');
+
+        if (tokenChanged) {
+          print('📱 FCM Token mudou, atualizando no servidor...');
+          print('🌐 URL: $_userServiceUrl/users/${_currentUser!.id}/fcm-token');
+          print('🔑 Token de acesso disponível: ${_accessToken != null}');
+
+          // Atualizar token no microserviço de usuário via PATCH
+          await updateFcmTokenPatch(currentFcmToken);
+
+          // Salvar novo token localmente para futuras comparações
+          await saveCurrentFcmToken(currentFcmToken);
+
+          print('✅ FCM Token atualizado com sucesso!');
+        } else {
+          print('📱 FCM Token não mudou, nenhuma atualização necessária');
+        }
+      } else {
+        print('⚠️ Não foi possível obter FCM token do Firebase');
+      }
+    } catch (e) {
+      print('⚠️ Erro ao verificar/atualizar FCM Token: $e');
+      print('📊 Stack trace: ${StackTrace.current}');
+      // Não falhar o processo por causa disso
     }
   }
 
@@ -232,6 +297,120 @@ class AuthService {
       'Accept': 'application/json',
     };
   }
+
+  /// Verifica se o FCM token mudou comparando com o token salvo
+  Future<bool> hasTokenChanged(String currentToken) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedToken = prefs.getString('fcm_token');
+
+      // Se não há token salvo ou se o token atual é diferente do salvo
+      return savedToken == null || savedToken != currentToken;
+    } catch (e) {
+      print('Erro ao verificar mudança de FCM token: $e');
+      return true; // Em caso de erro, assumir que mudou para tentar atualizar
+    }
+  }
+
+  /// Salva o FCM token atual localmente para futuras comparações
+  Future<void> saveCurrentFcmToken(String fcmToken) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('fcm_token', fcmToken);
+    } catch (e) {
+      print('Erro ao salvar FCM token: $e');
+    }
+  }
+
+  /// Atualiza FCM token usando PATCH request para a nova rota específica
+  Future<void> updateFcmTokenPatch(String fcmToken) async {
+    try {
+      print('🚀 Iniciando PATCH do FCM token...');
+
+      if (_currentUser?.id == null) {
+        throw Exception('Usuário não está logado - ID não disponível');
+      }
+
+      if (_accessToken == null) {
+        throw Exception('Token de acesso não disponível');
+      }
+
+      final url = '$_userServiceUrl/users/${_currentUser!.id}/fcm-token';
+      print('🌐 URL do PATCH: $url');
+      print(
+        '🔑 Authorization header: Bearer ${_accessToken!.substring(0, 20)}...',
+      );
+
+      final requestBody = json.encode({'fcmToken': fcmToken});
+      print('📦 Request body: $requestBody');
+
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $_accessToken',
+        },
+        body: requestBody,
+      );
+
+      print('📡 Response status: ${response.statusCode}');
+      print('📄 Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('✅ FCM token atualizado via PATCH com sucesso');
+
+        // Atualizar token no usuário local também
+        if (_currentUser != null) {
+          _currentUser = _currentUser!.copyWith(fcmToken: fcmToken);
+          await _saveUserData(_currentUser!);
+          print('💾 Dados do usuário atualizados localmente');
+        }
+      } else {
+        final errorData = json.decode(response.body);
+        throw Exception(
+          'Erro HTTP ${response.statusCode}: ${errorData['message'] ?? 'Erro desconhecido'}',
+        );
+      }
+    } catch (e) {
+      print('❌ Erro ao atualizar FCM token via PATCH: $e');
+      rethrow;
+    }
+  }
+
+  /// Método legado - manter para compatibilidade, mas usar o PATCH quando possível
+  Future<void> updateFcmToken(String fcmToken) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$_userServiceUrl/users/fcm-token'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_accessToken',
+        },
+        body: json.encode({'fcmToken': fcmToken}),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Erro ao atualizar FCM token');
+      }
+    } catch (e) {
+      print('Erro ao atualizar FCM token: $e');
+      rethrow;
+    }
+  }
+
+  /// Salva dados do usuário localmente
+  Future<void> _saveUserData(AuthUser user) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_userDataKey, json.encode(user.toJson()));
+    } catch (e) {
+      print('Erro ao salvar dados do usuário: $e');
+    }
+  }
+
+  /// Getter para verificar se está autenticado (compatibilidade)
+  bool get isAuthenticated => isLoggedIn;
 }
 
 /// 👤 MODELO DE USUÁRIO PARA AUTENTICAÇÃO
@@ -239,6 +418,7 @@ class AuthUser {
   final String id;
   final String? nome;
   final String? email;
+  final String? fcmToken;
   final bool isEmailVerified;
   final DateTime? lastLogin;
 
@@ -246,6 +426,7 @@ class AuthUser {
     required this.id,
     this.nome,
     this.email,
+    this.fcmToken,
     this.isEmailVerified = false,
     this.lastLogin,
   });
@@ -255,6 +436,7 @@ class AuthUser {
       id: json['id'],
       nome: json['name'],
       email: json['email'],
+      fcmToken: json['fcmToken'],
       isEmailVerified: json['isEmailVerified'] ?? false,
       lastLogin:
           json['lastLogin'] != null ? DateTime.parse(json['lastLogin']) : null,
@@ -266,9 +448,29 @@ class AuthUser {
       'id': id,
       'name': nome,
       'email': email,
+      'fcmToken': fcmToken,
       'isEmailVerified': isEmailVerified,
       'lastLogin': lastLogin?.toIso8601String(),
     };
+  }
+
+  /// Cria uma cópia do usuário com campos opcionalmente atualizados
+  AuthUser copyWith({
+    String? id,
+    String? nome,
+    String? email,
+    String? fcmToken,
+    bool? isEmailVerified,
+    DateTime? lastLogin,
+  }) {
+    return AuthUser(
+      id: id ?? this.id,
+      nome: nome ?? this.nome,
+      email: email ?? this.email,
+      fcmToken: fcmToken ?? this.fcmToken,
+      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      lastLogin: lastLogin ?? this.lastLogin,
+    );
   }
 }
 

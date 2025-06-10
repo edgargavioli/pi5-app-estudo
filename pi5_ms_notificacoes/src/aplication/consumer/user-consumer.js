@@ -36,6 +36,7 @@ export default async function processUserCreated(msg, chanel) {
 
         // Criar novo usuário
         const user = await userPersistence.create({
+            id: messageData.userId,  // ✅ Direto, não como objeto aninhado
             fcmToken: messageData.fcmToken,  // ✅ Direto, não como objeto aninhado
         });
 
