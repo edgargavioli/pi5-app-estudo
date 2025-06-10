@@ -33,9 +33,18 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const userRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // 50 requests per windowMs
+  message: 'Too many requests for user operations, please try again after 15 minutes',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 module.exports = {
   authLimiter,
   passwordResetLimiter,
   registerLimiter,
-  apiLimiter
+  apiLimiter,
+  userRateLimit
 }; 

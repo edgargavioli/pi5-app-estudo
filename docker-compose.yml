@@ -1,50 +1,211 @@
+version: '3.8'
+
 services:
+  # RabbitMQ - Broker Central de Mensageria
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq-broker
+    ports:
+      - "5672:5672"     # AMQP port
+      - "15672:15672"   # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin123
+      - RABBITMQ_DEFAULT_VHOST=/
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - microservices-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # User Service
   user-service:
     build:
       context: ./user-service
       dockerfile: Dockerfile
+    container_name: user-service
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/auth_service?schema=public
-      - JWT_SECRET=your_jwt_secret_key
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-user:5432/auth_service?schema=public
+      - JWT_SECRET=your_jwt_secret_key_super_secure_2024
       - JWT_EXPIRES_IN=24h
       - SMTP_HOST=smtp.gmail.com
       - SMTP_PORT=587
       - SMTP_USER=your_email@gmail.com
       - SMTP_PASS=your_app_password
+      # RabbitMQ Configuration
+      - RABBITMQ=amqp://admin:admin123@rabbitmq-broker:5672/
+      - RABBITMQ_EXCHANGE=pi5_events
     depends_on:
-      postgres:
+      postgres-user:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     volumes:
       - ./user-service:/app
       - /app/node_modules
+      - user-logs:/app/logs
     networks:
-      - user-network
+      - microservices-network
+    restart: unless-stopped
 
-  postgres:
-    image: postgres:latest
+  # Postgres para User Service
+  postgres-user:
+    image: postgres:16-alpine
+    container_name: postgres-user
     ports:
       - "5432:5432"
     environment:
+      - POSTGRES_DB=auth_service
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=auth_service
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-user-data:/var/lib/postgresql/data
     networks:
-      - user-network
+      - microservices-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  # Serviço de Notificações
+  notification-service:
+    build:
+      context: ./pi5_ms_notificacoes
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports:
+      - "4040:4040"
+    environment:
+      - NODE_ENV=development
+      - PORT=4040
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-notifications:5432/notificacoes
+      - RABBITMQ=amqp://admin:admin123@rabbitmq-broker:5672/
+      - USER_QUEUE=user_created_queue
+      - EVENT_QUEUE=event_created_queue
+      - STREAK_QUEUE=streak_created_queue
+      - FIREBASE=/app/config/firebase-service-account.json
+      - JWTSECRET=your_jwt_secret_key_super_secure_2024
+      - JWTEXPIRE=24h
+    depends_on:
+      postgres-notifications:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./pi5_ms_notificacoes:/app
+      - /app/node_modules
+      # Monta o arquivo Firebase do diretório correto
+      - D:/Faculdade/pi5-ms-notificacoes.json:/app/config/firebase-service-account.json:ro
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Postgres para Notifications Service
+  postgres-notifications:
+    image: postgres:16-alpine
+    container_name: postgres-notifications
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=notificacoes
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres-notifications-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Provas Service
+  provas-service:
+    build:
+      context: ./pi5_ms_provas
+      dockerfile: Dockerfile
+    container_name: provas-service
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-provas:5432/provas_db
+      - JWT_SECRET=your_jwt_secret_key_super_secure_2024
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq-broker:5672/
+      - RABBITMQ_EXCHANGE=pi5_events
+      - SERVICE_NAME=provas-service
+      - USER_SERVICE_URL=http://user-service:3000
+    depends_on:
+      postgres-provas:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./pi5_ms_provas:/usr/src/app
+      - provas-node-modules:/usr/src/app/node_modules
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Postgres para Provas Service
+  postgres-provas:
+    image: postgres:16-alpine
+    container_name: postgres-provas
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=provas_db
+    volumes:
+      - postgres-provas-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Adminer para gerenciar databases
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-user
+      - postgres-notifications
+      - postgres-provas
+    networks:
+      - microservices-network
+    restart: unless-stopped
 
 volumes:
-  postgres-data:
+  postgres-user-data:
+  postgres-notifications-data:
+  postgres-provas-data:
+  rabbitmq-data:
+  provas-node-modules:
+  user-logs:
 
 networks:
-  user-network:
-    driver: bridge 
+  microservices-network:
+    driver: bridge
+    name: pi5-network

@@ -42,7 +42,7 @@ services:
     image: postgres:14-alpine
     container_name: auth-postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_DB=auth_service
       - POSTGRES_USER=postgres

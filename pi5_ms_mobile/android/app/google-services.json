@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "180699725989",
+    "project_id": "pi5-ms-notificacoes",
+    "storage_bucket": "pi5-ms-notificacoes.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180699725989:android:2d5830911ed85699840d4c",
+        "android_client_info": {
+          "package_name": "com.example.pi5_ms_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-30jPJ2FTj27j7_Ai3PmoR-iIoCO9eWQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

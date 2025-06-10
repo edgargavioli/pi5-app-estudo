@@ -1,5 +1,6 @@
 const GetUserUseCase = require('../../application/useCases/GetUserUseCase');
 const UpdateUserUseCase = require('../../application/useCases/UpdateUserUseCase');
+const UpdateFcmTokenUseCase = require('../../application/useCases/UpdateFcmTokenUseCase');
 const PrismaUserRepository = require('../../infrastructure/repositories/PrismaUserRepository');
 const { AppError } = require('../../middleware/errorHandler');
 
@@ -12,6 +13,17 @@ class UserController {
     this.userRepository = new PrismaUserRepository();
     this.getUserUseCase = new GetUserUseCase(this.userRepository);
     this.updateUserUseCase = new UpdateUserUseCase(this.userRepository);
+    this.updateFcmTokenUseCase = new UpdateFcmTokenUseCase(this.userRepository);
+
+    // Bind methods to preserve 'this' context
+    this.getUser = this.getUser.bind(this);
+    this.updateUser = this.updateUser.bind(this);
+    this.updateFcmToken = this.updateFcmToken.bind(this);
+    this.deleteUser = this.deleteUser.bind(this);
+    this.updateProfileImage = this.updateProfileImage.bind(this);
+    this.getProfileImage = this.getProfileImage.bind(this);
+    this.generateHateoasLinks = this.generateHateoasLinks.bind(this);
+    this.isValidBase64Image = this.isValidBase64Image.bind(this);
   }
 
   /**
@@ -23,7 +35,7 @@ class UserController {
       const requestingUserId = req.user.id;
 
       const user = await this.getUserUseCase.execute(userId, requestingUserId);
-      
+
       // Add HATEOAS links
       const response = {
         data: user,
@@ -46,12 +58,47 @@ class UserController {
       const updateData = req.body;
 
       const user = await this.updateUserUseCase.execute(userId, updateData, requestingUserId);
-      
+
       // Add HATEOAS links
       const response = {
         data: user,
         message: 'User updated successfully',
         _links: this.generateHateoasLinks(req, user.id)
+      };
+
+      res.json(response);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Update FCM token for push notifications
+   */
+  async updateFcmToken(req, res) {
+    try {
+      const userId = req.params.id;
+      const requestingUserId = req.user.id;
+      const { fcmToken } = req.body;
+
+      // Authorization check
+      if (userId !== requestingUserId) {
+        throw new AppError('Unauthorized: You can only update your own FCM token', 403);
+      }
+
+      // Validation
+      if (!fcmToken || typeof fcmToken !== 'string' || fcmToken.trim().length === 0) {
+        throw new AppError('FCM token is required and must be a valid string', 400);
+      }
+
+      const result = await this.updateFcmTokenUseCase.execute(userId, fcmToken.trim(), requestingUserId);
+
+      const response = {
+        message: 'FCM token updated successfully',
+        data: {
+          fcmToken: result.fcmToken
+        },
+        _links: this.generateHateoasLinks(req, userId)
       };
 
       res.json(response);
@@ -156,7 +203,7 @@ class UserController {
    */
   generateHateoasLinks(req, userId) {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-    
+
     return {
       self: {
         href: `${baseUrl}/api/users/${userId}`,
@@ -165,6 +212,10 @@ class UserController {
       update: {
         href: `${baseUrl}/api/users/${userId}`,
         method: 'PUT'
+      },
+      updateFcmToken: {
+        href: `${baseUrl}/api/users/${userId}/fcm-token`,
+        method: 'PATCH'
       },
       delete: {
         href: `${baseUrl}/api/users/${userId}`,
@@ -194,4 +245,5 @@ class UserController {
   }
 }
 
-module.exports = new UserController(); 
+// Exportar uma instância em vez da classe
+module.exports = new UserController();

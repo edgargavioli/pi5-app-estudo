@@ -1,0 +1,35 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.env.example
+.nyc_output
+coverage
+.coverage
+.jest
+
+# Arquivos de desenvolvimento
+*.log
+*.pid
+*.seed
+*.swp
+*.swo
+.DS_Store
+
+# Arquivos de IDE
+.vscode
+.idea
+
+# Arquivos de teste
+src/teste.js
+src/teste-imediato.js
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Documentação
+*.md
