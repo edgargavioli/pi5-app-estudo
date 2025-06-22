@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export class SessaoEstudo {
     constructor(id, materiaId, provaId, conteudo, topicos, tempoInicio, tempoFim = null) {
         this.id = id;
@@ -41,7 +43,7 @@ export class SessaoEstudo {
     }
 
     update(conteudo, topicos) {
-        if (conteudo) {
+        if (conteudo !== null && conteudo !== undefined) {
             if (conteudo.trim().length === 0) {
                 throw new Error('Conteúdo não pode ser vazio');
             }
@@ -57,7 +59,7 @@ export class SessaoEstudo {
     }
 
     getDuracao() {
-        if (!this.tempoFim) {
+        if (!this.tempoFim || !this.tempoInicio) {
             return null;
         }
         return this.tempoFim - this.tempoInicio;

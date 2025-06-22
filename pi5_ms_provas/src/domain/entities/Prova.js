@@ -54,7 +54,7 @@ export class Prova {
         if (descricao !== undefined) this.descricao = descricao;
         if (data) this.data = new Date(data);
         if (horario) this.horario = new Date(horario);
-        if (local) {
+        if (local !== null && local !== undefined) {
             if (local.trim().length === 0) {
                 throw new Error('Local da prova não pode ser vazio');
             }

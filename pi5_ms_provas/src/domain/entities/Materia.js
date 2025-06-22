@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export class Materia {
     constructor(id, nome, disciplina) {
         this.id = id;
@@ -22,13 +24,13 @@ export class Materia {
     }
 
     update(nome, disciplina) {
-        if (nome) {
+        if (nome !== null && nome !== undefined) {
             if (nome.trim().length === 0) {
                 throw new Error('Nome da matéria não pode ser vazio');
             }
             this.nome = nome.trim();
         }
-        if (disciplina) {
+        if (disciplina !== null && disciplina !== undefined) {
             if (disciplina.trim().length === 0) {
                 throw new Error('Disciplina não pode ser vazia');
             }
