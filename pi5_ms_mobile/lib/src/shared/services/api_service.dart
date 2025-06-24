@@ -5,7 +5,7 @@ import 'auth_service.dart';
 class ApiService {
   // 🌐 URLs DOS MICROSERVIÇOS
   static const String _userServiceUrl = 'http://10.0.2.2:3000';
-  static const String _provasServiceUrl = 'http://10.0.2.2:3001';
+  static const String _provasServiceUrl = 'http://10.0.2.2:3002';
 
   // 🔐 INSTÂNCIA DO SERVIÇO DE AUTENTICAÇÃO
   static final AuthService _authService = AuthService();
@@ -17,7 +17,7 @@ class ApiService {
       'Accept': 'application/json',
     };
 
-    if (needsAuth && _authService.isLoggedIn) {
+    if (needsAuth && _authService.isAuthenticated) {
       headers['Authorization'] = 'Bearer ${_authService.accessToken}';
     }
 
@@ -95,7 +95,7 @@ class ApiService {
   /// 📤 POST REQUEST
   static Future<Map<String, dynamic>> post(
     String endpoint,
-    Map<String, dynamic> data, {
+    Map<String, Object?> data, {
     bool needsAuth = true,
   }) async {
     try {
@@ -135,7 +135,7 @@ class ApiService {
   /// 🔄 PUT REQUEST
   static Future<Map<String, dynamic>> put(
     String endpoint,
-    Map<String, dynamic> data, {
+    Map<String, Object?> data, {
     bool needsAuth = true,
   }) async {
     try {
@@ -256,10 +256,28 @@ class ApiService {
 
       try {
         final errorData = json.decode(response.body);
-        if (errorData['error'] != null) {
-          message = errorData['error'];
+
+        // Priorizar userMessage (mensagem amigável) se disponível
+        if (errorData['userMessage'] != null &&
+            errorData['userMessage'].toString().isNotEmpty) {
+          message = errorData['userMessage'];
         } else if (errorData['message'] != null) {
           message = errorData['message'];
+        } else if (errorData['error'] != null) {
+          message = errorData['error'];
+        }
+
+        // Se houver erros de validação, incluir detalhes
+        if (errorData['errors'] != null && errorData['errors'] is List) {
+          final validationErrors = errorData['errors'] as List;
+          if (validationErrors.isNotEmpty) {
+            final errorMessages = validationErrors
+                .map((error) => error['message'] ?? 'Erro de validação')
+                .join(', ');
+            message =
+                errorData['userMessage'] ??
+                'Erros de validação: $errorMessages';
+          }
         }
       } catch (e) {
         message = response.body.isNotEmpty ? response.body : message;
@@ -276,10 +294,15 @@ class ApiService {
 
       try {
         final errorData = json.decode(response.body);
-        if (errorData['error'] != null) {
-          message = errorData['error'];
+
+        // Priorizar userMessage se disponível
+        if (errorData['userMessage'] != null &&
+            errorData['userMessage'].toString().isNotEmpty) {
+          message = errorData['userMessage'];
         } else if (errorData['message'] != null) {
           message = errorData['message'];
+        } else if (errorData['error'] != null) {
+          message = errorData['error'];
         }
       } catch (e) {
         message = response.body.isNotEmpty ? response.body : message;

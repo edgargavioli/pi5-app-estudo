@@ -3,7 +3,6 @@ import 'api_service.dart';
 import 'cache_service.dart';
 
 class ProvaService {
-  
   // Listar todas as provas com cache
   static Future<List<Prova>> listarProvas({bool forceRefresh = false}) async {
     // Verificar cache primeiro (se não for refresh forçado)
@@ -16,16 +15,17 @@ class ProvaService {
 
     try {
       final response = await ApiService.get('/provas');
-      
+
       final List<dynamic> provasJson = response['data'] as List<dynamic>;
-      
-      final provas = provasJson
-          .map((json) => Prova.fromJson(json as Map<String, dynamic>))
-          .toList();
-      
+
+      final provas =
+          provasJson
+              .map((json) => Prova.fromJson(json as Map<String, dynamic>))
+              .toList();
+
       // Salvar no cache
       CacheService.setProvas(provas);
-      
+
       return provas;
     } catch (e) {
       // Se houver erro e temos cache, retornar cache
@@ -33,7 +33,7 @@ class ProvaService {
       if (cachedProvas != null) {
         return cachedProvas;
       }
-      
+
       throw Exception('Erro ao carregar provas: $e');
     }
   }
@@ -42,9 +42,10 @@ class ProvaService {
   static Future<Prova> buscarPorId(String id) async {
     try {
       final response = await ApiService.get('/provas/$id');
-      
-      final Map<String, dynamic> provaJson = response['data'] as Map<String, dynamic>;
-      
+
+      final Map<String, dynamic> provaJson =
+          response['data'] as Map<String, dynamic>;
+
       return Prova.fromJson(provaJson);
     } catch (e) {
       throw Exception('Erro ao carregar prova: $e');
@@ -55,12 +56,13 @@ class ProvaService {
   static Future<Prova> criarProva(Prova prova) async {
     try {
       final response = await ApiService.post('/provas', prova.toCreateJson());
-      
-      final Map<String, dynamic> provaJson = response['data'] as Map<String, dynamic>;
-      
+
+      final Map<String, dynamic> provaJson =
+          response['data'] as Map<String, dynamic>;
+
       // Invalidar cache
       CacheService.invalidateRelated('provas');
-      
+
       return Prova.fromJson(provaJson);
     } catch (e) {
       throw Exception('Erro ao criar prova: $e');
@@ -70,13 +72,17 @@ class ProvaService {
   // Atualizar prova
   static Future<Prova> atualizarProva(String id, Prova prova) async {
     try {
-      final response = await ApiService.put('/provas/$id', prova.toCreateJson());
-      
-      final Map<String, dynamic> provaJson = response['data'] as Map<String, dynamic>;
-      
+      final response = await ApiService.put(
+        '/provas/$id',
+        prova.toCreateJson(),
+      );
+
+      final Map<String, dynamic> provaJson =
+          response['data'] as Map<String, dynamic>;
+
       // Invalidar cache
       CacheService.invalidateRelated('provas');
-      
+
       return Prova.fromJson(provaJson);
     } catch (e) {
       throw Exception('Erro ao atualizar prova: $e');
@@ -87,7 +93,7 @@ class ProvaService {
   static Future<void> deletarProva(String id) async {
     try {
       await ApiService.delete('/provas/$id');
-      
+
       // Invalidar cache
       CacheService.invalidateRelated('provas');
     } catch (e) {
@@ -101,15 +107,45 @@ class ProvaService {
       final response = await ApiService.patch('/provas/$id/resultado', {
         'acertos': acertos,
       });
-      
-      final Map<String, dynamic> provaJson = response['data'] as Map<String, dynamic>;
-      
+
+      final Map<String, dynamic> provaJson =
+          response['data'] as Map<String, dynamic>;
+
       // Invalidar cache
       CacheService.invalidateRelated('provas');
-      
+
       return Prova.fromJson(provaJson);
     } catch (e) {
       throw Exception('Erro ao registrar resultado: $e');
     }
   }
-} 
+
+  // Atualizar status da prova
+  static Future<Prova> atualizarStatus(String id, StatusProva status) async {
+    try {
+      final response = await ApiService.patch('/provas/$id/status', {
+        'status': status.name,
+      });
+
+      final Map<String, dynamic> provaJson =
+          response['data'] as Map<String, dynamic>;
+
+      // Invalidar cache
+      CacheService.invalidateRelated('provas');
+
+      return Prova.fromJson(provaJson);
+    } catch (e) {
+      throw Exception('Erro ao atualizar status da prova: $e');
+    }
+  }
+
+  // Obter estatísticas das provas por status
+  static Future<Map<String, dynamic>> obterEstatisticasProvas() async {
+    try {
+      final response = await ApiService.get('/provas/stats/overview');
+      return response['data'] as Map<String, dynamic>;
+    } catch (e) {
+      throw Exception('Erro ao obter estatísticas das provas: $e');
+    }
+  }
+}

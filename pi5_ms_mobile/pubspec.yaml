@@ -36,8 +36,7 @@ dependencies:
     sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
+  # Use with the CupertinoIcons class for iOS style icons.  cupertino_icons: ^1.0.8
   # google_fonts: ^6.2.1  # Removido temporariamente para resolver problemas no Flutter Web
   fl_chart: ^0.71.0
   syncfusion_flutter_gauges: ^29.1.39
@@ -48,10 +47,17 @@ dependencies:
   shared_preferences: ^2.2.2
   url_launcher: ^6.2.2
   flutter_local_notifications: ^19.2.1
+  printing: ^5.14.2
+  share_plus: ^11.0.0
+  pdf: ^3.11.3
+  path_provider: ^2.1.5
+  image_picker: ^1.1.2
+  image: ^4.5.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_native_splash: ^2.4.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -69,9 +75,7 @@ flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
-  uses-material-design: true
-
-  # To add assets to your application, add an assets section, like this:
+  uses-material-design: true  # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/login_header.png
     - assets/images/logo.png
@@ -101,6 +105,20 @@ flutter:
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
-
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
+
+# Configuração da Splash Screen
+flutter_native_splash:
+  # Cor de fundo usando a cor azul do tema do app
+  color: "#1976D2"
+  # Imagem da logo centralizada
+  image: assets/images/logo.png
+  # Configurações específicas para plataformas
+  android: true
+  ios: true
+  web: false
+  # Configurações para Android 12+
+  android_12:
+    image: assets/images/logo.png
+    color: "#1976D2"

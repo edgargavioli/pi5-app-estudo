@@ -24,13 +24,14 @@ model User {
   imageBase64     String? // Base64-encoded profile image
 
   // Study-related fields
-  studyPreferences StudyPreferences?
-  studySessions    StudySession[]
-  studyMaterials   StudyMaterial[]
-
+  studyPreferences   StudyPreferences?
+  studySessions      StudySession[]
+  studyMaterials     StudyMaterial[]
   // Relations
   achievements       Achievement[]
   pointsTransactions PointsTransaction[]
+  studyStreak        StudyStreak?
+  streakAchievements StreakAchievement[]
 
   @@map("users")
 }
@@ -115,4 +116,41 @@ model PointsTransaction {
   user User @relation(fields: [userId], references: [id])
 
   @@map("points_transactions")
+}
+
+model StudyStreak {
+  id               String    @id @default(uuid())
+  userId           String
+  currentStreak    Int       @default(0) // Dias consecutivos atual
+  longestStreak    Int       @default(0) // Maior sequência já alcançada
+  lastStudyDate    DateTime? // Última data que cumpriu a meta
+  isActivatedToday Boolean   @default(false) // Se já ativou a sequência hoje
+  targetMinutes    Int       @default(1) // Meta em minutos (para testes: ~10 segundos)
+  studiedToday     Int       @default(0) // Minutos estudados hoje
+  timezone         String    @default("America/Sao_Paulo") // Fuso horário do usuário
+  lastResetDate    DateTime  @default(now()) // Última vez que resetou (meia-noite)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@map("study_streaks")
+}
+
+model StreakAchievement {
+  id          String   @id @default(uuid())
+  userId      String
+  streakDays  Int // Quantidade de dias da conquista (3, 7, 15, 30, etc.)
+  title       String // Título da conquista
+  description String // Descrição da conquista
+  unlockedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, streakDays])
+  @@map("streak_achievements")
 }

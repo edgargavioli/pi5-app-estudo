@@ -3,7 +3,8 @@ import { logger } from '../../application/utils/logger.js';
 
 /**
  * RabbitMQ Service - PI5 MS Provas
- * Responsável por publicar eventos de sessões e provas
+ * Responsável por publicar eventos simples de sessões e provas
+ * A lógica de personalização de notificações fica no microsserviço de notificações
  */
 class RabbitMQService {
   constructor() {
@@ -248,27 +249,16 @@ class RabbitMQService {
 
     return this.publish(this.routingKeys.EVENT_DELETED, event);
   }
-
   /**
-   * Publica evento de exame criado
+   * Publica evento de prova criada
    */
   async publishExamCreated(examType, examData, userId = null) {
     const event = {
-      data: {
-        examType,
-        examId: examData.id,
-        examData: {
-          name: examData.titulo,
-          description: examData.descricao,
-          date: examData.data || new Date().toISOString(),
-        },
-        userId: userId || examData.userId || 'user-default',
-        action: 'CREATED'
-      }
+      data: examData
     };
 
-    // Usar a fila diretamente, não o routing key
-    return this.publish(this.queues.EXAM_CREATED, event);
+    // Usar a routing key específica para notificações de prova
+    return this.publish('notificacao.prova.criada', event);
   }
 
   /**
@@ -379,49 +369,48 @@ class RabbitMQService {
   }
 
   /**
-   * Publica uma mensagem genérica
+   * Método básico para publicar eventos
    */
-  async publish(queueName, message, options = {}) {
+  async publish(routingKey, data, options = {}) {
     if (!this.isConnected || !this.channel) {
-      logger.warn('⚠️ RabbitMQ não conectado, pulando publicação', { queueName });
+      logger.error('❌ RabbitMQ não conectado para publicar evento', { routingKey });
       return false;
     }
 
     try {
-      // Garantir que a fila existe
-      await this.channel.assertQueue(queueName, { durable: true });
-
-      const messageBuffer = Buffer.from(JSON.stringify({
-        ...message,
+      const message = {
+        messageId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         timestamp: new Date().toISOString(),
-        service: this.config.serviceName,
-        messageId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      }));
-
-      const publishOptions = {
-        persistent: true,
-        timestamp: Date.now(),
-        ...options
+        source: this.config.serviceName,
+        routingKey,
+        data
       };
 
-      // Enviar diretamente para a fila
-      const published = this.channel.sendToQueue(
-        queueName,
+      const messageBuffer = Buffer.from(JSON.stringify(message));
+
+      const published = await this.channel.publish(
+        this.config.exchange,
+        routingKey,
         messageBuffer,
-        publishOptions
+        {
+          persistent: true,
+          timestamp: Date.now(),
+          ...options
+        }
       );
 
       if (published) {
-        logger.info('📤 Evento publicado', {
-          queueName,
-          messageId: JSON.parse(messageBuffer.toString()).messageId
+        logger.info('📤 Evento publicado com sucesso', {
+          routingKey,
+          messageId: message.messageId,
+          exchange: this.config.exchange
         });
       }
 
       return published;
     } catch (error) {
       logger.error('❌ Erro ao publicar evento', {
-        queueName,
+        routingKey,
         error: error.message
       });
       return false;
@@ -429,49 +418,77 @@ class RabbitMQService {
   }
 
   /**
-   * Manipula erros de conexão
+   * Publica evento simples de notificação para evento criado
+   */
+  async publishEventoNotificacao(eventoData) {
+    const event = {
+      data: {
+        ...eventoData,
+        userId: eventoData.userId || 'user-default'
+      }
+    };
+
+    return this.publish('notificacao.evento.criado', event);
+  }
+
+  /**
+   * Publica evento simples de notificação para sessão criada
+   */
+  async publishSessaoNotificacao(sessaoData) {
+    const event = {
+      data: {
+        ...sessaoData,
+        userId: sessaoData.userId || 'user-default'
+      }
+    };
+
+    return this.publish('notificacao.sessao.criada', event);
+  }
+
+  /**
+   * Tratamento de erro de conexão
    */
   handleConnectionError(error) {
-    logger.error('❌ Erro de conexão RabbitMQ', { error: error.message });
+    logger.error('❌ Erro na conexão RabbitMQ', { error: error.message });
     this.isConnected = false;
   }
 
   /**
-   * Manipula fechamento de conexão
+   * Tratamento de fechamento de conexão
    */
   async handleConnectionClose() {
-    logger.warn('⚠️ Conexão RabbitMQ fechada');
+    logger.warn('⚠️ Conexão RabbitMQ fechada. Tentando reconectar...');
     this.isConnected = false;
     await this.handleReconnect();
   }
 
   /**
-   * Manipula erros de canal
+   * Tratamento de erro de canal
    */
   handleChannelError(error) {
-    logger.error('❌ Erro de canal RabbitMQ', { error: error.message });
+    logger.error('❌ Erro no canal RabbitMQ', { error: error.message });
+    this.isConnected = false;
   }
 
   /**
-   * Gerencia reconexão automática
+   * Lógica de reconexão automática
    */
   async handleReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      logger.error('💀 Máximo de tentativas de reconexão atingido');
+      logger.error('❌ Máximo de tentativas de reconexão atingido');
       return;
     }
 
     this.reconnectAttempts++;
+    logger.info(`🔄 Tentativa de reconexão ${this.reconnectAttempts}/${this.maxReconnectAttempts} em ${this.reconnectDelay}ms...`);
 
-    logger.info(`🔄 Tentativa de reconexão ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`);
-
-    setTimeout(async () => {
-      await this.connect();
+    setTimeout(() => {
+      this.connect();
     }, this.reconnectDelay);
   }
 
   /**
-   * Fecha conexão graciosamente
+   * Fecha a conexão
    */
   async close() {
     try {
@@ -482,20 +499,20 @@ class RabbitMQService {
         await this.connection.close();
       }
       this.isConnected = false;
-      logger.info('🔒 Conexão RabbitMQ fechada');
+      logger.info('✅ Conexão RabbitMQ fechada com sucesso');
     } catch (error) {
       logger.error('❌ Erro ao fechar conexão RabbitMQ', { error: error.message });
     }
   }
-
   /**
-   * Verifica se está conectado
+   * Verifica se a conexão está saudável
    */
   isHealthy() {
-    return this.isConnected && this.connection && !this.connection.connection.stream.destroyed;
+    return this.isConnected && this.connection && this.channel;
   }
 }
 
-// Singleton instance
-const rabbitMQService = new RabbitMQService();
-export default rabbitMQService;
+// Singleton - criar única instância do serviço
+const rabbitMQServiceInstance = new RabbitMQService();
+
+export default rabbitMQServiceInstance;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../components/input_widget.dart';
+import '../../shared/models/materia_model.dart';
 import '../../shared/models/prova_model.dart';
 import '../../shared/services/prova_service.dart';
 import '../../shared/services/materia_service.dart';
@@ -17,7 +17,6 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
   final TextEditingController dataProvaController = TextEditingController();
   final TextEditingController localController = TextEditingController();
   final TextEditingController descricaoController = TextEditingController();
-  final TextEditingController totalQuestoesController = TextEditingController();
 
   DateTime? _dataSelecionada;
   TimeOfDay? _horarioSelecionado;
@@ -47,166 +46,491 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
 
   Future<void> _criarNovaMateria() async {
     final TextEditingController nomeMateria = TextEditingController();
-    final TextEditingController categoriaMateria = TextEditingController();
+    final TextEditingController descricaoMateria = TextEditingController();
     String? categoriaSelecionada = 'Exatas';
 
-    final result = await showDialog<bool>(
+    await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: Row(
-                children: [
-                  Icon(
-                    Icons.add_circle,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  const Text('Nova Matéria'),
-                ],
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-              content: SizedBox(
-                width: double.maxFinite,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    InputWidget(
-                      labelText: 'Nome da matéria',
-                      controller: nomeMateria,
+                    // Header do dialog
+                    Container(
                       width: double.infinity,
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: categoriaSelecionada,
-                      decoration: const InputDecoration(
-                        labelText: 'Categoria',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.category),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer.withOpacity(0.8),
+                            Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer.withOpacity(0.4),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Exatas',
-                          child: Text('Exatas'),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Icon(
+                              Icons.school_rounded,
+                              size: 32,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Nova Matéria',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Adicione uma nova matéria aos seus estudos',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Campos do formulário
+                    _buildDialogInputField(
+                      label: 'Nome da matéria',
+                      controller: nomeMateria,
+                      icon: Icons.book_rounded,
+                      hint: 'Ex: Matemática, História, Química...',
+                      isRequired: true,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    _buildDialogInputField(
+                      label: 'Descrição',
+                      controller: descricaoMateria,
+                      icon: Icons.description_rounded,
+                      hint: 'Adicione uma descrição opcional',
+                      maxLines: 2,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Dropdown de categoria melhorado
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.category_rounded,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Categoria',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '*',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        DropdownMenuItem(
-                          value: 'Humanas',
-                          child: Text('Humanas'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Biológicas',
-                          child: Text('Biológicas'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Línguas',
-                          child: Text('Línguas'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Outras',
-                          child: Text('Outras'),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outline.withOpacity(0.2),
+                            ),
+                          ),
+                          child: DropdownButtonFormField<String>(
+                            value: categoriaSelecionada,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withOpacity(0.3),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                            ),
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            items: [
+                              _buildCategoryItem(
+                                'Exatas',
+                                Icons.calculate_rounded,
+                                Colors.blue,
+                              ),
+                              _buildCategoryItem(
+                                'Humanas',
+                                Icons.psychology_rounded,
+                                Colors.green,
+                              ),
+                              _buildCategoryItem(
+                                'Biológicas',
+                                Icons.biotech_rounded,
+                                Colors.orange,
+                              ),
+                              _buildCategoryItem(
+                                'Línguas',
+                                Icons.translate_rounded,
+                                Colors.purple,
+                              ),
+                              _buildCategoryItem(
+                                'Outras',
+                                Icons.category_rounded,
+                                Colors.grey,
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setStateDialog(() {
+                                categoriaSelecionada = value;
+                              });
+                            },
+                          ),
                         ),
                       ],
-                      onChanged: (value) {
-                        setStateDialog(() {
-                          categoriaSelecionada = value;
-                        });
-                      },
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Botões de ação
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed:
+                                _isCreatingMateria
+                                    ? null
+                                    : () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.outline.withOpacity(0.3),
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              'Cancelar',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed:
+                                _isCreatingMateria
+                                    ? null
+                                    : () async {
+                                      if (nomeMateria.text.trim().isEmpty) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: const Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.warning_rounded,
+                                                  color: Colors.white,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  'Por favor, insira o nome da matéria',
+                                                ),
+                                              ],
+                                            ),
+                                            backgroundColor:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.error,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      setStateDialog(() {
+                                        _isCreatingMateria = true;
+                                      });
+
+                                      try {
+                                        // Criar objeto Materia
+                                        final novaMateria = Materia(
+                                          id: '', // Será preenchido pela API
+                                          nome: nomeMateria.text.trim(),
+                                          disciplina:
+                                              categoriaSelecionada ?? 'Outras',
+                                          descricao:
+                                              descricaoMateria.text
+                                                      .trim()
+                                                      .isEmpty
+                                                  ? null
+                                                  : descricaoMateria.text
+                                                      .trim(),
+                                          createdAt: DateTime.now(),
+                                          updatedAt: DateTime.now(),
+                                        );
+
+                                        final materiaCreated =
+                                            await MateriaService.criarMateria(
+                                              novaMateria,
+                                            );
+
+                                        // Adicionar à lista local
+                                        setState(() {
+                                          _materias.add(materiaCreated);
+                                          // Selecionar automaticamente a nova matéria
+                                          _materiasSelecionadasIds.add(
+                                            materiaCreated.id,
+                                          );
+                                        });
+
+                                        if (mounted) {
+                                          Navigator.of(context).pop(true);
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Row(
+                                                children: [
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.all(6),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white
+                                                          .withOpacity(0.2),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
+                                                          ),
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons
+                                                          .check_circle_rounded,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Text(
+                                                          'Matéria criada com sucesso!',
+                                                          style:
+                                                              const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color:
+                                                                    Colors
+                                                                        .white,
+                                                              ),
+                                                        ),
+                                                        Text(
+                                                          '"${materiaCreated.nome}" foi adicionada e selecionada',
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: Colors.white
+                                                                .withOpacity(
+                                                                  0.9,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              backgroundColor: Colors.green,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              duration: const Duration(
+                                                seconds: 4,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.error_rounded,
+                                                    color: Colors.white,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Text(
+                                                      'Erro ao criar matéria: $e',
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              backgroundColor:
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.error,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        if (mounted) {
+                                          setStateDialog(() {
+                                            _isCreatingMateria = false;
+                                          });
+                                        }
+                                      }
+                                    },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 0,
+                            ),
+                            child:
+                                _isCreatingMateria
+                                    ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                    : const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.add_rounded, size: 20),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Criar Matéria',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed:
-                      _isCreatingMateria
-                          ? null
-                          : () {
-                            Navigator.of(context).pop(false);
-                          },
-                  child: const Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed:
-                      _isCreatingMateria
-                          ? null
-                          : () async {
-                            if (nomeMateria.text.trim().isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Por favor, insira o nome da matéria',
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-
-                            setStateDialog(() {
-                              _isCreatingMateria = true;
-                            });
-
-                            try {
-                              // Criar objeto Materia
-                              final novaMateria = Materia(
-                                id: '', // Será preenchido pela API
-                                nome: nomeMateria.text.trim(),
-                                disciplina: categoriaSelecionada ?? 'Outras',
-                                descricao: categoriaSelecionada ?? 'Outras',
-                                createdAt: DateTime.now(),
-                                updatedAt: DateTime.now(),
-                              );
-
-                              final materiaCreated =
-                                  await MateriaService.criarMateria(
-                                    novaMateria,
-                                  );
-
-                              // Adicionar à lista local
-                              setState(() {
-                                _materias.add(materiaCreated);
-                                // Selecionar automaticamente a nova matéria
-                                _materiasSelecionadasIds.add(materiaCreated.id);
-                              });
-
-                              if (mounted) {
-                                Navigator.of(context).pop(true);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Matéria "${materiaCreated.nome}" criada e selecionada!',
-                                    ),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              }
-                            } catch (e) {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Erro ao criar matéria: $e'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            } finally {
-                              if (mounted) {
-                                setStateDialog(() {
-                                  _isCreatingMateria = false;
-                                });
-                              }
-                            }
-                          },
-                  child:
-                      _isCreatingMateria
-                          ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                          : const Text('Criar'),
-                ),
-              ],
             );
           },
         );
@@ -268,22 +592,6 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
         _dataSelecionada!.day,
       );
 
-      // Converter total de questões se fornecido
-      int? totalQuestoes;
-      if (totalQuestoesController.text.isNotEmpty) {
-        totalQuestoes = int.tryParse(totalQuestoesController.text);
-        if (totalQuestoes == null || totalQuestoes <= 0) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Total de questões deve ser um número válido maior que zero',
-              ),
-            ),
-          );
-          return;
-        }
-      }
-
       final novaProva = Prova(
         id: '', // Será gerado pelo backend
         titulo: nomeController.text,
@@ -294,7 +602,6 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
         local: localController.text,
         materiasIds: _materiasSelecionadasIds,
         filtros: null,
-        totalQuestoes: totalQuestoes,
         createdAt: DateTime.now().toUtc(),
         updatedAt: DateTime.now().toUtc(),
       );
@@ -366,236 +673,648 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
     return true;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 8),
-              const Center(
-                child: Text(
-                  'Adicionar Prova',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  // Métodos auxiliares para o dialog de criação de matéria
+  Widget _buildDialogInputField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    String? hint,
+    int maxLines = 1,
+    bool isRequired = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            if (isRequired) ...[
+              const SizedBox(width: 4),
+              Text(
+                '*',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const Divider(height: 32),
-
-              InputWidget(
-                labelText: 'Nome da prova',
-                controller: nomeController,
-                width: double.infinity,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.title_outlined),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              InputWidget(
-                labelText: 'Descrição (opcional)',
-                controller: descricaoController,
-                width: double.infinity,
-                maxLines: 3,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.description_outlined),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              InputWidget(
-                labelText: 'Data da prova',
-                controller: dataProvaController,
-                width: double.infinity,
-                readOnly: true,
-                onTap: _selecionarData,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.calendar_today_outlined),
-                  suffixIcon: const Icon(Icons.calendar_today),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Campo de horário
-              TextField(
-                readOnly: true,
-                onTap: _selecionarHorario,
-                decoration: InputDecoration(
-                  labelText: 'Horário da prova',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.access_time_outlined),
-                  suffixIcon: const Icon(Icons.access_time),
-                  hintText:
-                      _horarioSelecionado != null
-                          ? _horarioSelecionado!.format(context)
-                          : 'Selecione o horário',
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              InputWidget(
-                labelText: 'Local da prova',
-                controller: localController,
-                width: double.infinity,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.location_on_outlined),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              InputWidget(
-                labelText: 'Total de questões (opcional)',
-                controller: totalQuestoesController,
-                width: double.infinity,
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.done,
-                hintText: 'Ex: 10, 20, 50...',
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.format_list_numbered_outlined),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Seleção múltipla de matérias
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.school,
-                            color: Theme.of(context).colorScheme.primary,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Matérias da Prova',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Toque nas matérias para selecioná-las:',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      if (_materias.isEmpty)
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[50],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey[300]!),
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    color: Colors.grey[600],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Nenhuma matéria disponível',
-                                    style: TextStyle(color: Colors.grey[600]),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              _buildCreateMateriaChip(),
-                            ],
-                          ),
-                        )
-                      else
-                        _buildMateriasSelection(),
-
-                      if (_materiasSelecionadasIds.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.check_circle,
-                                color: Theme.of(context).colorScheme.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '${_materiasSelecionadasIds.length} matéria${_materiasSelecionadasIds.length > 1 ? 's' : ''} selecionada${_materiasSelecionadasIds.length > 1 ? 's' : ''}',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 80), // Espaço para o botão flutuante
             ],
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            hintText: hint,
+            filled: true,
+            fillColor: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
           ),
         ),
+      ],
+    );
+  }
+
+  DropdownMenuItem<String> _buildCategoryItem(
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 18, color: color),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            value,
+            style: TextStyle(fontWeight: FontWeight.w500, color: color),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
+    );
+  }
+
+  // Métodos auxiliares para o novo design
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernInputField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    String? hint,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+    bool isRequired = false,
+    IconData? suffixIcon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            if (isRequired) ...[
+              const SizedBox(width: 4),
+              Text(
+                '*',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          readOnly: readOnly,
+          onTap: onTap,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: Icon(
+              icon,
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+            ),
+            suffixIcon:
+                suffixIcon != null
+                    ? Icon(
+                      suffixIcon,
+                      color: Theme.of(context).colorScheme.outline,
+                    )
+                    : null,
+            filled: true,
+            fillColor: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMateriasSection() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.school_rounded,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Matérias da Prova',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '*',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Selecione as matérias que serão abordadas na prova',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            if (_materias.isEmpty)
+              _buildEmptyMateriasState()
+            else
+              _buildMateriasSelection(),
+
+            if (_materiasSelecionadasIds.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _buildSelectedMateriasIndicator(),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyMateriasState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          style: BorderStyle.solid,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.school_outlined,
+            size: 48,
+            color: Theme.of(context).colorScheme.outline,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Nenhuma matéria disponível',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Crie uma nova matéria para começar',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          _buildCreateMateriaChip(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectedMateriasIndicator() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.8),
+            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.4),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              Icons.check,
+              color: Theme.of(context).colorScheme.onPrimary,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '${_materiasSelecionadasIds.length} matéria${_materiasSelecionadasIds.length > 1 ? 's' : ''} selecionada${_materiasSelecionadasIds.length > 1 ? 's' : ''}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSaveButton() {
+    return Container(
+      height: 56,
+      width: 56,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary.withOpacity(0.8),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: FloatingActionButton(
         heroTag: "adicionar_prova_save_fab",
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         onPressed: _isLoading ? null : _criarProva,
-        backgroundColor: Theme.of(context).colorScheme.primary,
         child:
             _isLoading
                 ? SizedBox(
-                  width: 20,
-                  height: 20,
+                  width: 24,
+                  height: 24,
                   child: CircularProgressIndicator(
                     color: Theme.of(context).colorScheme.onPrimary,
-                    strokeWidth: 2,
+                    strokeWidth: 2.5,
                   ),
                 )
                 : Icon(
-                  Icons.check,
+                  Icons.check_rounded,
                   color: Theme.of(context).colorScheme.onPrimary,
+                  size: 28,
                 ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Adicionar Prova',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header com ícone e descrição
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withOpacity(0.8),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withOpacity(0.4),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Icon(
+                      Icons.quiz_rounded,
+                      size: 32,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Organize seus estudos',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Preencha as informações da sua prova',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Seção de Informações Básicas
+            _buildSection(
+              title: 'Informações Básicas',
+              icon: Icons.info_outline_rounded,
+              children: [
+                _buildModernInputField(
+                  label: 'Nome da prova',
+                  controller: nomeController,
+                  icon: Icons.title_rounded,
+                  hint: 'Ex: Vestibular UFMG, ENEM 2024...',
+                  isRequired: true,
+                ),
+
+                const SizedBox(height: 16),
+
+                _buildModernInputField(
+                  label: 'Descrição',
+                  controller: descricaoController,
+                  icon: Icons.description_rounded,
+                  hint: 'Adicione detalhes sobre a prova (opcional)',
+                  maxLines: 3,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Seção de Data e Horário
+            _buildSection(
+              title: 'Data e Horário',
+              icon: Icons.schedule_rounded,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: _buildModernInputField(
+                        label: 'Data da prova',
+                        controller: dataProvaController,
+                        icon: Icons.calendar_today_rounded,
+                        hint: 'Selecione a data',
+                        readOnly: true,
+                        onTap: _selecionarData,
+                        isRequired: true,
+                        suffixIcon: Icons.calendar_month,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildModernInputField(
+                        label: 'Horário',
+                        controller: TextEditingController(
+                          text: _horarioSelecionado?.format(context) ?? '',
+                        ),
+                        icon: Icons.access_time_rounded,
+                        hint: 'Hora',
+                        readOnly: true,
+                        onTap: _selecionarHorario,
+                        isRequired: true,
+                        suffixIcon: Icons.schedule,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Seção de Local e Questões
+            _buildSection(
+              title: 'Detalhes da Prova',
+              icon: Icons.location_on_rounded,
+              children: [
+                _buildModernInputField(
+                  label: 'Local da prova',
+                  controller: localController,
+                  icon: Icons.place_rounded,
+                  hint: 'Ex: Campus Pampulha, Colégio XYZ...',
+                  isRequired: true,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Seção de Matérias
+            _buildMateriasSection(),
+
+            const SizedBox(height: 100), // Espaço para o FAB
+          ],
+        ),
+      ),
+      floatingActionButton: _buildSaveButton(),
     );
   }
 
@@ -604,17 +1323,15 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
       onTap: _isCreatingMateria ? null : _criarNovaMateria,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color:
-              _isCreatingMateria
-                  ? Theme.of(context).colorScheme.primary.withOpacity(0.7)
-                  : Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
+          color: Theme.of(
+            context,
+          ).colorScheme.primaryContainer.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: Theme.of(context).colorScheme.primary,
             width: 2,
-            style: BorderStyle.values[1], // dashed style
           ),
         ),
         child: Row(
@@ -625,7 +1342,7 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  color: Theme.of(context).colorScheme.primary,
                   strokeWidth: 2,
                 ),
               )
@@ -635,16 +1352,13 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
                 size: 16,
                 color: Theme.of(context).colorScheme.primary,
               ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             Text(
               'Criar Nova Matéria',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
-                color:
-                    _isCreatingMateria
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ],
@@ -658,7 +1372,9 @@ class _AdicionarProvaPageState extends State<AdicionarProvaPage> {
     final Map<String, List<Materia>> materiasPorCategoria = {};
     for (final materia in _materias) {
       final categoria =
-          materia.categoria.isNotEmpty ? materia.categoria : 'Outras';
+          materia.disciplina?.isNotEmpty == true
+              ? materia.disciplina!
+              : 'Outras';
       materiasPorCategoria.putIfAbsent(categoria, () => []).add(materia);
     }
 

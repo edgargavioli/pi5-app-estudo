@@ -14,10 +14,9 @@ class RabbitMQService {
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 10;
     this.reconnectDelay = 5000;
-    
     // Configurações do ambiente
     this.config = {
-      url: process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672/',
+      url: process.env.RABBITMQ || process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672/',
       exchange: process.env.RABBITMQ_EXCHANGE || 'pi5_events',
       serviceName: process.env.SERVICE_NAME || 'user-service'
     };
@@ -27,7 +26,7 @@ class RabbitMQService {
       // User Service Queues
       USER_POINTS_UPDATES: `${this.config.serviceName}.points.updates`,
       USER_ACHIEVEMENTS: `${this.config.serviceName}.achievements`,
-      
+
       // Dead Letter Queue
       DEAD_LETTER: `${this.config.serviceName}.dead_letter`
     };
@@ -37,7 +36,7 @@ class RabbitMQService {
       SESSAO_CRIADA: 'provas.sessao.criada',
       SESSAO_FINALIZADA: 'provas.sessao.finalizada',
       PROVA_FINALIZADA: 'provas.prova.finalizada',
-      
+
       // Eventos que User Service PUBLICA
       PONTOS_ATUALIZADOS: 'user.pontos.atualizados',
       NIVEL_ALTERADO: 'user.nivel.alterado',
@@ -50,14 +49,14 @@ class RabbitMQService {
    */
   async connect() {
     try {
-      logger.info('Tentando conectar ao RabbitMQ...', { 
+      logger.info('Tentando conectar ao RabbitMQ...', {
         url: this.config.url.replace(/\/\/.*@/, '//***:***@'),
-        attempt: this.reconnectAttempts + 1 
+        attempt: this.reconnectAttempts + 1
       });
 
       this.connection = await amqp.connect(this.config.url);
       this.channel = await this.connection.createChannel();
-      
+
       // Configurar tratamento de erros
       this.connection.on('error', this.handleConnectionError.bind(this));
       this.connection.on('close', this.handleConnectionClose.bind(this));
@@ -71,10 +70,10 @@ class RabbitMQService {
 
       // Configurar filas
       await this.setupQueues();
-      
+
       this.isConnected = true;
       this.reconnectAttempts = 0;
-      
+
       logger.info('✅ Conectado ao RabbitMQ com sucesso!', {
         exchange: this.config.exchange,
         serviceName: this.config.serviceName
@@ -82,11 +81,11 @@ class RabbitMQService {
 
       return true;
     } catch (error) {
-      logger.error('❌ Erro ao conectar ao RabbitMQ', { 
+      logger.error('❌ Erro ao conectar ao RabbitMQ', {
         error: error.message,
-        attempt: this.reconnectAttempts + 1 
+        attempt: this.reconnectAttempts + 1
       });
-      
+
       await this.handleReconnect();
       return false;
     }
@@ -220,7 +219,7 @@ class RabbitMQService {
 
         try {
           const content = JSON.parse(message.content.toString());
-          
+
           logger.info('📥 Mensagem recebida', {
             queue: queueName,
             routingKey: message.fields.routingKey,
@@ -229,10 +228,10 @@ class RabbitMQService {
 
           // Executar handler
           await handler(content, message);
-          
+
           // Acknowledge da mensagem
           this.channel.ack(message);
-          
+
           logger.info('✅ Mensagem processada com sucesso', {
             messageId: content.messageId
           });
@@ -295,9 +294,9 @@ class RabbitMQService {
     }
 
     this.reconnectAttempts++;
-    
+
     logger.info(`🔄 Tentativa de reconexão ${this.reconnectAttempts}/${this.maxReconnectAttempts}...`);
-    
+
     setTimeout(async () => {
       await this.connect();
     }, this.reconnectDelay);

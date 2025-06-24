@@ -26,8 +26,8 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
   void _navegarParaCronometro() {
     final cronometroService = CronometroService();
     if (cronometroService.hasActiveSession) {
-      // Navegar para a tela de estudos que gerencia as sessões
-      Navigator.pushNamed(context, AppRoutes.estudos);
+      // Mostrar diálogo informando sobre o novo fluxo de estudos
+      _showEstudosInfoDialog();
     }
   }
 
@@ -48,7 +48,8 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
                   Navigator.pushNamed(context, AppRoutes.materias);
                   break;
                 case 'estudos':
-                  Navigator.pushNamed(context, AppRoutes.estudos);
+                  // Mostrar um aviso sobre o novo fluxo de estudos
+                  _showEstudosInfoDialog();
                   break;
                 case 'perfil':
                   Navigator.pushNamed(context, AppRoutes.perfil);
@@ -58,48 +59,49 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
                   break;
               }
             },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: 'materias',
-                child: Row(
-                  children: [
-                    Icon(Icons.library_books),
-                    SizedBox(width: 8),
-                    Text('Matérias'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'estudos',
-                child: Row(
-                  children: [
-                    Icon(Icons.book),
-                    SizedBox(width: 8),
-                    Text('Estudos'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'perfil',
-                child: Row(
-                  children: [
-                    Icon(Icons.person),
-                    SizedBox(width: 8),
-                    Text('Perfil'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 8),
-                    Text('Sair'),
-                  ],
-                ),
-              ),
-            ],
+            itemBuilder:
+                (BuildContext context) => [
+                  const PopupMenuItem<String>(
+                    value: 'materias',
+                    child: Row(
+                      children: [
+                        Icon(Icons.library_books),
+                        SizedBox(width: 8),
+                        Text('Matérias'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'estudos',
+                    child: Row(
+                      children: [
+                        Icon(Icons.book),
+                        SizedBox(width: 8),
+                        Text('Estudos'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'perfil',
+                    child: Row(
+                      children: [
+                        Icon(Icons.person),
+                        SizedBox(width: 8),
+                        Text('Perfil'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout),
+                        SizedBox(width: 8),
+                        Text('Sair'),
+                      ],
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
@@ -110,9 +112,7 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
             currentIndex: _currentIndex,
           ),
           // Cronômetro flutuante
-          CronometroFlutuanteWidget(
-            onTapCronometro: _navegarParaCronometro,
-          ),
+          CronometroFlutuanteWidget(onTapCronometro: _navegarParaCronometro),
         ],
       ),
       bottomNavigationBar: BottonNavBarWidget(
@@ -140,6 +140,41 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
                 AppRoutes.logout(context);
               },
               child: const Text('Sair'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEstudosInfoDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Estudos'),
+          content: const Text(
+            'Para uma melhor experiência de estudos, acesse a página de estudos através de uma prova específica. '
+            'Vá para "Provas" e selecione a prova que deseja estudar.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushNamed(context, AppRoutes.estudos);
+              },
+              child: const Text('Continuar mesmo assim'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushNamed(context, AppRoutes.provas);
+              },
+              child: const Text('Ir para Provas'),
             ),
           ],
         );

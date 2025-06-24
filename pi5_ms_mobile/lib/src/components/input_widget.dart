@@ -22,7 +22,6 @@ class InputWidget extends StatelessWidget {
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
   final TextInputAction? textInputAction;
-
   const InputWidget({
     super.key,
     required this.labelText,
@@ -31,7 +30,7 @@ class InputWidget extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
     this.width = 200.0,
-    this.height = 50.0,
+    this.height = 65.0,
     this.style,
     this.textAlign = TextAlign.start,
     this.maxLength,
@@ -58,11 +57,13 @@ class InputWidget extends StatelessWidget {
         controller: controller,
         keyboardType: keyboardType,
         obscureText: obscureText,
-        style: style ?? TextStyle(
-          color: colorScheme.onSurface,
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
+        style:
+            style ??
+            TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
         textAlign: textAlign,
         maxLength: maxLength,
         maxLines: maxLines,
@@ -75,48 +76,121 @@ class InputWidget extends StatelessWidget {
         validator: validator,
         textInputAction: textInputAction,
         decoration:
-            decoration ??
+            decoration?.copyWith(
+              labelText: decoration?.labelText ?? labelText,
+              hintText: decoration?.hintText ?? hintText,
+              floatingLabelBehavior:
+                  decoration?.floatingLabelBehavior ??
+                  FloatingLabelBehavior.always,
+              suffixIcon: decoration?.suffixIcon ?? suffixIcon,
+              hintStyle:
+                  decoration?.hintStyle ??
+                  TextStyle(
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+              labelStyle:
+                  decoration?.labelStyle ??
+                  TextStyle(
+                    color: colorScheme.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+              border:
+                  decoration?.border ??
+                  OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    borderSide: BorderSide(
+                      color: colorScheme.outline,
+                      width: 1.5,
+                    ),
+                  ),
+              enabledBorder:
+                  decoration?.enabledBorder ??
+                  OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    borderSide: BorderSide(
+                      color: colorScheme.outline.withValues(alpha: 0.5),
+                      width: 1.5,
+                    ),
+                  ),
+              focusedBorder:
+                  decoration?.focusedBorder ??
+                  OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    borderSide: BorderSide(
+                      color: colorScheme.primary,
+                      width: 2.0,
+                    ),
+                  ),
+              errorBorder:
+                  decoration?.errorBorder ??
+                  OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    borderSide: BorderSide(
+                      color: colorScheme.error,
+                      width: 2.0,
+                    ),
+                  ),
+              focusedErrorBorder:
+                  decoration?.focusedErrorBorder ??
+                  OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    borderSide: BorderSide(
+                      color: colorScheme.error,
+                      width: 2.0,
+                    ),
+                  ),
+              filled: decoration?.filled ?? true,
+              fillColor: decoration?.fillColor ?? colorScheme.surfaceContainer,
+              contentPadding:
+                  decoration?.contentPadding ??
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            ) ??
             InputDecoration(
               labelText: labelText,
               hintText: hintText,
               floatingLabelBehavior: FloatingLabelBehavior.always,
               suffixIcon: suffixIcon,
               hintStyle: TextStyle(
-                color: colorScheme.onSurface.withOpacity(0.8),
+                color: colorScheme.onSurface.withValues(alpha: 0.6),
                 fontSize: 16,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
               ),
               labelStyle: TextStyle(
                 color: colorScheme.primary,
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: BorderSide(
-                  color: colorScheme.outline,
-                  width: 1.5,
-                ),
+                borderRadius: BorderRadius.circular(12.0),
+                borderSide: BorderSide(color: colorScheme.outline, width: 1.5),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
+                borderRadius: BorderRadius.circular(12.0),
                 borderSide: BorderSide(
-                  color: colorScheme.outline.withOpacity(0.7),
+                  color: colorScheme.outline.withValues(alpha: 0.5),
                   width: 1.5,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: BorderSide(
-                  color: colorScheme.primary,
-                  width: 2,
-                ),
+                borderRadius: BorderRadius.circular(12.0),
+                borderSide: BorderSide(color: colorScheme.primary, width: 2.0),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                borderSide: BorderSide(color: colorScheme.error, width: 2.0),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                borderSide: BorderSide(color: colorScheme.error, width: 2.0),
               ),
               filled: true,
               fillColor: colorScheme.surfaceContainer,
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
+                horizontal: 20,
+                vertical: 20,
               ),
             ),
       ),

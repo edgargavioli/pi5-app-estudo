@@ -22,7 +22,7 @@
     "schema": "src/infrastructure/persistence/prisma/schema.prisma"
   },
   "dependencies": {
-    "@prisma/client": "^6.9.0",
+    "@prisma/client": "^6.10.1",
     "amqplib": "^0.10.3",
     "axios": "^1.9.0",
     "compression": "^1.7.4",
@@ -46,6 +46,6 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
-    "prisma": "^6.9.0"
+    "prisma": "^6.10.1"
   }
 }
