@@ -1,0 +1,67 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter - Métricas do sistema
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # User Service
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['user-service:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+
+  # Provas Service  
+  - job_name: 'provas-service'
+    static_configs:
+      - targets: ['provas-service:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+
+  # Notifications Service
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['notification-service:4040']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+
+  # PostgreSQL Exporters
+  - job_name: 'postgres-user'
+    static_configs:
+      - targets: ['postgres-user:5432']
+    scrape_interval: 10s
+
+  - job_name: 'postgres-provas'
+    static_configs:
+      - targets: ['postgres-provas:5432']
+    scrape_interval: 10s
+
+  - job_name: 'postgres-notifications'
+    static_configs:
+      - targets: ['postgres-notifications:5432']
+    scrape_interval: 10s
+
+  # RabbitMQ Management Plugin
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq-broker:15692']
+    scrape_interval: 10s
+
+  # Docker containers metrics
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['host.docker.internal:9323']
+    scrape_interval: 10s

@@ -4,7 +4,7 @@ import 'auth_service.dart';
 
 class EstatisticasProvasService {
   // URL do microsserviço de provas
-  static const String _baseUrl = 'http://10.0.2.2:3001/api';
+  static const String _baseUrl = 'http://10.0.2.2:3002/api';
 
   /// Obtém estatísticas das provas por status
   static Future<Map<String, dynamic>> obterEstatisticasPorStatus() async {

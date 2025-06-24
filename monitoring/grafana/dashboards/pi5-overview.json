@@ -1,0 +1,267 @@
+{
+    "id": null,
+    "title": "PI5 - Microsserviços Overview",
+    "tags": [
+        "pi5",
+        "microservices",
+        "overview"
+    ],
+    "timezone": "browser",
+    "refresh": "5s",
+    "time": {
+        "from": "now-1h",
+        "to": "now"
+    },
+    "panels": [
+        {
+            "id": 1,
+            "title": "Services Status",
+            "type": "stat",
+            "targets": [
+                {
+                    "expr": "up{job=~\"user-service|provas-service|notification-service\"}",
+                    "legendFormat": "{{job}}"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "thresholds": {
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": 0
+                            },
+                            {
+                                "color": "green",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "mappings": [
+                        {
+                            "options": {
+                                "0": {
+                                    "text": "DOWN"
+                                }
+                            },
+                            "type": "value"
+                        },
+                        {
+                            "options": {
+                                "1": {
+                                    "text": "UP"
+                                }
+                            },
+                            "type": "value"
+                        }
+                    ]
+                }
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "id": 2,
+            "title": "Request Rate (req/sec)",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "rate(http_requests_total{job=~\"user-service|provas-service|notification-service\"}[5m])",
+                    "legendFormat": "{{job}} - {{method}} {{status}}"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 0
+            },
+            "yAxes": [
+                {
+                    "label": "Requests/sec",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "title": "Response Time (ms)",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.95, rate(http_request_duration_ms_bucket{job=~\"user-service|provas-service|notification-service\"}[5m]))",
+                    "legendFormat": "{{job}} - 95th percentile"
+                },
+                {
+                    "expr": "histogram_quantile(0.50, rate(http_request_duration_ms_bucket{job=~\"user-service|provas-service|notification-service\"}[5m]))",
+                    "legendFormat": "{{job}} - 50th percentile"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 8
+            },
+            "yAxes": [
+                {
+                    "label": "Response Time (ms)",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "title": "Memory Usage",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "process_resident_memory_bytes{job=~\"user-service|provas-service|notification-service\"} / 1024 / 1024",
+                    "legendFormat": "{{job}} - RSS Memory (MB)"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 8
+            },
+            "yAxes": [
+                {
+                    "label": "Memory (MB)",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "title": "CPU Usage",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "rate(process_cpu_seconds_total{job=~\"user-service|provas-service|notification-service\"}[5m]) * 100",
+                    "legendFormat": "{{job}} - CPU %"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 16
+            },
+            "yAxes": [
+                {
+                    "label": "CPU %",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "title": "Database Connections",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "pg_stat_database_numbackends{job=~\"postgres-.*\"}",
+                    "legendFormat": "{{job}} - Active Connections"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 16
+            },
+            "yAxes": [
+                {
+                    "label": "Connections",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "title": "RabbitMQ Queue Messages",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "rabbitmq_queue_messages{job=\"rabbitmq\"}",
+                    "legendFormat": "{{queue}} - Messages"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 24
+            },
+            "yAxes": [
+                {
+                    "label": "Messages",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "title": "System Load",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "node_load1{job=\"node-exporter\"}",
+                    "legendFormat": "Load 1m"
+                },
+                {
+                    "expr": "node_load5{job=\"node-exporter\"}",
+                    "legendFormat": "Load 5m"
+                },
+                {
+                    "expr": "node_load15{job=\"node-exporter\"}",
+                    "legendFormat": "Load 15m"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 24
+            },
+            "yAxes": [
+                {
+                    "label": "Load",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        }
+    ],
+    "schemaVersion": 27,
+    "version": 1
+}

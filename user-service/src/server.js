@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const promMid = require('express-prometheus-middleware');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -28,6 +29,15 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined'));
+
+// Prometheus metrics middleware
+app.use(promMid({
+  metricsPath: '/metrics',
+  collectDefaultMetrics: true,
+  requestDurationBuckets: [0.1, 0.5, 1, 1.5],
+  requestLengthBuckets: [515, 1024, 5120, 10240],
+  responseLengthBuckets: [515, 1024, 5120, 10240],
+}));
 
 // Logging middleware
 app.use(logger.logRequest.bind(logger));

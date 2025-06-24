@@ -1,0 +1,212 @@
+{
+    "id": null,
+    "title": "PI5 - Database Monitoring",
+    "tags": [
+        "pi5",
+        "database",
+        "postgresql"
+    ],
+    "timezone": "browser",
+    "refresh": "10s",
+    "time": {
+        "from": "now-1h",
+        "to": "now"
+    },
+    "panels": [
+        {
+            "id": 1,
+            "title": "Database Connections",
+            "type": "stat",
+            "targets": [
+                {
+                    "expr": "pg_stat_database_numbackends{job=~\"postgres-.*\"}",
+                    "legendFormat": "{{job}}"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "unit": "short"
+                }
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "id": 2,
+            "title": "Database Size",
+            "type": "stat",
+            "targets": [
+                {
+                    "expr": "pg_database_size_bytes{job=~\"postgres-.*\"} / 1024 / 1024",
+                    "legendFormat": "{{datname}} (MB)"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "unit": "decbytes"
+                }
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 8,
+                "y": 0
+            }
+        },
+        {
+            "id": 3,
+            "title": "Query Performance",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "rate(pg_stat_database_tup_returned{job=~\"postgres-.*\"}[5m])",
+                    "legendFormat": "{{job}} - Rows Returned/sec"
+                },
+                {
+                    "expr": "rate(pg_stat_database_tup_fetched{job=~\"postgres-.*\"}[5m])",
+                    "legendFormat": "{{job}} - Rows Fetched/sec"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 16,
+                "y": 0
+            },
+            "yAxes": [
+                {
+                    "label": "Rows/sec",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "title": "Transaction Rate",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "rate(pg_stat_database_xact_commit{job=~\"postgres-.*\"}[5m])",
+                    "legendFormat": "{{job}} - Commits/sec"
+                },
+                {
+                    "expr": "rate(pg_stat_database_xact_rollback{job=~\"postgres-.*\"}[5m])",
+                    "legendFormat": "{{job}} - Rollbacks/sec"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 8
+            },
+            "yAxes": [
+                {
+                    "label": "Transactions/sec",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "title": "Cache Hit Ratio",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "pg_stat_database_blks_hit{job=~\"postgres-.*\"} / (pg_stat_database_blks_hit{job=~\"postgres-.*\"} + pg_stat_database_blks_read{job=~\"postgres-.*\"}) * 100",
+                    "legendFormat": "{{job}} - Cache Hit %"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 8
+            },
+            "yAxes": [
+                {
+                    "label": "Hit Ratio %",
+                    "min": 0,
+                    "max": 100
+                },
+                {
+                    "show": false
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "title": "Lock Stats",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "pg_locks_count{job=~\"postgres-.*\"}",
+                    "legendFormat": "{{job}} - {{mode}}"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 16
+            },
+            "yAxes": [
+                {
+                    "label": "Locks",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "title": "Disk I/O",
+            "type": "graph",
+            "targets": [
+                {
+                    "expr": "rate(pg_stat_database_blks_read{job=~\"postgres-.*\"}[5m])",
+                    "legendFormat": "{{job}} - Blocks Read/sec"
+                },
+                {
+                    "expr": "rate(pg_stat_database_blks_hit{job=~\"postgres-.*\"}[5m])",
+                    "legendFormat": "{{job}} - Blocks Hit/sec"
+                }
+            ],
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 16
+            },
+            "yAxes": [
+                {
+                    "label": "Blocks/sec",
+                    "min": 0
+                },
+                {
+                    "show": false
+                }
+            ]
+        }
+    ],
+    "schemaVersion": 27,
+    "version": 1
+}

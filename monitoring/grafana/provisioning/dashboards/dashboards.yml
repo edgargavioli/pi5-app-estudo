@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: 'PI5 Dashboards'
+    orgId: 1
+    folder: 'PI5 Microsserviços'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
