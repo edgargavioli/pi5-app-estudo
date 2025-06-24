@@ -429,7 +429,7 @@ class EstatisticasService {
         print('❌ Token não encontrado para buscar estatísticas');
         return null;
       }
-      const baseUrl = 'http://10.0.2.2:3001'; // URL do microsserviço de provas
+      const baseUrl = 'http://10.0.2.2:3002'; // URL do microsserviço de provas
       var url = '$baseUrl/sessoes/estatisticas';
 
       if (provaId != null) {

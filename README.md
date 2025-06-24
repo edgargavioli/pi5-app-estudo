@@ -113,6 +113,14 @@ pi5_ms_mobile/                     # Flutter App Multiplataforma
 - **Environment Variables** para configuração flexível
 - **Logs Centralizados** com rotação automática
 
+### Monitoramento & Observabilidade
+- **Prometheus** para coleta e armazenamento de métricas
+- **Grafana** para dashboards e visualização de dados
+- **Node Exporter** para métricas do sistema operacional
+- **Alerting** configurável para eventos críticos
+- **Custom Dashboards** para microsserviços e bancos de dados
+- **Real-time Monitoring** de performance e recursos
+
 ## 📋 Pré-requisitos Detalhados
 
 ### Para Desenvolvimento Local
@@ -361,23 +369,32 @@ docker-compose logs -f --tail=50
 
 # Verificar saúde dos serviços
 curl http://localhost:3000/api/health  # User Service
-curl http://localhost:3001/api/health  # Provas Service  
+curl http://localhost:3002/api/health  # Provas Service  
 curl http://localhost:4040/api/health  # Notifications Service
+
+# Verificar serviços de monitoramento
+curl http://localhost:9090/-/healthy   # Prometheus
+curl http://localhost:3001/api/health  # Grafana
+curl http://localhost:9100/metrics     # Node Exporter
 ```
 
 **URLs dos Serviços Disponíveis:**
 - **User Service API**: http://localhost:3000
   - Swagger: http://localhost:3000/api-docs
   - Health: http://localhost:3000/api/health
-- **Provas Service API**: http://localhost:3001  
-  - Swagger: http://localhost:3001/api-docs
-  - Health: http://localhost:3001/api/health
+- **Provas Service API**: http://localhost:3002
+  - Swagger: http://localhost:3002/api-docs
+  - Health: http://localhost:3002/api/health
 - **Notifications Service API**: http://localhost:4040
   - Swagger: http://localhost:4040/api-docs
   - Health: http://localhost:4040/api/health
 - **RabbitMQ Management**: http://localhost:15672
   - Usuário: `admin` / Senha: `admin123`
 - **Adminer (Database UI)**: http://localhost:8080
+- **📊 Grafana (Monitoring)**: http://localhost:3001
+  - Usuário: `admin` / Senha: `admin123`
+- **📈 Prometheus (Metrics)**: http://localhost:9090
+- **🖥️ Node Exporter (System Metrics)**: http://localhost:9100
 
 **Credenciais para Adminer:**
 | Campo | Valor |
@@ -560,6 +577,17 @@ flutter run -d <device-id>
 - ✅ **API Documentation**: Swagger/OpenAPI 3.0 completo
 - ✅ **Database Migrations**: Versionamento automático de schema
 
+### 📊 Monitoramento e Observabilidade
+- ✅ **Prometheus Integration**: Coleta automática de métricas dos microsserviços
+- ✅ **Grafana Dashboards**: Visualização em tempo real de performance e recursos
+- ✅ **System Monitoring**: Node Exporter para métricas do sistema operacional
+- ✅ **Database Monitoring**: Métricas específicas de PostgreSQL e conexões
+- ✅ **API Performance**: Monitoramento de latência, throughput e taxa de erro
+- ✅ **Resource Tracking**: CPU, memória, disco e rede em tempo real
+- ✅ **Custom Dashboards**: Painéis específicos para cada microsserviço
+- ✅ **Health Checks**: Verificação automática de saúde dos serviços
+- ✅ **Alerting Ready**: Base preparada para configuração de alertas críticos
+
 ## 🧪 Testando o Sistema Completo
 
 ### Verificação Rápida da Infraestrutura
@@ -569,18 +597,23 @@ docker-compose ps
 
 # 2. Testar APIs de Health Check
 curl -f http://localhost:3000/api/health && echo "✓ User Service OK"
-curl -f http://localhost:3001/api/health && echo "✓ Provas Service OK"  
+curl -f http://localhost:3002/api/health && echo "✓ Provas Service OK"  
 curl -f http://localhost:4040/api/health && echo "✓ Notifications Service OK"
 
-# 3. Verificar conectividade do banco
+# 3. Verificar serviços de monitoramento
+curl -f http://localhost:9090/-/healthy && echo "✓ Prometheus OK"
+curl -f http://localhost:3001/api/health && echo "✓ Grafana OK"
+curl -f http://localhost:9100/metrics > /dev/null && echo "✓ Node Exporter OK"
+
+# 4. Verificar conectividade do banco
 docker exec postgres-user pg_isready -U postgres
 docker exec postgres-provas pg_isready -U postgres  
 docker exec postgres-notifications pg_isready -U postgres
 
-# 4. Verificar RabbitMQ Management
+# 5. Verificar RabbitMQ Management
 curl -u admin:admin123 http://localhost:15672/api/overview
 
-# 5. Verificar Adminer
+# 6. Verificar Adminer
 curl -f http://localhost:8080 && echo "✓ Adminer OK"
 ```
 

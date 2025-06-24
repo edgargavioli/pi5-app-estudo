@@ -5,7 +5,7 @@ import 'auth_service.dart';
 class ApiService {
   // 🌐 URLs DOS MICROSERVIÇOS
   static const String _userServiceUrl = 'http://10.0.2.2:3000';
-  static const String _provasServiceUrl = 'http://10.0.2.2:3001';
+  static const String _provasServiceUrl = 'http://10.0.2.2:3002';
 
   // 🔐 INSTÂNCIA DO SERVIÇO DE AUTENTICAÇÃO
   static final AuthService _authService = AuthService();
