@@ -22,9 +22,7 @@ export default class NotificationScheduler {
         } catch (error) {
             console.error('Error processing pending notifications:', error);
         }
-    }
-
-    async sendNotification(notification) {
+    } async sendNotification(notification) {
         console.log(
             notification
         )
@@ -34,9 +32,16 @@ export default class NotificationScheduler {
                 console.error(`User ${notification.userId} not found`);
                 await this.notificationPersistence.updateStatus(notification.id, 'FAILED');
                 return;
+            }            // Priorizar mensagens personalizadas do consumer, senão usar generateContent()
+            let content;
+            if (notification.entityData.notificationTitle && notification.entityData.notificationBody) {
+                content = {
+                    title: notification.entityData.notificationTitle,
+                    body: notification.entityData.notificationBody
+                };
+            } else {
+                content = notification.generateContent();
             }
-
-            const content = notification.generateContent();
 
             // Simula o envio (você pode comentar esta linha se quiser testar o Firebase real)
             console.log(`📱 Sending notification to user ${user.fcmToken}:`, content);

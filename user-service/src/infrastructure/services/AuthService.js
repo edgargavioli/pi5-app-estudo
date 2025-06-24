@@ -18,10 +18,20 @@ class AuthService {
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
         where: { email }
-      });
-
-      if (existingUser) {
-        throw new AppError('User already exists with this email', 400);
+      }); if (existingUser) {
+        throw new AppError(
+          'User already exists with this email',
+          400,
+          {
+            field: 'email',
+            value: email,
+            type: 'duplicate_user'
+          }
+        ).withContext({
+          action: 'user_registration',
+          existingUserId: existingUser.id,
+          existingUserCreatedAt: existingUser.createdAt
+        });
       }
 
       // Hash password
@@ -78,16 +88,37 @@ class AuthService {
       // Find user
       const user = await prisma.user.findUnique({
         where: { email }
-      });
-
-      if (!user) {
-        throw new AppError('Invalid credentials', 401);
+      }); if (!user) {
+        throw new AppError(
+          'Invalid credentials',
+          401,
+          {
+            field: 'email',
+            type: 'user_not_found'
+          }
+        ).withContext({
+          action: 'user_login',
+          attemptedEmail: email,
+          timestamp: new Date().toISOString()
+        });
       }
 
       // Verify password
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
-        throw new AppError('Invalid credentials', 401);
+        throw new AppError(
+          'Invalid credentials',
+          401,
+          {
+            field: 'password',
+            type: 'invalid_password'
+          }
+        ).withContext({
+          action: 'user_login',
+          userId: user.id,
+          lastLogin: user.lastLogin,
+          timestamp: new Date().toISOString()
+        });
       }
 
       // Update last login
@@ -150,7 +181,7 @@ class AuthService {
     try {
       // Verificar o refresh token
       const decoded = this.verifyToken(refreshToken);
-      
+
       // Buscar usuário no banco
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId }

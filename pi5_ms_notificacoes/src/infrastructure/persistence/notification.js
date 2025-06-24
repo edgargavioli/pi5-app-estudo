@@ -4,17 +4,23 @@ import Notification from "../../domain/entities/notification.js";
 export default class NotificationPersistence {
     constructor() {
         this.prisma = prisma;
-    }
-
-    async create(notificationData) {
+    } async create(notificationData) {
         try {
+            // Incluir title e body no entityData se foram fornecidos
+            const enhancedEntityData = {
+                ...notificationData.entityData,
+                ...(notificationData.title && { notificationTitle: notificationData.title }),
+                ...(notificationData.body && { notificationBody: notificationData.body }),
+                ...(notificationData.message && { notificationMessage: notificationData.message })
+            };
+
             const createdNotification = await this.prisma.notification.create({
                 data: {
                     userId: notificationData.userId,
                     type: notificationData.type,
                     entityId: notificationData.entityId,
                     entityType: notificationData.entityType,
-                    entityData: notificationData.entityData,
+                    entityData: enhancedEntityData,
                     scheduledFor: notificationData.scheduledFor,
                     status: notificationData.status || 'PENDING'
                 }

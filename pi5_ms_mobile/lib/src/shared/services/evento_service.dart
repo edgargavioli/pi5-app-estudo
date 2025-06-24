@@ -26,7 +26,7 @@ class EventoService {
     }
   }
 
-  static Future<Evento> criarEvento(Map<String, dynamic> eventoData) async {
+  static Future<Evento> criarEvento(Map<String, Object?> eventoData) async {
     try {
       final data = await ApiService.post(baseUrl, eventoData);
       return Evento.fromJson(data['data']);
@@ -38,7 +38,7 @@ class EventoService {
 
   static Future<Evento> atualizarEvento(
     String id,
-    Map<String, dynamic> eventoData,
+    Map<String, Object?> eventoData,
   ) async {
     try {
       final data = await ApiService.put('$baseUrl/$id', eventoData);

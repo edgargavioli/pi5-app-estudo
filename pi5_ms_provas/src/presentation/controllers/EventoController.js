@@ -15,16 +15,27 @@ export class EventoController {
         this.getUseCase = new GetEventoUseCase(eventoRepository);
         this.updateUseCase = new UpdateEventoUseCase(eventoRepository);
         this.deleteUseCase = new DeleteEventoUseCase(eventoRepository);
-    }
-
-    async create(req, res) {
+    } async create(req, res) {
         try {
             logger.info('Iniciando criação de evento', { eventoData: req.body });
             const evento = await this.createUseCase.execute(req.body, req.userId);
             logger.info('Evento criado com sucesso', { eventoId: evento.id });
 
-            // Publicar evento de criação
-            await rabbitMQService.publishEntityCreated('evento', evento, req.userId);
+            // Verificar se RabbitMQ está conectado antes de publicar
+            if (!rabbitMQService.isHealthy()) {
+                logger.warn('RabbitMQ não está conectado, tentando reconectar...');
+                await rabbitMQService.connect();
+            }
+
+            // Publicar evento de criação e notificação
+            try {
+                await rabbitMQService.publishEntityCreated('evento', evento, req.userId);
+                await rabbitMQService.publishEventoNotificacao(evento);
+                logger.info('Eventos RabbitMQ publicados com sucesso');
+            } catch (rabbitError) {
+                logger.error('Erro ao publicar eventos RabbitMQ', { error: rabbitError.message });
+                // Não falhar a requisição por causa do RabbitMQ
+            }
 
             const response = HateoasConfig.wrapResponse(evento, req.baseUrl, 'eventos', evento.id);
             res.status(201).json(response);

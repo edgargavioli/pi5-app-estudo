@@ -43,12 +43,14 @@ class Evento {
       local: json['local'] as String,
       materiaId: json['materiaId'] as String?,
       urlInscricao: json['urlInscricao'] as String?,
-      taxaInscricao: json['taxaInscricao'] != null
-          ? double.parse(json['taxaInscricao'].toString())
-          : null,
-      dataLimiteInscricao: json['dataLimiteInscricao'] != null
-          ? DateTime.parse(json['dataLimiteInscricao'] as String)
-          : null,
+      taxaInscricao:
+          json['taxaInscricao'] != null
+              ? double.parse(json['taxaInscricao'].toString())
+              : null,
+      dataLimiteInscricao:
+          json['dataLimiteInscricao'] != null
+              ? DateTime.parse(json['dataLimiteInscricao'] as String)
+              : null,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -72,7 +74,7 @@ class Evento {
     };
   }
 
-  Map<String, dynamic> toCreateJson() {
+  Map<String, Object?> toCreateJson() {
     return {
       'titulo': titulo,
       'descricao': descricao,
@@ -94,6 +96,7 @@ enum TipoEvento {
   ENEM,
   CERTIFICACAO,
   PROVA_SIMULADA,
+  SESSAO_ESTUDO,
 }
 
 extension TipoEventoExtension on TipoEvento {
@@ -109,6 +112,8 @@ extension TipoEventoExtension on TipoEvento {
         return 'Certificação';
       case TipoEvento.PROVA_SIMULADA:
         return 'Prova Simulada';
+      case TipoEvento.SESSAO_ESTUDO:
+        return 'Sessão de Estudo';
     }
   }
 }
@@ -122,8 +127,50 @@ class SessaoEstudo {
   final List<String> topicos;
   final DateTime? tempoInicio;
   final DateTime? tempoFim;
+  final bool isAgendada;
+  final bool? cumpriuPrazo;
+  final DateTime? horarioAgendado;
+  final int? metaTempo; // Meta de tempo em minutos
+  final int questoesAcertadas;
+  final int totalQuestoes;
+  final bool finalizada;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  // Calcular percentual de acerto
+  double get percentualAcerto {
+    if (totalQuestoes > 0) {
+      return (questoesAcertadas / totalQuestoes) * 100;
+    }
+    return 0.0;
+  }
+
+  // Calcular progresso da meta de tempo
+  double get progressoMeta {
+    if (!isAgendada ||
+        metaTempo == null ||
+        tempoInicio == null ||
+        tempoFim == null) {
+      return 0.0;
+    }
+
+    final tempoRealMinutos = tempoFim!.difference(tempoInicio!).inMinutes;
+    final progresso = (tempoRealMinutos / metaTempo!) * 100;
+    return progresso.clamp(0.0, 100.0);
+  }
+
+  // Verificar se pode ser iniciada (para sessões agendadas)
+  bool get podeSerIniciada {
+    if (!isAgendada || horarioAgendado == null) {
+      return true; // Sessões livres podem ser iniciadas a qualquer momento
+    }
+
+    final agora = DateTime.now();
+    final tolerancia = const Duration(minutes: 30);
+    final horarioLimite = horarioAgendado!.add(tolerancia);
+
+    return agora.isAfter(horarioAgendado!) && agora.isBefore(horarioLimite);
+  }
 
   SessaoEstudo({
     required this.id,
@@ -134,10 +181,16 @@ class SessaoEstudo {
     required this.topicos,
     this.tempoInicio,
     this.tempoFim,
+    this.isAgendada = false,
+    this.cumpriuPrazo,
+    this.horarioAgendado,
+    this.metaTempo,
+    this.questoesAcertadas = 0,
+    this.totalQuestoes = 0,
+    this.finalizada = false,
     required this.createdAt,
     required this.updatedAt,
   });
-
   factory SessaoEstudo.fromJson(Map<String, dynamic> json) {
     return SessaoEstudo(
       id: json['id'] as String,
@@ -146,17 +199,28 @@ class SessaoEstudo {
       eventoId: json['eventoId'] as String?,
       conteudo: json['conteudo'] as String,
       topicos: List<String>.from(json['topicos'] as List),
-      tempoInicio: json['tempoInicio'] != null
-          ? DateTime.parse(json['tempoInicio'] as String)
-          : null,
-      tempoFim: json['tempoFim'] != null
-          ? DateTime.parse(json['tempoFim'] as String)
-          : null,
+      tempoInicio:
+          json['tempoInicio'] != null
+              ? DateTime.parse(json['tempoInicio'] as String)
+              : null,
+      tempoFim:
+          json['tempoFim'] != null
+              ? DateTime.parse(json['tempoFim'] as String)
+              : null,
+      isAgendada: json['isAgendada'] as bool? ?? false,
+      cumpriuPrazo: json['cumpriuPrazo'] as bool?,
+      horarioAgendado:
+          json['horarioAgendado'] != null
+              ? DateTime.parse(json['horarioAgendado'] as String)
+              : null,
+      metaTempo: json['metaTempo'] as int?,
+      questoesAcertadas: json['questoesAcertadas'] as int? ?? 0,
+      totalQuestoes: json['totalQuestoes'] as int? ?? 0,
+      finalizada: json['finalizada'] as bool? ?? false,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -167,35 +231,58 @@ class SessaoEstudo {
       'topicos': topicos,
       'tempoInicio': tempoInicio?.toIso8601String(),
       'tempoFim': tempoFim?.toIso8601String(),
+      'isAgendada': isAgendada,
+      'cumpriuPrazo': cumpriuPrazo,
+      'horarioAgendado': horarioAgendado?.toIso8601String(),
+      'metaTempo': metaTempo,
+      'questoesAcertadas': questoesAcertadas,
+      'totalQuestoes': totalQuestoes,
+      'finalizada': finalizada,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
-  Map<String, dynamic> toCreateJson() {
-    final json = <String, dynamic>{
+  Map<String, Object?> toCreateJson() {
+    final json = <String, Object?>{
       'materiaId': materiaId,
       'conteudo': conteudo,
       'topicos': topicos,
+      'isAgendada': isAgendada,
+      'questoesAcertadas': questoesAcertadas,
+      'totalQuestoes': totalQuestoes,
+      'finalizada': finalizada,
     };
-    
+
     // Só incluir campos opcionais se não forem null
     if (provaId != null && provaId!.isNotEmpty) {
       json['provaId'] = provaId;
     }
-    
+
     if (eventoId != null && eventoId!.isNotEmpty) {
       json['eventoId'] = eventoId;
     }
-    
+
     if (tempoInicio != null) {
       json['tempoInicio'] = tempoInicio!.toIso8601String();
     }
-    
+
     if (tempoFim != null) {
       json['tempoFim'] = tempoFim!.toIso8601String();
     }
-    
+
+    if (cumpriuPrazo != null) {
+      json['cumpriuPrazo'] = cumpriuPrazo;
+    }
+
+    if (horarioAgendado != null) {
+      json['horarioAgendado'] = horarioAgendado!.toIso8601String();
+    }
+
+    if (metaTempo != null) {
+      json['metaTempo'] = metaTempo;
+    }
+
     return json;
   }
-} 
+}
