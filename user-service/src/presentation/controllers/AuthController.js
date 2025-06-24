@@ -25,8 +25,63 @@ class AuthController {
         }
       });
     } catch (error) {
-      loggingService.error('Registration failed', { error: error.message });
-      handleError(error, res);
+      loggingService.error('Registration failed', {
+        error: error.message,
+        email: req.body.email,
+        name: req.body.name
+      });
+
+      // Melhorar mensagens de erro específicas para registro
+      if (error.message && error.message.includes('already exists')) {
+        const enhancedError = new AppError(
+          'A user with this email address already exists',
+          400,
+          {
+            field: 'email',
+            value: req.body.email,
+            type: 'duplicate_email'
+          }
+        ).withContext({
+          action: 'user_registration',
+          attemptedEmail: req.body.email
+        }).withSuggestions([
+          'Try logging in instead of registering',
+          'Use a different email address',
+          'Reset your password if you forgot it'
+        ]);
+
+        return handleError(enhancedError, res, req);
+      }
+
+      if (error.message && error.message.includes('Password validation failed')) {
+        const enhancedError = new AppError(
+          'Password does not meet security requirements',
+          400,
+          {
+            field: 'password',
+            type: 'validation_error',
+            requirements: {
+              minLength: 8,
+              requireUppercase: true,
+              requireLowercase: true,
+              requireNumbers: true,
+              requireSpecialChars: true,
+              allowedSpecialChars: '!@#$%^&*(),.?":{}|<>'
+            }
+          }
+        ).withContext({
+          action: 'user_registration'
+        }).withSuggestions([
+          'Use at least 8 characters',
+          'Include uppercase and lowercase letters',
+          'Add at least one number',
+          'Include at least one special character'
+        ]);
+
+        return handleError(enhancedError, res, req);
+      }
+
+      handleError(error, res, req);
     }
   }
 
@@ -56,8 +111,57 @@ class AuthController {
         }
       });
     } catch (error) {
-      loggingService.error('Login failed', { error: error.message, email: req.body.email });
-      handleError(error, res);
+      loggingService.error('Login failed', {
+        error: error.message,
+        email: req.body.email,
+        timestamp: new Date().toISOString()
+      });
+
+      // Melhorar mensagens de erro específicas para login
+      if (error.message && error.message.includes('Invalid credentials')) {
+        const enhancedError = new AppError(
+          'Email or password is incorrect',
+          401,
+          {
+            field: 'credentials',
+            type: 'authentication_failed'
+          }
+        ).withContext({
+          action: 'user_login',
+          attemptedEmail: req.body.email,
+          timestamp: new Date().toISOString()
+        }).withSuggestions([
+          'Check if your email is spelled correctly',
+          'Verify your password',
+          'Try resetting your password if you forgot it',
+          'Make sure your account is not locked'
+        ]);
+
+        return handleError(enhancedError, res, req);
+      }
+
+      if (error.message && error.message.includes('not verified')) {
+        const enhancedError = new AppError(
+          'Please verify your email address before logging in',
+          403,
+          {
+            field: 'email_verification',
+            type: 'email_not_verified',
+            email: req.body.email
+          }
+        ).withContext({
+          action: 'user_login',
+          requiresEmailVerification: true
+        }).withSuggestions([
+          'Check your email inbox for verification link',
+          'Check your spam/junk folder',
+          'Request a new verification email'
+        ]);
+
+        return handleError(enhancedError, res, req);
+      }
+
+      handleError(error, res, req);
     }
   }
 

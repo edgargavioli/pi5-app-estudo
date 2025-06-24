@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:pi5_ms_mobile/src/shared/models/materia_model.dart';
 import 'package:pi5_ms_mobile/src/shared/models/prova_model.dart';
 import 'package:pi5_ms_mobile/src/shared/services/prova_service.dart';
 import 'package:pi5_ms_mobile/src/shared/services/materia_service.dart';
+import 'package:pi5_ms_mobile/src/shared/widgets/custom_snackbar.dart';
 
 class EditProvaPage extends StatefulWidget {
   final Prova prova;
-  
+
   const EditProvaPage({super.key, required this.prova});
 
   @override
@@ -20,12 +22,12 @@ class _EditProvaPageState extends State<EditProvaPage> {
   final TextEditingController localController = TextEditingController();
   final TextEditingController descricaoController = TextEditingController();
   final TextEditingController materiaController = TextEditingController();
-
   DateTime? _dataSelecionada;
   TimeOfDay? _horarioSelecionado;
   List<Materia> _materias = [];
   List<String> _materiasSelecionadasIds = [];
   bool _isLoading = false;
+  bool _isCreatingMateria = false;
 
   @override
   void initState() {
@@ -56,9 +58,9 @@ class _EditProvaPageState extends State<EditProvaPage> {
         _materias = materias;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar matérias: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao carregar matérias: $e')));
     }
   }
 
@@ -119,32 +121,26 @@ class _EditProvaPageState extends State<EditProvaPage> {
       final provaAtualizada = Prova(
         id: widget.prova.id,
         titulo: nomeController.text,
-        descricao: descricaoController.text.isEmpty ? null : descricaoController.text,
+        descricao:
+            descricaoController.text.isEmpty ? null : descricaoController.text,
         data: dataProva,
         horario: dataHorario,
         local: localController.text,
         materiasIds: _materiasSelecionadasIds,
         filtros: widget.prova.filtros, // Mantém os filtros existentes
-        totalQuestoes: widget.prova.totalQuestoes, // Mantém o total de questões
-        acertos: widget.prova.acertos, // Mantém os acertos
         createdAt: widget.prova.createdAt,
         updatedAt: DateTime.now().toUtc(),
       );
 
       await ProvaService.atualizarProva(widget.prova.id, provaAtualizada);
-      
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Prova atualizada com sucesso!')),
-        );
-        
+        CustomSnackBar.showSuccess(context, 'Prova atualizada com sucesso!');
+
         Navigator.of(context).pop(true); // Indica que houve alteração
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao atualizar prova: $e')),
-        );
+        CustomSnackBar.showError(context, 'Erro ao atualizar prova: $e');
       }
     } finally {
       if (mounted) {
@@ -157,36 +153,31 @@ class _EditProvaPageState extends State<EditProvaPage> {
 
   bool _validarCampos() {
     if (nomeController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, insira o nome da prova')),
-      );
+      CustomSnackBar.showWarning(context, 'Por favor, insira o nome da prova');
       return false;
     }
-
     if (_dataSelecionada == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecione a data da prova')),
+      CustomSnackBar.showWarning(
+        context,
+        'Por favor, selecione a data da prova',
       );
       return false;
     }
-
     if (_horarioSelecionado == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecione o horário da prova')),
+      CustomSnackBar.showWarning(
+        context,
+        'Por favor, selecione o horário da prova',
       );
       return false;
     }
-
     if (localController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, insira o local da prova')),
-      );
+      CustomSnackBar.showWarning(context, 'Por favor, insira o local da prova');
       return false;
     }
-
     if (_materiasSelecionadasIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecione pelo menos uma matéria')),
+      CustomSnackBar.showWarning(
+        context,
+        'Por favor, selecione pelo menos uma matéria',
       );
       return false;
     }
@@ -241,17 +232,19 @@ class _EditProvaPageState extends State<EditProvaPage> {
                 child: FloatingActionButton(
                   heroTag: "editar_prova_save_fab",
                   backgroundColor: colorScheme.primary,
+                  tooltip: 'Salvar alterações',
                   onPressed: _isLoading ? null : _salvarProva,
-                  child: _isLoading
-                      ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: colorScheme.onPrimary,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Icon(Icons.check, color: colorScheme.onPrimary),
+                  child:
+                      _isLoading
+                          ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: colorScheme.onPrimary,
+                              strokeWidth: 2,
+                            ),
+                          )
+                          : Icon(Icons.check, color: colorScheme.onPrimary),
                 ),
               ),
             ),
@@ -292,9 +285,10 @@ class _EditProvaPageState extends State<EditProvaPage> {
         labelText: 'Horário da prova',
         border: const OutlineInputBorder(),
         suffixIcon: const Icon(Icons.access_time),
-        hintText: _horarioSelecionado != null
-            ? _horarioSelecionado!.format(context)
-            : 'Selecione o horário',
+        hintText:
+            _horarioSelecionado != null
+                ? _horarioSelecionado!.format(context)
+                : 'Selecione o horário',
       ),
     );
   }
@@ -325,12 +319,12 @@ class _EditProvaPageState extends State<EditProvaPage> {
             const SizedBox(height: 8),
             Text(
               'Toque nas matérias para selecioná-las:',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
-            
+
             if (_materias.isEmpty)
               Container(
                 padding: const EdgeInsets.all(24),
@@ -353,16 +347,20 @@ class _EditProvaPageState extends State<EditProvaPage> {
               )
             else
               _buildMateriasSelection(),
-            
+
             if (_materiasSelecionadasIds.isNotEmpty) ...[
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.3),
                   ),
                 ),
                 child: Row(
@@ -394,131 +392,177 @@ class _EditProvaPageState extends State<EditProvaPage> {
     // Agrupar matérias por categoria
     final Map<String, List<Materia>> materiasPorCategoria = {};
     for (final materia in _materias) {
-      final categoria = materia.categoria.isNotEmpty ? materia.categoria : 'Outras';
+      final categoria =
+          materia.categoria.isNotEmpty ? materia.categoria : 'Outras';
       materiasPorCategoria.putIfAbsent(categoria, () => []).add(materia);
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: materiasPorCategoria.entries.map((entry) {
-        final categoria = entry.key;
-        final materias = entry.value;
-        
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Título da categoria
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8, top: 12),
-              child: Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: _getCategoriaColor(categoria),
-                      borderRadius: BorderRadius.circular(2),
+      children: [
+        // Mostrar as matérias por categoria
+        ...materiasPorCategoria.entries.map((entry) {
+          final categoria = entry.key;
+          final materias = entry.value;
+          final isFirstCategory =
+              materiasPorCategoria.entries.first.key == categoria;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Título da categoria
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8, top: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: _getCategoriaColor(categoria),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    categoria,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: _getCategoriaColor(categoria),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: _getCategoriaColor(categoria).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      '${materias.length}',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(width: 8),
+                    Text(
+                      categoria,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                         color: _getCategoriaColor(categoria),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getCategoriaColor(categoria).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${materias.length}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: _getCategoriaColor(categoria),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Chips das matérias + chip criar nova matéria (na primeira categoria)
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  // Incluir o chip de criar nova matéria apenas na primeira categoria
+                  if (isFirstCategory) _buildCreateMateriaChip(),
+
+                  // Chips das matérias desta categoria
+                  ...materias.map((materia) {
+                    final isSelected = _materiasSelecionadasIds.contains(
+                      materia.id,
+                    );
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _materiasSelecionadasIds.remove(materia.id);
+                          } else {
+                            _materiasSelecionadasIds.add(materia.id);
+                          }
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color:
+                                isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.outline,
+                            width: isSelected ? 2 : 1,
+                          ),
+                          boxShadow:
+                              isSelected
+                                  ? [
+                                    BoxShadow(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary.withOpacity(0.3),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                  : null,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isSelected) ...[
+                              Icon(
+                                Icons.check_circle,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            Text(
+                              materia.nome,
+                              style: TextStyle(
+                                color:
+                                    isSelected
+                                        ? Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary
+                                        : Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
+                                fontWeight:
+                                    isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w500,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
                 ],
               ),
-            ),
-            
-            // Chips das matérias
-            Wrap(
+
+              if (entry != materiasPorCategoria.entries.last)
+                const SizedBox(height: 8),
+            ],
+          );
+        }),
+
+        // Se não há matérias, mostrar apenas o chip de criar nova matéria
+        if (materiasPorCategoria.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: materias.map((materia) {
-                final isSelected = _materiasSelecionadasIds.contains(materia.id);
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      if (isSelected) {
-                        _materiasSelecionadasIds.remove(materia.id);
-                      } else {
-                        _materiasSelecionadasIds.add(materia.id);
-                      }
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected 
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSelected 
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.outline,
-                        width: isSelected ? 2 : 1,
-                      ),
-                      boxShadow: isSelected ? [
-                        BoxShadow(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ] : null,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (isSelected) ...[
-                          Icon(
-                            Icons.check_circle,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          const SizedBox(width: 6),
-                        ],
-                        Text(
-                          materia.nome,
-                          style: TextStyle(
-                            color: isSelected 
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Theme.of(context).colorScheme.onSurface,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
+              children: [_buildCreateMateriaChip()],
             ),
-            
-            if (entry != materiasPorCategoria.entries.last)
-              const SizedBox(height: 8),
-          ],
-        );
-      }).toList(),
+          ),
+      ],
     );
   }
 
@@ -537,6 +581,655 @@ class _EditProvaPageState extends State<EditProvaPage> {
       default:
         return Colors.grey;
     }
+  }
+
+  Future<void> _criarNovaMateria() async {
+    final TextEditingController nomeMateria = TextEditingController();
+    final TextEditingController descricaoMateria = TextEditingController();
+    String? categoriaSelecionada = 'Exatas';
+
+    await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header do dialog
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer.withOpacity(0.8),
+                            Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer.withOpacity(0.4),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Icon(
+                              Icons.school_rounded,
+                              size: 32,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Nova Matéria',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Adicione uma nova matéria aos seus estudos',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Campos do formulário
+                    _buildDialogInputField(
+                      label: 'Nome da matéria',
+                      controller: nomeMateria,
+                      icon: Icons.book_rounded,
+                      hint: 'Ex: Matemática, História, Química...',
+                      isRequired: true,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    _buildDialogInputField(
+                      label: 'Descrição',
+                      controller: descricaoMateria,
+                      icon: Icons.description_rounded,
+                      hint: 'Adicione uma descrição opcional',
+                      maxLines: 2,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Dropdown de categoria melhorado
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.category_rounded,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Categoria',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '*',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outline.withOpacity(0.2),
+                            ),
+                          ),
+                          child: DropdownButtonFormField<String>(
+                            value: categoriaSelecionada,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withOpacity(0.3),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                            ),
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            items: [
+                              _buildCategoryItem(
+                                'Exatas',
+                                Icons.calculate_rounded,
+                                Colors.blue,
+                              ),
+                              _buildCategoryItem(
+                                'Humanas',
+                                Icons.psychology_rounded,
+                                Colors.green,
+                              ),
+                              _buildCategoryItem(
+                                'Biológicas',
+                                Icons.biotech_rounded,
+                                Colors.orange,
+                              ),
+                              _buildCategoryItem(
+                                'Línguas',
+                                Icons.translate_rounded,
+                                Colors.purple,
+                              ),
+                              _buildCategoryItem(
+                                'Outras',
+                                Icons.category_rounded,
+                                Colors.grey,
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setStateDialog(() {
+                                categoriaSelecionada = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Botões de ação
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed:
+                                _isCreatingMateria
+                                    ? null
+                                    : () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.outline.withOpacity(0.3),
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              'Cancelar',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed:
+                                _isCreatingMateria
+                                    ? null
+                                    : () async {
+                                      if (nomeMateria.text.trim().isEmpty) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: const Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.warning_rounded,
+                                                  color: Colors.white,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  'Por favor, insira o nome da matéria',
+                                                ),
+                                              ],
+                                            ),
+                                            backgroundColor:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.error,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+
+                                      setStateDialog(() {
+                                        _isCreatingMateria = true;
+                                      });
+
+                                      try {
+                                        // Criar objeto Materia
+                                        final novaMateria = Materia(
+                                          id: '', // Será preenchido pela API
+                                          nome: nomeMateria.text.trim(),
+                                          disciplina:
+                                              categoriaSelecionada ?? 'Outras',
+                                          descricao:
+                                              descricaoMateria.text
+                                                      .trim()
+                                                      .isEmpty
+                                                  ? null
+                                                  : descricaoMateria.text
+                                                      .trim(),
+                                          createdAt: DateTime.now(),
+                                          updatedAt: DateTime.now(),
+                                        );
+
+                                        final materiaCreated =
+                                            await MateriaService.criarMateria(
+                                              novaMateria,
+                                            );
+
+                                        // Adicionar à lista local
+                                        setState(() {
+                                          _materias.add(materiaCreated);
+                                          // Selecionar automaticamente a nova matéria
+                                          _materiasSelecionadasIds.add(
+                                            materiaCreated.id,
+                                          );
+                                        });
+
+                                        if (mounted) {
+                                          Navigator.of(context).pop(true);
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Row(
+                                                children: [
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.all(6),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white
+                                                          .withOpacity(0.2),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
+                                                          ),
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons
+                                                          .check_circle_rounded,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        const Text(
+                                                          'Matéria criada com sucesso!',
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '"${materiaCreated.nome}" foi adicionada e selecionada',
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: Colors.white
+                                                                .withOpacity(
+                                                                  0.9,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              backgroundColor: Colors.green,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              duration: const Duration(
+                                                seconds: 4,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.error_rounded,
+                                                    color: Colors.white,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Text(
+                                                      'Erro ao criar matéria: $e',
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              backgroundColor:
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.error,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        if (mounted) {
+                                          setStateDialog(() {
+                                            _isCreatingMateria = false;
+                                          });
+                                        }
+                                      }
+                                    },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child:
+                                _isCreatingMateria
+                                    ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    )
+                                    : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.add_rounded),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Criar Matéria',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.titleSmall?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Métodos auxiliares para o dialog de criação de matéria
+  Widget _buildDialogInputField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    String? hint,
+    int maxLines = 1,
+    bool isRequired = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            if (isRequired) ...[
+              const SizedBox(width: 4),
+              Text(
+                '*',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            hintText: hint,
+            filled: true,
+            fillColor: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  DropdownMenuItem<String> _buildCategoryItem(
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return DropdownMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 18, color: color),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            value,
+            style: TextStyle(fontWeight: FontWeight.w500, color: color),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCreateMateriaChip() {
+    return GestureDetector(
+      onTap: _isCreatingMateria ? null : _criarNovaMateria,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(
+            context,
+          ).colorScheme.primaryContainer.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary,
+            width: 1,
+            style: BorderStyle.solid,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_isCreatingMateria)
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                  strokeWidth: 2,
+                ),
+              )
+            else
+              Icon(
+                Icons.add,
+                size: 16,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            const SizedBox(width: 8),
+            Text(
+              'Criar Nova Matéria',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

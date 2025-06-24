@@ -3,6 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:pi5_ms_mobile/src/infraestructure/firebase_fcm_get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'cache_service.dart';
+import 'gamificacao_service.dart';
+import 'streak_service.dart';
+import 'estatisticas_service.dart';
 
 class AuthService {
   // 🌐 URL DO USER-SERVICE
@@ -22,11 +25,52 @@ class AuthService {
   AuthUser? _currentUser;
   String? _accessToken;
   String? _refreshToken;
-
   // Getters
   AuthUser? get currentUser => _currentUser;
+
+  /// Getter para verificar se está autenticado
+  bool get isAuthenticated => _accessToken != null && _currentUser != null;
+
+  /// Getter para o token de acesso
   String? get accessToken => _accessToken;
-  bool get isLoggedIn => _currentUser != null && _accessToken != null;
+
+  /// Getter para o token de refresh
+  String? get refreshToken => _refreshToken;
+
+  /// 🛠️ CONSTRUIR MENSAGEM DE ERRO DE VALIDAÇÃO AMIGÁVEL
+  String _buildValidationErrorMessage(List<dynamic> validationErrors) {
+    if (validationErrors.isEmpty) return 'Erro de validação';
+
+    final errors = <String>[];
+
+    for (final error in validationErrors) {
+      final field = error['field'] as String?;
+      final message = error['message'] as String?;
+
+      if (field == 'email') {
+        errors.add('Email inválido');
+      } else if (field == 'password') {
+        if (message?.contains('8 characters') == true) {
+          errors.add('Senha deve ter pelo menos 8 caracteres');
+        } else if (message?.contains('uppercase') == true ||
+            message?.contains('lowercase') == true ||
+            message?.contains('number') == true ||
+            message?.contains('special') == true) {
+          errors.add(
+            'Senha deve conter letra maiúscula, minúscula, número e símbolo especial',
+          );
+        } else {
+          errors.add('Senha inválida');
+        }
+      } else if (field == 'name') {
+        errors.add('Nome deve ter pelo menos 2 caracteres');
+      } else {
+        errors.add(message ?? 'Campo inválido');
+      }
+    }
+
+    return errors.join(', ');
+  }
 
   /// 🚀 INICIALIZAR SERVIÇO (verificar tokens salvos)
   Future<void> initialize() async {
@@ -87,10 +131,16 @@ class AuthService {
         await prefs.setString(
           _userDataKey,
           json.encode(_currentUser!.toJson()),
-        );
+        ); // 📱 VERIFICAR E ATUALIZAR FCM TOKEN APÓS LOGIN
+        await _checkAndUpdateFcmToken(); // 🗂️ LIMPAR DADOS LOCAIS ANTIGOS DE GAMIFICAÇÃO
+        await _limparDadosLocaisGamificacao();
 
-        // 📱 VERIFICAR E ATUALIZAR FCM TOKEN APÓS LOGIN
-        await _checkAndUpdateFcmToken();
+        // 🎯 SINCRONIZAR DADOS COM BACKEND APÓS LOGIN
+        try {
+          EstatisticasService.sincronizarComBackend();
+        } catch (e) {
+          print('❌ Erro ao sincronizar após login: $e');
+        }
 
         return AuthResult.success(
           message: 'Login realizado com sucesso',
@@ -98,7 +148,12 @@ class AuthService {
         );
       } else {
         final error = json.decode(response.body);
-        return AuthResult.error(error['message'] ?? 'Falha ao fazer login');
+
+        // Priorizar userMessage se disponível, senão usar message
+        String errorMessage =
+            error['userMessage'] ?? error['message'] ?? 'Falha ao fazer login';
+
+        return AuthResult.error(errorMessage);
       }
     } catch (e) {
       print('❌ Erro no login: $e');
@@ -127,6 +182,8 @@ class AuthService {
         }),
       );
 
+      print(response.body);
+
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
 
@@ -144,13 +201,14 @@ class AuthService {
         await prefs.setString(
           _userDataKey,
           json.encode(_currentUser!.toJson()),
-        );
-
-        // 📱 SALVAR FCM TOKEN APÓS REGISTRO (já foi enviado no registro)
+        ); // 📱 SALVAR FCM TOKEN APÓS REGISTRO (já foi enviado no registro)
         final fcmToken = await getToken();
         if (fcmToken != null) {
           await saveCurrentFcmToken(fcmToken);
         }
+
+        // 🗂️ LIMPAR DADOS LOCAIS ANTIGOS DE GAMIFICAÇÃO
+        await _limparDadosLocaisGamificacao();
 
         return AuthResult.success(
           message: 'Registro realizado com sucesso',
@@ -158,11 +216,39 @@ class AuthService {
         );
       } else {
         final error = json.decode(response.body);
-        return AuthResult.error(error['message'] ?? 'Falha ao fazer registro');
+
+        // Priorizar userMessage se disponível, senão usar message
+        String errorMessage =
+            error['userMessage'] ??
+            error['message'] ??
+            'Falha ao fazer registro';
+
+        // Se houver detalhes de validação, incluir informações específicas
+        if (error['errors'] != null && error['errors'] is List) {
+          final validationErrors = error['errors'] as List;
+          if (validationErrors.isNotEmpty) {
+            errorMessage =
+                error['userMessage'] ??
+                _buildValidationErrorMessage(validationErrors);
+          }
+        }
+
+        return AuthResult.error(errorMessage);
       }
     } catch (e) {
       print('❌ Erro no registro: $e');
       return AuthResult.error('Erro inesperado ao fazer registro');
+    }
+  }
+
+  /// 🗂️ Limpa dados locais de gamificação ao fazer login com novo usuário
+  Future<void> _limparDadosLocaisGamificacao() async {
+    try {
+      await GamificacaoService.limparDadosLocais();
+      await StreakService.limparCache();
+      await EstatisticasService.limparDadosLocais();
+    } catch (e) {
+      print('Erro ao limpar dados locais de gamificação: $e');
     }
   }
 
@@ -220,28 +306,31 @@ class AuthService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_accessTokenKey);
       await prefs.remove(_refreshTokenKey);
-      await prefs.remove(_userDataKey);
-
-      // Limpar estado
+      await prefs.remove(_userDataKey); // Limpar estado
       _accessToken = null;
       _refreshToken = null;
       _currentUser = null;
 
       // Limpar cache
       CacheService.clear();
+
+      // Limpar dados de gamificação e streak
+      await _limparDadosLocaisGamificacao();
     } catch (e) {
       print('❌ Erro ao fazer logout: $e');
       rethrow;
     }
   }
 
-  /// 🔄 RENOVAR TOKENS
+  /// 🔄 RENOVAR TOKENS DE AUTENTICAÇÃO
   Future<bool> refreshTokens() async {
     try {
-      if (_refreshToken == null) return false;
+      if (_refreshToken == null) {
+        return false;
+      }
 
       final response = await http.post(
-        Uri.parse('$_userServiceUrl/auth/refresh'),
+        Uri.parse('$_userServiceUrl/auth/refresh-token'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -262,23 +351,29 @@ class AuthService {
         await prefs.setString(_refreshTokenKey, _refreshToken!);
 
         return true;
+      } else {
+        // Refresh token inválido, fazer logout
+        await logout();
+        return false;
       }
-
-      return false;
     } catch (e) {
       print('❌ Erro ao renovar tokens: $e');
+      await logout();
       return false;
     }
   }
 
-  /// ✅ VALIDAR TOKEN
+  /// 🔍 VALIDAR SE TOKEN AINDA É VÁLIDO
   Future<bool> _validateToken() async {
     try {
+      if (_accessToken == null) return false;
+
       final response = await http.get(
         Uri.parse('$_userServiceUrl/auth/validate'),
         headers: {
-          'Authorization': 'Bearer $_accessToken',
+          'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': 'Bearer $_accessToken',
         },
       );
 
@@ -408,9 +503,6 @@ class AuthService {
       print('Erro ao salvar dados do usuário: $e');
     }
   }
-
-  /// Getter para verificar se está autenticado (compatibilidade)
-  bool get isAuthenticated => isLoggedIn;
 }
 
 /// 👤 MODELO DE USUÁRIO PARA AUTENTICAÇÃO

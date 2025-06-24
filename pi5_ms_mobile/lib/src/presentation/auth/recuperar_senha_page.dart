@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/components/input_widget.dart';
-import 'package:pi5_ms_mobile/src/presentation/auth/login_page.dart';
+import 'package:pi5_ms_mobile/src/components/button_widget.dart';
 import 'package:pi5_ms_mobile/src/presentation/auth/verificar_codigo_page.dart';
 
 class RecuperaSenhaPage extends StatefulWidget {
@@ -11,7 +11,8 @@ class RecuperaSenhaPage extends StatefulWidget {
   State<RecuperaSenhaPage> createState() => _RecuperaSenhaPageState();
 }
 
-class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> with SingleTickerProviderStateMixin {
+class _RecuperaSenhaPageState extends State<RecuperaSenhaPage>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _emailController = TextEditingController();
   late AnimationController _controller;
   late Animation<double> _breathingAnimation;
@@ -27,10 +28,7 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> with SingleTicker
     _breathingAnimation = Tween<double>(
       begin: 1.0,
       end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -44,10 +42,7 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> with SingleTicker
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return Transform.scale(
-          scale: _breathingAnimation.value,
-          child: child,
-        );
+        return Transform.scale(scale: _breathingAnimation.value, child: child);
       },
       child: child,
     );
@@ -92,7 +87,8 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> with SingleTicker
                                 child: IconButton(
                                   icon: Icon(
                                     Icons.arrow_back_ios,
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
                                   ),
                                   onPressed: () {
                                     Navigator.pop(context);
@@ -108,8 +104,13 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> with SingleTicker
                                     Text(
                                       'Meu Estudo',
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary,
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
+                                            0.04,
                                         fontFamily: 'Roboto',
                                         fontWeight: FontWeight.w400,
                                       ),
@@ -118,9 +119,16 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> with SingleTicker
                                     _buildBreathingWidget(
                                       Image.asset(
                                         'assets/images/logo.png',
-                                        width: MediaQuery.of(context).size.width * 0.18,
-                                        height: MediaQuery.of(context).size.width * 0.18,
-                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.18,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                            0.18,
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary,
                                       ),
                                     ),
                                   ],
@@ -139,7 +147,8 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> with SingleTicker
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onPrimary,
-                                fontSize: MediaQuery.of(context).size.width * 0.07,
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.07,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w400,
                               ),
@@ -178,7 +187,8 @@ class _RecuperaSenhaPageState extends State<RecuperaSenhaPage> with SingleTicker
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const VerificaCodigoPage(),
+                                  builder:
+                                      (context) => const VerificaCodigoPage(),
                                 ),
                               );
                             },

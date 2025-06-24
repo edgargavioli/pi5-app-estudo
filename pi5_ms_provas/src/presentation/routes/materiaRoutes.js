@@ -37,6 +37,71 @@ router.get('/', async (req, res) => {
     await materiaController.getAll(req, res);
 });
 
+// Listar matérias não utilizadas (que não estão associadas a nenhuma prova)
+router.get('/nao-utilizadas', async (req, res) => {
+    /*
+    #swagger.tags = ['Matérias']
+    #swagger.summary = 'Listar matérias não utilizadas'
+    #swagger.description = 'Retorna uma lista com todas as matérias que não estão associadas a nenhuma prova'
+    #swagger.responses[200] = {
+        description: 'Lista de matérias não utilizadas retornada com sucesso',
+        schema: { 
+            type: 'object',
+            properties: {
+                data: {
+                    type: 'array',
+                    items: { $ref: '#/components/schemas/Materia' }
+                },
+                _links: {
+                    type: 'object',
+                    properties: {
+                        self: { type: 'object' },
+                        create: { type: 'object' }
+                    }
+                }
+            }
+        }
+    }
+    #swagger.responses[500] = {
+        description: 'Erro interno do servidor',
+        schema: { $ref: '#/components/schemas/Error' }
+    }
+    */    await materiaController.getUnused(req, res);
+});
+
+// Listar matérias utilizadas (que estão associadas a provas)
+router.get('/utilizadas', async (req, res) => {
+    /*
+    #swagger.tags = ['Matérias']
+    #swagger.summary = 'Listar matérias utilizadas'
+    #swagger.description = 'Retorna uma lista com todas as matérias que estão associadas a pelo menos uma prova'
+    #swagger.responses[200] = {
+        description: 'Lista de matérias utilizadas retornada com sucesso',
+        schema: { 
+            type: 'object',
+            properties: {
+                data: {
+                    type: 'array',
+                    items: { $ref: '#/components/schemas/Materia' }
+                },
+                _links: {
+                    type: 'object',
+                    properties: {
+                        self: { type: 'object' },
+                        create: { type: 'object' }
+                    }
+                }
+            }
+        }
+    }
+    #swagger.responses[500] = {
+        description: 'Erro interno do servidor',
+        schema: { $ref: '#/components/schemas/Error' }
+    }
+    */
+    await materiaController.getUsed(req, res);
+});
+
 // Buscar uma matéria específica
 router.get('/:id', async (req, res) => {
     /*
@@ -238,4 +303,4 @@ router.delete('/:id', async (req, res) => {
     await materiaController.delete(req, res);
 });
 
-export default router; 
+export default router;

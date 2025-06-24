@@ -3,8 +3,7 @@ import 'package:intl/intl.dart';
 import '../../shared/models/evento_model.dart';
 import '../../shared/models/prova_model.dart';
 import '../../shared/services/evento_service.dart';
-import '../../shared/services/materia_service.dart';
-import '../../components/button_widget.dart';
+import '../../shared/services/prova_service.dart';
 
 class CriarEventoPage extends StatefulWidget {
   final DateTime? dataInicial;
@@ -20,15 +19,11 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
   final _tituloController = TextEditingController();
   final _descricaoController = TextEditingController();
   final _localController = TextEditingController();
-  final _urlInscricaoController = TextEditingController();
-  final _taxaInscricaoController = TextEditingController();
-
   DateTime _dataSelecionada = DateTime.now();
   TimeOfDay _horarioSelecionado = TimeOfDay.now();
-  DateTime? _dataLimiteInscricao;
   TipoEvento _tipoSelecionado = TipoEvento.PROVA_SIMULADA;
-  String? _materiaSelecionada;
-  List<Materia> _materias = [];
+  String? _provaSelecionada;
+  List<Prova> _provas = [];
   bool _isLoading = false;
 
   @override
@@ -37,7 +32,7 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
     if (widget.dataInicial != null) {
       _dataSelecionada = widget.dataInicial!;
     }
-    _carregarMaterias();
+    _carregarProvas();
   }
 
   @override
@@ -45,25 +40,23 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
     _tituloController.dispose();
     _descricaoController.dispose();
     _localController.dispose();
-    _urlInscricaoController.dispose();
-    _taxaInscricaoController.dispose();
     super.dispose();
   }
 
-  Future<void> _carregarMaterias() async {
+  Future<void> _carregarProvas() async {
     setState(() => _isLoading = true);
     try {
-      final materias = await MateriaService.listarMaterias();
+      final provas = await ProvaService.listarProvas();
       setState(() {
-        _materias = materias;
+        _provas = provas;
         _isLoading = false;
       });
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao carregar matérias: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao carregar provas: $e')));
       }
     }
   }
@@ -73,7 +66,7 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
       context: context,
       initialDate: _dataSelecionada,
       firstDate: DateTime.now(),
-      lastDate: DateTime(2025),
+      lastDate: DateTime(2030),
       locale: const Locale('pt', 'BR'),
     );
     if (picked != null) {
@@ -97,31 +90,29 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
     }
   }
 
-  Future<void> _selecionarDataLimite() async {
-    final data = await showDatePicker(
-      context: context,
-      initialDate: _dataLimiteInscricao ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: _dataSelecionada,
-    );
-
-    if (data != null) {
-      setState(() {
-        _dataLimiteInscricao = data;
-      });
-    }
-  }
-
   Future<void> _criarEvento() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
+      // Mostrar diálogo de loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (context) => const AlertDialog(
+              content: Row(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 16),
+                  Text('Criando evento...'),
+                ],
+              ),
+            ),
+      );
+
       final dataHorario = DateTime(
         _dataSelecionada.year,
         _dataSelecionada.month,
@@ -130,44 +121,58 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
         _horarioSelecionado.minute,
       );
 
-      final eventoData = {
+      final eventoData = <String, dynamic>{
         'titulo': _tituloController.text.trim(),
-        'descricao': _descricaoController.text.trim().isEmpty 
-            ? null 
-            : _descricaoController.text.trim(),
+        'descricao':
+            _descricaoController.text.trim().isEmpty
+                ? null
+                : _descricaoController.text.trim(),
         'tipo': _tipoSelecionado.name,
         'data': _dataSelecionada.toIso8601String(),
         'horario': dataHorario.toIso8601String(),
         'local': _localController.text.trim(),
-        'materiaId': _materiaSelecionada,
-        'urlInscricao': _urlInscricaoController.text.trim().isEmpty 
-            ? null 
-            : _urlInscricaoController.text.trim(),
-        'taxaInscricao': _taxaInscricaoController.text.trim().isEmpty 
-            ? null 
-            : double.tryParse(_taxaInscricaoController.text.trim()),
-        'dataLimiteInscricao': _dataLimiteInscricao?.toIso8601String(),
+        'provaId': _provaSelecionada,
       };
+
+      // Validar dados antes de enviar
+      if (_tituloController.text.trim().isEmpty) {
+        throw Exception('Título é obrigatório');
+      }
+      if (_localController.text.trim().isEmpty) {
+        throw Exception('Local é obrigatório');
+      }
 
       await EventoService.criarEvento(eventoData);
 
+      // Fechar diálogo de loading
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Evento criado com sucesso!')),
+          const SnackBar(
+            content: Text('Evento criado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
         );
         Navigator.pop(context, true);
       }
     } catch (e) {
+      // Fechar diálogo de loading se existir
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
+
+      setState(() => _isLoading = false);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao criar evento: $e')),
+          SnackBar(
+            content: Text('Erro ao criar evento: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
@@ -175,217 +180,532 @@ class _CriarEventoPageState extends State<CriarEventoPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Criar Evento'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        centerTitle: true,
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Título
-              TextFormField(
-                controller: _tituloController,
-                decoration: const InputDecoration(
-                  labelText: 'Título *',
-                  hintText: 'Ex: ENEM 2025',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Título é obrigatório';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+      body: _isLoading ? _buildLoadingState(theme) : _buildContent(theme),
+    );
+  }
 
-              // Descrição
-              TextFormField(
-                controller: _descricaoController,
-                decoration: const InputDecoration(
-                  labelText: 'Descrição',
-                  hintText: 'Descrição do evento',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
+  Widget _buildLoadingState(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(color: theme.colorScheme.primary),
+          const SizedBox(height: 16),
+          Text(
+            'Carregando dados...',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-              // Tipo
-              DropdownButtonFormField<TipoEvento>(
-                value: _tipoSelecionado,
-                decoration: const InputDecoration(
-                  labelText: 'Tipo *',
-                  border: OutlineInputBorder(),
-                ),
-                items: TipoEvento.values.map((tipo) {
-                  return DropdownMenuItem(
-                    value: tipo,
-                    child: Text(tipo.displayName),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _tipoSelecionado = value;
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
+  Widget _buildContent(ThemeData theme) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Card
+          _buildHeaderCard(theme),
+          const SizedBox(height: 24),
 
-              // Data
-              InkWell(
-                onTap: _selecionarData,
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Data *',
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_today),
-                  ),
-                  child: Text(DateFormat('dd/MM/yyyy').format(_dataSelecionada)),
-                ),
-              ),
-              const SizedBox(height: 16),
+          // Form
+          Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                // Informações Básicas
+                _buildBasicInfoCard(theme),
+                const SizedBox(height: 16),
 
-              // Horário
-              InkWell(
-                onTap: _selecionarHorario,
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Horário *',
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.access_time),
-                  ),
-                  child: Text(_horarioSelecionado.format(context)),
-                ),
-              ),
-              const SizedBox(height: 16),
+                // Tipo e Local
+                _buildTypeLocationCard(theme),
+                const SizedBox(height: 16),
 
-              // Local
-              TextFormField(
-                controller: _localController,
-                decoration: const InputDecoration(
-                  labelText: 'Local *',
-                  hintText: 'Ex: Campus Universitário',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Local é obrigatório';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+                // Data e Horário
+                _buildDateTimeCard(theme),
+                const SizedBox(height: 16),
 
-              // Matéria
-              DropdownButtonFormField<String>(
-                value: _materiaSelecionada,
-                decoration: const InputDecoration(
-                  labelText: 'Matéria (opcional)',
-                  border: OutlineInputBorder(),
-                ),
-                items: _materias.map((materia) {
-                  return DropdownMenuItem<String>(
-                    value: materia.id,
-                    child: Text(materia.nome),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _materiaSelecionada = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
+                // Prova (se aplicável)
+                if (_tipoSelecionado == TipoEvento.PROVA_SIMULADA)
+                  _buildProvaCard(theme),
+                if (_tipoSelecionado == TipoEvento.PROVA_SIMULADA)
+                  const SizedBox(height: 16),
 
-              // URL de Inscrição
-              TextFormField(
-                controller: _urlInscricaoController,
-                decoration: const InputDecoration(
-                  labelText: 'URL de Inscrição',
-                  hintText: 'https://exemplo.com/inscricao',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.url,
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Taxa de Inscrição
-              TextFormField(
-                controller: _taxaInscricaoController,
-                decoration: const InputDecoration(
-                  labelText: 'Taxa de Inscrição (R\$)',
-                  hintText: '0.00',
-                  border: OutlineInputBorder(),
-                  prefixText: 'R\$ ',
-                ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-              ),
-              const SizedBox(height: 16),
+                // Botão de Criar
+                _buildCreateButton(theme),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-              // Data Limite de Inscrição
-              InkWell(
-                onTap: _selecionarDataLimite,
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: 'Data Limite de Inscrição',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_dataLimiteInscricao != null)
-                          IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              setState(() {
-                                _dataLimiteInscricao = null;
-                              });
-                            },
-                          ),
-                        const Icon(Icons.calendar_today),
-                      ],
-                    ),
-                  ),
-                  child: Text(
-                    _dataLimiteInscricao != null
-                        ? DateFormat('dd/MM/yyyy').format(_dataLimiteInscricao!)
-                        : 'Selecionar data limite',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Botão Criar
-              SizedBox(
-                height: 48,
-                child: ButtonWidget(
-                  text: _isLoading ? 'Criando...' : 'Criar Evento',
-                  onPressed: _isLoading ? null : _criarEvento,
-                  color: colorScheme.primary,
-                  textStyle: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: colorScheme.onPrimary,
-                  ),
-                ),
-              ),
+  Widget _buildHeaderCard(ThemeData theme) {
+    return Card(
+      elevation: 2,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              theme.colorScheme.primaryContainer.withOpacity(0.8),
+              theme.colorScheme.primaryContainer.withOpacity(0.4),
             ],
           ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: Icon(
+                Icons.event_rounded,
+                size: 28,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Criar Evento',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Organize eventos importantes do seu cronograma de estudos',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-} 
+
+  Widget _buildBasicInfoCard(ThemeData theme) {
+    return Card(
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.edit_note_rounded,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Informações do Evento',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            _buildInputField(
+              label: 'Título do evento',
+              controller: _tituloController,
+              icon: Icons.title_rounded,
+              hint: 'Ex: Prova de Matemática, Simulado ENEM...',
+              isRequired: true,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Título é obrigatório';
+                }
+                return null;
+              },
+            ),
+
+            const SizedBox(height: 16),
+
+            _buildInputField(
+              label: 'Descrição (opcional)',
+              controller: _descricaoController,
+              icon: Icons.description_rounded,
+              hint: 'Adicione detalhes sobre o evento...',
+              maxLines: 3,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeLocationCard(ThemeData theme) {
+    return Card(
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.category_rounded,
+                  color: theme.colorScheme.secondary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Tipo e Local',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            _buildDropdownField<TipoEvento>(
+              label: 'Tipo de Evento',
+              icon: Icons.label_rounded,
+              value: _tipoSelecionado,
+              items: TipoEvento.values,
+              itemBuilder: (tipo) => tipo.displayName,
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _tipoSelecionado = value);
+                }
+              },
+              isRequired: true,
+            ),
+
+            const SizedBox(height: 16),
+
+            _buildInputField(
+              label: 'Local',
+              controller: _localController,
+              icon: Icons.location_on_rounded,
+              hint: 'Ex: Sala 101, Campus Central...',
+              isRequired: true,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Local é obrigatório';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateTimeCard(ThemeData theme) {
+    return Card(
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.access_time_rounded,
+                  color: theme.colorScheme.tertiary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Data e Horário',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.tertiary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+                Expanded(child: _buildDateSelector(theme)),
+                const SizedBox(width: 12),
+                Expanded(child: _buildTimeSelector(theme)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProvaCard(ThemeData theme) {
+    return Card(
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.quiz_rounded,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Prova Relacionada',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _buildDropdownField<String?>(
+              label: 'Prova (opcional)',
+              icon: Icons.assignment_rounded,
+              value: _provaSelecionada,
+              items: <String?>[null, ..._provas.map((p) => p.id)],
+              itemBuilder:
+                  (id) =>
+                      id == null
+                          ? 'Nenhuma prova'
+                          : _provas.firstWhere((p) => p.id == id).titulo,
+              onChanged: (value) {
+                setState(() => _provaSelecionada = value);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    String? hint,
+    int maxLines = 1,
+    bool isRequired = false,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: isRequired ? '$label *' : label,
+        hintText: hint,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surface,
+      ),
+    );
+  }
+
+  Widget _buildDropdownField<T>({
+    required String label,
+    required IconData icon,
+    required T? value,
+    required List<T> items,
+    required String Function(T) itemBuilder,
+    required void Function(T?) onChanged,
+    bool isRequired = false,
+  }) {
+    return DropdownButtonFormField<T>(
+      value: value,
+      decoration: InputDecoration(
+        labelText: isRequired ? '$label *' : label,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surface,
+      ),
+      items:
+          items.map((item) {
+            return DropdownMenuItem<T>(
+              value: item,
+              child: Text(itemBuilder(item)),
+            );
+          }).toList(),
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildDateSelector(ThemeData theme) {
+    return InkWell(
+      onTap: _selecionarData,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(12),
+          color: theme.colorScheme.surface,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.calendar_today_rounded,
+              color: theme.colorScheme.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Data',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    DateFormat('dd/MM/yyyy').format(_dataSelecionada),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeSelector(ThemeData theme) {
+    return InkWell(
+      onTap: _selecionarHorario,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(12),
+          color: theme.colorScheme.surface,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.access_time_rounded,
+              color: theme.colorScheme.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Horário',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _horarioSelecionado.format(context),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreateButton(ThemeData theme) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _criarEvento,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
+          elevation: 2,
+          shadowColor: theme.colorScheme.primary.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child:
+            _isLoading
+                ? SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                )
+                : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_rounded, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Criar Evento',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+      ),
+    );
+  }
+}

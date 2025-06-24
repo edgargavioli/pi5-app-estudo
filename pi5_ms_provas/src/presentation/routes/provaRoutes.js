@@ -333,9 +333,70 @@ router.patch('/:id/resultado', async (req, res) => {
     #swagger.responses[404] = {
         description: 'Prova não encontrada',
         schema: { $ref: '#/components/schemas/Error' }
+    }    */
+    await provaController.registrarResultado(req, res);
+});
+
+// Atualizar status da prova
+router.patch('/:id/status', async (req, res) => {
+    /*
+    #swagger.tags = ['Provas']
+    #swagger.summary = 'Atualizar status da prova'
+    #swagger.description = 'Atualiza o status de uma prova (PENDENTE, CONCLUIDA, CANCELADA)'
+    #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'ID da prova',
+        required: true,
+        type: 'string',
+        format: 'uuid'
+    }
+    #swagger.requestBody = {
+        required: true,
+        content: {
+            "application/json": {
+                schema: {
+                    type: 'object',
+                    required: ['status'],
+                    properties: {
+                        status: { 
+                            type: 'string',
+                            enum: ['PENDENTE', 'CONCLUIDA', 'CANCELADA'],
+                            example: 'CONCLUIDA',
+                            description: 'Novo status da prova'
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #swagger.responses[200] = {
+        description: 'Status atualizado com sucesso',
+        schema: { 
+            type: 'object',
+            properties: {
+                data: { $ref: '#/components/schemas/Prova' },
+                _links: { type: 'object' }
+            }
+        }
+    }
+    #swagger.responses[400] = {
+        description: 'Status inválido',
+        schema: { 
+            type: 'object',
+            properties: {
+                error: { 
+                    type: 'string',
+                    example: 'Status inválido. Valores aceitos: PENDENTE, CONCLUIDA, CANCELADA'
+                }
+            }
+        }
+    }
+    #swagger.responses[404] = {
+        description: 'Prova não encontrada',
+        schema: { $ref: '#/components/schemas/Error' }
     }
     */
-    await provaController.registrarResultado(req, res);
+    await provaController.updateStatus(req, res);
 });
 
 // Deletar uma prova
@@ -362,8 +423,158 @@ router.delete('/:id', async (req, res) => {
         description: 'Erro interno do servidor',
         schema: { $ref: '#/components/schemas/Error' }
     }
-    */
-    await provaController.delete(req, res);
+    */    await provaController.delete(req, res);
 });
 
-export default router; 
+// Adicionar matéria a uma prova
+router.post('/:id/materias', async (req, res) => {
+    /*
+    #swagger.tags = ['Provas']
+    #swagger.summary = 'Adicionar matéria a uma prova'
+    #swagger.description = 'Vincula uma matéria a uma prova existente'
+    #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'ID da prova',
+        required: true,
+        type: 'string',
+        format: 'uuid'
+    }
+    #swagger.parameters['body'] = {
+        in: 'body',
+        description: 'ID da matéria a ser vinculada',
+        required: true,
+        schema: {
+            type: 'object',
+            properties: {
+                materiaId: { type: 'string', format: 'uuid' }
+            }
+        }
+    }
+    */
+    await provaController.addMateria(req, res);
+});
+
+// Remover matéria de uma prova
+router.delete('/:id/materias/:materiaId', async (req, res) => {
+    /*
+    #swagger.tags = ['Provas']
+    #swagger.summary = 'Remover matéria de uma prova'
+    #swagger.description = 'Remove a vinculação de uma matéria com uma prova'
+    #swagger.parameters['id'] = {
+        in: 'path',
+        description: 'ID da prova',
+        required: true,
+        type: 'string',
+        format: 'uuid'
+    }
+    #swagger.parameters['materiaId'] = {
+        in: 'path',
+        description: 'ID da matéria',
+        required: true,
+        type: 'string',
+        format: 'uuid'
+    }
+    */
+    await provaController.removeMateria(req, res);
+});
+
+// Obter estatísticas das provas
+router.get('/stats/overview', async (req, res) => {
+    /*
+    #swagger.tags = ['Provas']
+    #swagger.summary = 'Obter estatísticas das provas'
+    #swagger.description = 'Retorna estatísticas das provas do usuário agrupadas por status'
+    #swagger.responses[200] = {
+        description: 'Estatísticas obtidas com sucesso',
+        schema: {
+            type: 'object',
+            properties: {
+                success: { type: 'boolean', example: true },
+                data: {
+                    type: 'object',
+                    properties: {
+                        total: { type: 'number', example: 10 },
+                        pendentes: { type: 'number', example: 5 },
+                        concluidas: { type: 'number', example: 4 },
+                        canceladas: { type: 'number', example: 1 },
+                        porcentagemConcluidas: { type: 'number', example: 40.0 },
+                        porcentagemPendentes: { type: 'number', example: 50.0 },
+                        porcentagemCanceladas: { type: 'number', example: 10.0 },
+                        proximasProvas: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    id: { type: 'string' },
+                                    titulo: { type: 'string' },
+                                    data: { type: 'string', format: 'date' },
+                                    diasRestantes: { type: 'number' }
+                                }
+                            }
+                        },
+                        provasRecentes: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    id: { type: 'string' },
+                                    titulo: { type: 'string' },
+                                    dataProva: { type: 'string', format: 'date' },
+                                    dataConclusao: { type: 'string', format: 'date-time' }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #swagger.responses[500] = {
+        description: 'Erro interno do servidor',
+        schema: { $ref: '#/components/schemas/Error' }
+    }
+    */
+    await provaController.getEstatisticas(req, res);
+});
+
+// Obter estatísticas das provas por status
+router.get('/estatisticas', async (req, res) => {
+    /*
+    #swagger.tags = ['Provas']
+    #swagger.summary = 'Obter estatísticas das provas por status'
+    #swagger.description = 'Retorna estatísticas simples das provas do usuário agrupadas por status'
+    #swagger.parameters[0] = {
+        name: 'userId',
+        in: 'query',
+        required: true,
+        description: 'ID do usuário',
+        type: 'string'
+    }
+    #swagger.responses[200] = {
+        description: 'Estatísticas obtidas com sucesso',
+        schema: {
+            type: 'object',
+            properties: {
+                total: { type: 'number', example: 10 },
+                pendentes: { type: 'number', example: 5 },
+                concluidas: { type: 'number', example: 4 },
+                canceladas: { type: 'number', example: 1 },
+                percentualConcluidas: { type: 'number', example: 40.0 },
+                percentualPendentes: { type: 'number', example: 50.0 },
+                percentualCanceladas: { type: 'number', example: 10.0 }
+            }
+        }
+    }
+    #swagger.responses[400] = {
+        description: 'Parâmetro userId é obrigatório',
+        schema: { $ref: '#/components/schemas/Error' }
+    }
+    #swagger.responses[500] = {
+        description: 'Erro interno do servidor',
+        schema: { $ref: '#/components/schemas/Error' }
+    }
+    */
+    await provaController.obterEstatisticasPorStatus(req, res);
+});
+
+export default router;

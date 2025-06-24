@@ -132,7 +132,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
   # Provas Service
   provas-service:
     build:
@@ -140,7 +139,7 @@ services:
       dockerfile: Dockerfile
     container_name: provas-service
     ports:
-      - "3001:3000"
+      - "3002:3000"  # Mudando para 3002 para não conflitar com Grafana
     environment:
       - NODE_ENV=development
       - PORT=3000
@@ -182,7 +181,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
   # Adminer para gerenciar databases
   adminer:
     image: adminer:latest
@@ -197,6 +195,70 @@ services:
       - microservices-network
     restart: unless-stopped
 
+  # Prometheus - Coleta de Métricas
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Grafana - Dashboards e Visualização
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"  # Mudando para 3001 para não conflitar com user-service
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_DOMAIN=localhost
+      - GF_SMTP_ENABLED=false
+      - GF_PATHS_DATA=/var/lib/grafana
+      - GF_PATHS_LOGS=/var/log/grafana
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - grafana-logs:/var/log/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Node Exporter - Métricas do Sistema
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
 volumes:
   postgres-user-data:
   postgres-notifications-data:
@@ -204,6 +266,9 @@ volumes:
   rabbitmq-data:
   provas-node-modules:
   user-logs:
+  prometheus-data:
+  grafana-data:
+  grafana-logs:
 
 networks:
   microservices-network:

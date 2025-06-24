@@ -1,1 +1,0 @@
- D:\\Faculdade\\pi5-app-estudo\\pi5_ms_mobile\\.dart_tool\\flutter_build\\2592781d456ec2ad39dd8984619dbc82\\native_assets.json: 

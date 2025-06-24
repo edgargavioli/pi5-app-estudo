@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const promMid = require('express-prometheus-middleware');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -28,6 +29,15 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined'));
+
+// Prometheus metrics middleware
+app.use(promMid({
+  metricsPath: '/metrics',
+  collectDefaultMetrics: true,
+  requestDurationBuckets: [0.1, 0.5, 1, 1.5],
+  requestLengthBuckets: [515, 1024, 5120, 10240],
+  responseLengthBuckets: [515, 1024, 5120, 10240],
+}));
 
 // Logging middleware
 app.use(logger.logRequest.bind(logger));
@@ -124,14 +134,25 @@ const server = app.listen(PORT, async () => {
   console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
   console.log(`Features: HATEOAS, Swagger, Middleware, Rate Limiting`);
 
-  // Connect to RabbitMQ
+  // Connect to RabbitMQ for notifications (QueueService)
   try {
     await QueueService.connect();
-    console.log('✅ Connected to RabbitMQ');
+    console.log('✅ Connected to RabbitMQ for notifications');
   } catch (error) {
-    console.error('❌ Failed to connect to RabbitMQ:', error.message);
-    // Don't exit the process, just log the error
-    // The application can still function without the queue
+    console.error('❌ Failed to connect to RabbitMQ for notifications:', error.message);
+  }
+
+  // Connect to RabbitMQ for events processing (RabbitMQService + EventHandler)
+  try {
+    await rabbitMQService.connect();
+    console.log('✅ Connected to RabbitMQ for events');
+
+    // Initialize EventHandler to process streak events
+    const eventHandler = new EventHandler();
+    await eventHandler.startConsumers();
+    console.log('✅ Event handlers initialized for streak processing');
+  } catch (error) {
+    console.error('❌ Failed to connect to RabbitMQ for events:', error.message);
   }
 });
 
@@ -139,6 +160,7 @@ const server = app.listen(PORT, async () => {
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received. Shutting down gracefully...');
   await QueueService.disconnect();
+  await rabbitMQService.close();
   await prisma.$disconnect();
   server.close(() => {
     console.log('Server closed');
@@ -149,6 +171,7 @@ process.on('SIGTERM', async () => {
 process.on('SIGINT', async () => {
   console.log('SIGINT received. Shutting down gracefully...');
   await QueueService.disconnect();
+  await rabbitMQService.close();
   await prisma.$disconnect();
   server.close(() => {
     console.log('Server closed');
@@ -160,6 +183,7 @@ process.on('SIGINT', async () => {
 process.on('uncaughtException', async (error) => {
   console.error('Uncaught Exception:', error);
   await QueueService.disconnect();
+  await rabbitMQService.close();
   await prisma.$disconnect();
   process.exit(1);
 });
@@ -168,6 +192,7 @@ process.on('uncaughtException', async (error) => {
 process.on('unhandledRejection', async (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   await QueueService.disconnect();
+  await rabbitMQService.close();
   await prisma.$disconnect();
   process.exit(1);
 });

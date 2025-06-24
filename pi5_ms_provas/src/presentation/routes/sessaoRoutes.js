@@ -37,6 +37,63 @@ router.get('/', async (req, res) => {
     await sessaoController.getAll(req, res);
 });
 
+// Obter estatísticas de sessões de estudo (DEVE VIR ANTES DE /:id)
+router.get('/estatisticas', async (req, res) => {
+    /*
+    #swagger.tags = ['Sessões de Estudo']
+    #swagger.summary = 'Obter estatísticas de sessões de estudo'
+    #swagger.description = 'Retorna estatísticas agregadas das sessões de estudo do usuário'
+    #swagger.parameters['provaId'] = {
+        in: 'query',
+        description: 'ID da prova para filtrar estatísticas (opcional)',
+        required: false,
+        type: 'string'
+    }
+    #swagger.responses[200] = {
+        description: 'Estatísticas obtidas com sucesso',
+        schema: { 
+            type: 'object',
+            properties: {
+                success: { type: 'boolean', example: true },
+                data: {
+                    type: 'object',
+                    properties: {
+                        userId: { type: 'string' },
+                        provaId: { type: 'string', nullable: true },
+                        tempoTotalEstudado: {
+                            type: 'object',
+                            properties: {
+                                minutos: { type: 'integer' },
+                                formatado: { type: 'string' }
+                            }
+                        },
+                        sessoes: {
+                            type: 'object',
+                            properties: {
+                                total: { type: 'integer' }
+                            }
+                        },
+                        questoes: {
+                            type: 'object',
+                            properties: {
+                                total: { type: 'integer' },
+                                acertadas: { type: 'integer' },
+                                desempenho: { type: 'number' }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #swagger.responses[500] = {
+        description: 'Erro interno do servidor',
+        schema: { $ref: '#/components/schemas/Error' }
+    }
+    */
+    await sessaoController.getEstatisticas(req, res);
+});
+
 // Buscar uma sessão de estudo específica
 router.get('/:id', async (req, res) => {
     /*
@@ -289,9 +346,7 @@ router.post('/:id/finalizar', async (req, res) => {
     #swagger.responses[500] = {
         description: 'Erro interno do servidor',
         schema: { $ref: '#/components/schemas/Error' }
-    }
-    */
-    await sessaoController.finalizar(req, res);
+    }    */    await sessaoController.finalizar(req, res);
 });
 
-export default router; 
+export default router;

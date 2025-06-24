@@ -17,11 +17,40 @@ export default class Notification {
         this.entityData = entityData;
         this.scheduledFor = scheduledFor;
         this.status = status;
-    }
-
-    // Gera o conteúdo dinamicamente baseado no tipo
+    }    // Gera o conteúdo dinamicamente baseado no tipo
     generateContent() {
         switch (this.type) {
+            // Eventos
+            case 'EVENTO_CRIADO':
+                return this.generateEventCreatedContent();
+            case 'EVENTO_LEMBRETE_3_DIAS':
+                return this.generateEventReminderContent(3);
+            case 'EVENTO_DIA':
+                return this.generateEventTodayContent();
+
+            // Provas
+            case 'PROVA_CRIADA':
+                return this.generateExamCreatedContent();
+            case 'PROVA_LEMBRETE_1_SEMANA':
+                return this.generateExamWeekReminderContent();
+            case 'PROVA_LEMBRETE_3_DIAS':
+                return this.generateExamReminderContent(3);
+            case 'PROVA_LEMBRETE_1_DIA':
+                return this.generateExamReminderContent(1);
+            case 'PROVA_DIA':
+                return this.generateExamTodayContent();
+            case 'PROVA_1_HORA':
+                return this.generateExamOneHourContent();
+
+            // Sessões
+            case 'SESSAO_CRIADA':
+                return this.generateSessionCreatedContent();
+            case 'SESSAO_INICIADA':
+                return this.generateSessionStartedContent();
+            case 'SESSAO_LEMBRETE':
+                return this.generateSessionReminderContent();
+
+            // Tipos legados
             case 'EVENT_REMINDER':
                 return this.generateEventReminderContent();
             case 'EVENT_TODAY':
@@ -50,63 +79,127 @@ export default class Notification {
                     body: 'Você tem uma nova notificação'
                 };
         }
-    }
+    } generateEventReminderContent(days = null) {
+        const daysDiff = days || this.getDaysDifference(this.entityData.date || this.entityData.data);
+        const entityName = this.entityData.titulo || this.entityData.name || 'Evento';
+        const entityDate = this.entityData.data || this.entityData.date;
 
-    generateEventReminderContent() {
-        const daysDiff = this.getDaysDifference(this.entityData.date);
-        return {
-            title: `Lembrete: ${this.entityData.name}`,
-            body: `O evento acontecerá em ${daysDiff} dias - ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
-        };
+        if (daysDiff === 3) {
+            return {
+                title: `⏰ Lembrete: ${entityName} em 3 dias`,
+                body: `O evento "${entityName}" acontecerá em 3 dias - ${new Date(entityDate).toLocaleDateString('pt-BR')}`
+            };
+        } else {
+            return {
+                title: `Lembrete: ${entityName}`,
+                body: `O evento acontecerá em ${daysDiff} dias - ${new Date(entityDate).toLocaleDateString('pt-BR')}`
+            };
+        }
     }
 
     generateEventTodayContent() {
+        const entityName = this.entityData.titulo || this.entityData.name || 'Evento';
+        const entityTime = this.entityData.horario || this.entityData.time;
+        const timeStr = entityTime ? new Date(entityTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+
         return {
-            title: `Hoje é o dia!`,
-            body: `O evento ${this.entityData.name} acontece hoje às ${this.entityData.time}`
+            title: `🔥 HOJE: ${entityName}!`,
+            body: `O evento "${entityName}" acontece hoje${timeStr ? ` às ${timeStr}` : ''}! 🎯`
         };
     }
 
     generateEventCreatedContent() {
+        const entityName = this.entityData.titulo || this.entityData.name || 'Evento';
+        const entityDate = this.entityData.data || this.entityData.date;
+
         return {
             title: `📅 Novo evento criado`,
-            body: `${this.entityData.name} foi adicionado para ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
+            body: `"${entityName}" foi adicionado para ${new Date(entityDate).toLocaleDateString('pt-BR')}`
         };
     }
 
     generateExamWeekReminderContent() {
+        const entityName = this.entityData.titulo || this.entityData.name || 'Prova';
+        const entityDate = this.entityData.data || this.entityData.date;
+
         return {
             title: `📚 Prova se aproximando`,
-            body: `A prova de ${this.entityData.name} acontecerá em 1 semana - ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
+            body: `A prova "${entityName}" acontecerá em 1 semana - ${new Date(entityDate).toLocaleDateString('pt-BR')}`
+        };
+    } generateExamReminderContent(days = null) {
+        const daysDiff = days || this.getDaysDifference(this.entityData.date || this.entityData.data);
+        const entityName = this.entityData.titulo || this.entityData.name || 'Prova';
+        const entityDate = this.entityData.data || this.entityData.date;
+        const entityTime = this.entityData.horario || this.entityData.time;
+
+        if (daysDiff === 1) {
+            return {
+                title: `🔔 AMANHÃ é dia de prova!`,
+                body: `A prova "${entityName}" é AMANHÃ! 📚\n✅ Separe seus materiais\n✅ Descanse bem\n✅ Confie no seu preparo!`
+            };
+        } else if (daysDiff === 3) {
+            return {
+                title: `⏰ Prova em 3 dias - Revisão final!`,
+                body: `A prova "${entityName}" é em 3 dias! 🎯\nFaça uma revisão geral dos tópicos principais!`
+            };
+        } else {
+            return {
+                title: `⏰ Lembrete: Prova em ${daysDiff} dias`,
+                body: `Prova "${entityName}" - ${new Date(entityDate).toLocaleDateString('pt-BR')}`
+            };
+        }
+    }
+
+    generateExamOneHourContent() {
+        const entityName = this.entityData.titulo || this.entityData.name || 'Prova';
+        const entityLocal = this.entityData.local || 'Local da prova';
+        return {
+            title: `⏰ Prova em 1 hora!`,
+            body: `Sua prova "${entityName}" começa em 1 hora! ⏰\n\n✅ Verifique seus materiais\n✅ Saia com antecedência\n✅ Mantenha a calma!\n\n📍 ${entityLocal}`
         };
     }
 
-    generateExamReminderContent() {
-        const daysDiff = this.getDaysDifference(this.entityData.date);
+    generateSessionStartedContent() {
+        const sessionName = this.entityData.conteudo || this.entityData.name || 'Sessão de estudo';
         return {
-            title: `⏰ Lembrete: Prova em ${daysDiff} dias`,
-            body: `Prova de ${this.entityData.name} - ${new Date(this.entityData.date).toLocaleDateString('pt-BR')} às ${this.entityData.time}`
+            title: `🎯 Sessão iniciada!`,
+            body: `Sua sessão "${sessionName}" começou! Foque e dê o seu melhor! 💪`
         };
     }
 
-    generateExamTodayContent() {
+    generateSessionReminderContent() {
+        const sessionName = this.entityData.conteudo || this.entityData.name || 'Sessão de estudo';
         return {
-            title: `🎯 Prova hoje!`,
-            body: `Hoje é o dia da prova de ${this.entityData.name} às ${this.entityData.time}. Boa sorte!`
+            title: `📚 Lembrete de sessão`,
+            body: `Não esqueça da sua sessão "${sessionName}" hoje! 📅`
+        };
+    } generateExamTodayContent() {
+        const entityName = this.entityData.titulo || this.entityData.name || 'Prova';
+        const entityTime = this.entityData.horario || this.entityData.time;
+        const timeStr = entityTime ? new Date(entityTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+
+        return {
+            title: `🎯 HOJE é dia de prova!`,
+            body: `Hoje é o dia da prova "${entityName}"${timeStr ? ` às ${timeStr}` : ''}! Você se preparou bem! Confie em si mesmo! 💪🍀 Boa sorte!`
         };
     }
 
     generateExamCreatedContent() {
+        const entityName = this.entityData.titulo || this.entityData.name || 'Prova';
+        const entityDate = this.entityData.data || this.entityData.date;
+
         return {
-            title: `📋 Nova prova cadastrada`,
-            body: `Prova de ${this.entityData.name} agendada para ${new Date(this.entityData.date).toLocaleDateString('pt-BR')}`
+            title: `� Nova prova cadastrada`,
+            body: `Prova "${entityName}" agendada para ${new Date(entityDate).toLocaleDateString('pt-BR')}`
         };
     }
 
     generateSessionCreatedContent() {
+        const sessionName = this.entityData.conteudo || this.entityData.name || 'Sessão de estudo';
+
         return {
-            title: `🎯 Sessão de estudo iniciada`,
-            body: `Sessão de ${this.entityData.name} começou agora. Boa sorte!`
+            title: `📚 Sessão de estudo criada`,
+            body: `Sessão "${sessionName}" foi criada! Organize-se e bons estudos! 💪`
         };
     }
 

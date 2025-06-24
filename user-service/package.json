@@ -34,10 +34,13 @@
     "helmet": "^7.1.0",
     "joi": "^17.12.1",
     "jsonwebtoken": "^9.0.2",
+    "luxon": "^3.6.1",
     "morgan": "^1.10.0",
     "nodemailer": "^6.9.9",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "prom-client": "^13.2.0",
+    "express-prometheus-middleware": "^1.2.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "winston": "^3.11.0"

@@ -5,18 +5,18 @@ import NotificationScheduler from '../../infrastructure/services/notification-sc
 import { startSessionConsumer } from './session-consumer.js';
 import { startExamConsumer } from './exam-consumer.js';
 import { startFcmTokenConsumer } from './fcm-token-consumer.js';
+import { startCustomNotificationConsumer } from './custom-notification-consumer.js';
 
 export async function startAllConsumers() {
     try {
-        console.log('Starting all consumers...');
-
-        // Inicia todos os consumers
+        console.log('Starting all consumers...');        // Inicia todos os consumers
         await startUserConsumer();
         await startEventConsumer();
         await startStreakConsumer();
         await startSessionConsumer();
         await startExamConsumer();
         await startFcmTokenConsumer();
+        await startCustomNotificationConsumer();
 
         // Inicia o scheduler de notificações
         const scheduler = new NotificationScheduler();

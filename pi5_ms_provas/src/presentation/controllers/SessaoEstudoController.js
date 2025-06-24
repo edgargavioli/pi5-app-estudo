@@ -4,6 +4,7 @@ import { UpdateSessaoEstudoUseCase } from '../../application/use-cases/sessao-es
 import { DeleteSessaoEstudoUseCase } from '../../application/use-cases/sessao-estudo/DeleteSessaoEstudoUseCase.js';
 import { FinalizarSessaoEstudoUseCase } from '../../application/use-cases/sessao-estudo/FinalizarSessaoEstudoUseCase.js';
 import { GetAllSessoesEstudoUseCase } from '../../application/use-cases/sessao-estudo/GetAllSessoesEstudoUseCase.js';
+import { GetEstatisticasSessaoUseCase } from '../../application/use-cases/sessao-estudo/GetEstatisticasSessaoUseCase.js';
 import { SessaoEstudoRepository } from '../../infrastructure/persistence/repositories/SessaoEstudoRepository.js';
 import { HateoasConfig } from '../../infrastructure/hateoas/HateoasConfig.js';
 import { logger } from '../../application/utils/logger.js';
@@ -18,6 +19,7 @@ export class SessaoEstudoController {
         this.updateUseCase = new UpdateSessaoEstudoUseCase(repository);
         this.deleteUseCase = new DeleteSessaoEstudoUseCase(repository);
         this.finalizarUseCase = new FinalizarSessaoEstudoUseCase(repository);
+        this.getEstatisticasUseCase = new GetEstatisticasSessaoUseCase(repository);
     }
 
     async create(req, res) {
@@ -35,10 +37,14 @@ export class SessaoEstudoController {
             logger.info('Sessão de estudo criada com sucesso', {
                 sessaoId: sessao.id,
                 userId
+            });            // Publicar evento de sessão criada
+            await rabbitMQService.publishSessaoCriada({
+                ...sessao,
+                userId
             });
 
-            // Publicar evento de sessão criada
-            await rabbitMQService.publishSessaoCriada({
+            // Publicar notificação de sessão criada
+            await rabbitMQService.publishSessaoNotificacao({
                 ...sessao,
                 userId
             });
@@ -78,6 +84,32 @@ export class SessaoEstudoController {
             res.json(response);
         } catch (error) {
             logger.error('Erro ao listar sessões de estudo', {
+                error: error.message,
+                userId: req.userId
+            });
+            res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+    }
+
+    async getAgendadas(req, res) {
+        try {
+            // 🔒 Listar apenas sessões agendadas do usuário autenticado
+            const userId = req.userId;
+
+            logger.info('Listando sessões agendadas do usuário', { userId });
+
+            const queryParams = { ...req.query, isAgendada: true };
+            const sessoes = await this.getAllUseCase.execute(userId, queryParams);
+
+            logger.info('Sessões agendadas listadas com sucesso', {
+                total: sessoes.length,
+                userId
+            });
+
+            const response = HateoasConfig.wrapCollectionResponse(sessoes, req.baseUrl, 'sessoes/agendadas');
+            res.json(response);
+        } catch (error) {
+            logger.error('Erro ao listar sessões agendadas', {
                 error: error.message,
                 userId: req.userId
             });
@@ -239,6 +271,39 @@ export class SessaoEstudoController {
             if (error.message.includes('já foi finalizada')) {
                 return res.status(400).json({ error: error.message });
             }
+            res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+    }
+
+    async getEstatisticas(req, res) {
+        try {
+            const userId = req.userId;
+            const provaId = req.query.provaId || null;
+
+            logger.info('Buscando estatísticas de sessões de estudo', {
+                userId,
+                provaId
+            });
+
+            const estatisticas = await this.getEstatisticasUseCase.execute(userId, provaId);
+
+            logger.info('Estatísticas de sessões recuperadas com sucesso', {
+                userId,
+                provaId,
+                tempoTotalMinutos: estatisticas.tempoTotalEstudado.minutos,
+                totalSessoes: estatisticas.sessoes.total
+            });
+
+            res.json({
+                success: true,
+                data: estatisticas
+            });
+        } catch (error) {
+            logger.error('Erro ao buscar estatísticas de sessões', {
+                error: error.message,
+                userId: req.userId,
+                provaId: req.query.provaId
+            });
             res.status(500).json({ error: 'Erro interno do servidor' });
         }
     }

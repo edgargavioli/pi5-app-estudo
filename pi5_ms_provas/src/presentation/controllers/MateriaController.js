@@ -45,6 +45,40 @@ export class MateriaController {
             const errorResponse = HateoasConfig.wrapErrorResponse('Erro interno do servidor', 500, req.baseUrl);
             res.status(500).json(errorResponse);
         }
+    }    /**
+     * Lista todas as matérias não utilizadas (não associadas a nenhuma prova)
+     * @param {Object} req - Request object contendo userId
+     * @param {Object} res - Response object
+     * @returns {Promise<void>} Lista de matérias não utilizadas com links HATEOAS
+     */
+    async getUnused(req, res) {
+        try {
+            logger.info('Buscando materias nao utilizadas');
+            const materias = await this.getUseCase.executeUnused(req.userId);
+            const response = HateoasConfig.wrapCollectionResponse(materias, req.baseUrl, 'materias');
+            res.json(response);
+        } catch (error) {
+            logger.error('Erro ao buscar materias nao utilizadas', { error: error.message });
+            const errorResponse = HateoasConfig.wrapErrorResponse('Erro interno do servidor', 500, req.baseUrl);
+            res.status(500).json(errorResponse);
+        }
+    }    /**
+     * Lista todas as matérias utilizadas (associadas a pelo menos uma prova)
+     * @param {Object} req - Request object contendo userId
+     * @param {Object} res - Response object
+     * @returns {Promise<void>} Lista de matérias utilizadas com links HATEOAS
+     */
+    async getUsed(req, res) {
+        try {
+            logger.info('Buscando materias utilizadas');
+            const materias = await this.getUseCase.executeUsed(req.userId);
+            const response = HateoasConfig.wrapCollectionResponse(materias, req.baseUrl, 'materias');
+            res.json(response);
+        } catch (error) {
+            logger.error('Erro ao buscar materias utilizadas', { error: error.message });
+            const errorResponse = HateoasConfig.wrapErrorResponse('Erro interno do servidor', 500, req.baseUrl);
+            res.status(500).json(errorResponse);
+        }
     }
 
     async getById(req, res) {
@@ -94,7 +128,7 @@ export class MateriaController {
             res.status(204).send();
         } catch (error) {
             logger.error('Erro ao deletar materia', { error: error.message, id: req.params.id });
-            
+
             // IMPORTANTE: FK constraint deve vir ANTES de "nao encontrada"
             if (error.message.includes('possui provas ou sessoes de estudo associadas')) {
                 const errorResponse = HateoasConfig.wrapErrorResponse(error.message, 409, req.baseUrl);
@@ -108,4 +142,4 @@ export class MateriaController {
             res.status(500).json(errorResponse);
         }
     }
-} 
+}

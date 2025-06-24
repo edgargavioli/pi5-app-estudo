@@ -15,7 +15,7 @@ class PrismaUserRepository extends UserRepository {
    */
   toDomainEntity(userData) {
     if (!userData) return null;
-    
+
     return new User({
       id: userData.id,
       email: userData.email,
@@ -51,7 +51,7 @@ class PrismaUserRepository extends UserRepository {
       const userData = await prisma.user.findUnique({
         where: { id }
       });
-      
+
       return this.toDomainEntity(userData);
     } catch (error) {
       throw new AppError(`Error finding user by ID: ${error.message}`, 500);
@@ -63,7 +63,7 @@ class PrismaUserRepository extends UserRepository {
       const userData = await prisma.user.findUnique({
         where: { email }
       });
-      
+
       return this.toDomainEntity(userData);
     } catch (error) {
       throw new AppError(`Error finding user by email: ${error.message}`, 500);
@@ -76,7 +76,7 @@ class PrismaUserRepository extends UserRepository {
       const savedUser = await prisma.user.create({
         data: userData
       });
-      
+
       return this.toDomainEntity(savedUser);
     } catch (error) {
       if (error.code === 'P2002') {
@@ -85,15 +85,17 @@ class PrismaUserRepository extends UserRepository {
       throw new AppError(`Error saving user: ${error.message}`, 500);
     }
   }
-
   async update(user) {
     try {
       const userData = this.toPersistenceData(user);
+      // Remove o ID dos dados de update pois deve estar apenas no where
+      const { id, ...dataToUpdate } = userData;
+
       const updatedUser = await prisma.user.update({
         where: { id: user.id },
-        data: userData
+        data: dataToUpdate
       });
-      
+
       return this.toDomainEntity(updatedUser);
     } catch (error) {
       if (error.code === 'P2002') {
@@ -125,12 +127,12 @@ class PrismaUserRepository extends UserRepository {
       if (excludeId) {
         whereClause.NOT = { id: excludeId };
       }
-      
+
       const user = await prisma.user.findFirst({
         where: whereClause,
         select: { id: true }
       });
-      
+
       return !!user;
     } catch (error) {
       throw new AppError(`Error checking email existence: ${error.message}`, 500);
@@ -157,11 +159,11 @@ class PrismaUserRepository extends UserRepository {
         where: { id },
         select: { imageBase64: true }
       });
-      
+
       if (!user) {
         throw new AppError('User not found', 404);
       }
-      
+
       return user.imageBase64;
     } catch (error) {
       if (error instanceof AppError) {
@@ -170,6 +172,36 @@ class PrismaUserRepository extends UserRepository {
       throw new AppError(`Error getting profile image: ${error.message}`, 500);
     }
   }
+
+  async createPointsTransaction(transactionData) {
+    try {
+      const transaction = await prisma.pointsTransaction.create({
+        data: {
+          userId: transactionData.userId,
+          points: transactionData.points,
+          reason: transactionData.reason,
+          type: transactionData.type
+        }
+      });
+
+      return transaction;
+    } catch (error) {
+      throw new AppError(`Error creating points transaction: ${error.message}`, 500);
+    }
+  }
+
+  async getPointsHistory(userId) {
+    try {
+      const transactions = await prisma.pointsTransaction.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      return transactions;
+    } catch (error) {
+      throw new AppError(`Error getting points history: ${error.message}`, 500);
+    }
+  }
 }
 
-module.exports = PrismaUserRepository; 
+module.exports = PrismaUserRepository;
