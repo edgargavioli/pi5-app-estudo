@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/routes/app_routes.dart';
 import 'package:pi5_ms_mobile/src/services/firebase_notification_service.dart';
@@ -6,27 +5,27 @@ import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/shared/util.dart';
 import 'package:pi5_ms_mobile/src/shared/services/cronometro_service.dart';
 import 'package:pi5_ms_mobile/src/shared/services/auth_service.dart';
+import 'package:pi5_ms_mobile/src/shared/services/estatisticas_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FirebaseNotificationService.initialize();
-
   // 🔐 INICIALIZAR SERVIÇOS CRÍTICOS
   try {
-    print('🚀 Inicializando serviços...');
-
     // Inicializar AuthService (verificar tokens salvos)
     await AuthService().initialize();
-    print('✅ AuthService inicializado');
 
     // Inicializar CronometroService
-    await CronometroService().inicializar();
-    print('✅ CronometroService inicializado');
-
-    print('🎯 Todos os serviços inicializados com sucesso!');
+    await CronometroService()
+        .inicializar(); // 🎯 SINCRONIZAR DADOS COM BACKEND (se logado)
+    final authService = AuthService();
+    if (authService.accessToken != null) {
+      EstatisticasService.sincronizarComBackend();
+    }
   } catch (e) {
-    print('❌ Erro ao inicializar serviços: $e');
+    // Erro ao inicializar serviços - continuar mesmo assim
+    print('Erro ao inicializar serviços: $e');
   }
 
   runApp(const MyApp());
@@ -82,7 +81,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [Locale('en', 'US'), Locale('pt', 'BR')],
-          title: "PI5 MS Mobile",
+          title: "Meu Estudo",
           themeMode: themeMode,
           theme: theme.light(),
           darkTheme: theme.dark(),

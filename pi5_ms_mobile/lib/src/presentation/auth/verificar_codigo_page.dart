@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
 import 'package:pi5_ms_mobile/src/components/input_widget.dart';
-import 'package:pi5_ms_mobile/src/presentation/auth/login_page.dart';
+import 'package:pi5_ms_mobile/src/components/button_widget.dart';
 import 'package:pi5_ms_mobile/src/presentation/auth/nova_senha_page.dart';
 import 'package:pi5_ms_mobile/src/presentation/auth/recuperar_senha_page.dart';
 

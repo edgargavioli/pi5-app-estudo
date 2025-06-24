@@ -7,6 +7,7 @@ import { MateriaRepository } from '../../infrastructure/persistence/repositories
 import { logger } from '../../application/utils/logger.js';
 import { HateoasConfig } from '../../infrastructure/hateoas/HateoasConfig.js';
 import rabbitMQService from '../../infrastructure/messaging/RabbitMQService.js';
+import { GetEstatisticasProvaUseCase } from '../../application/use-cases/prova/GetEstatisticasProvaUseCase.js';
 
 const provaRepository = new ProvaRepository();
 const materiaRepository = new MateriaRepository();
@@ -15,8 +16,9 @@ export class ProvaController {
     constructor() {
         this.createUseCase = new CreateProvaUseCase(provaRepository, materiaRepository);
         this.getUseCase = new GetProvaUseCase(provaRepository);
-        this.updateUseCase = new UpdateProvaUseCase(provaRepository);
+        this.updateUseCase = new UpdateProvaUseCase(provaRepository, materiaRepository);
         this.deleteUseCase = new DeleteProvaUseCase(provaRepository);
+        this.getEstatisticasUseCase = new GetEstatisticasProvaUseCase(provaRepository);
     }
 
     async create(req, res) {
@@ -207,6 +209,208 @@ export class ProvaController {
         } catch (error) {
             logger.error('Erro ao registrar resultado da prova', { error: error.message, id: req.params.id });
             res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+    }
+
+    // Adicionar matéria a uma prova
+    async addMateria(req, res) {
+        try {
+            const { id } = req.params;
+            const { materiaId } = req.body;
+
+            // Verificar se a prova existe e pertence ao usuário
+            const prova = await this.getUseCase.execute(id, req.userId);
+            if (!prova) {
+                return res.status(404).json({ error: 'Prova não encontrada' });
+            }
+
+            // Verificar se a matéria existe e pertence ao usuário
+            const materia = await materiaRepository.findById(materiaId);
+            if (!materia || materia.userId !== req.userId) {
+                return res.status(404).json({ error: 'Matéria não encontrada' });
+            }
+
+            // Adicionar a matéria à prova
+            await provaRepository.addMateriasToProva(id, [materiaId]);
+
+            // Buscar a prova atualizada
+            const provaAtualizada = await this.getUseCase.execute(id, req.userId);
+
+            logger.info('Matéria adicionada à prova com sucesso', { provaId: id, materiaId });
+
+            const response = HateoasConfig.wrapResponse(provaAtualizada, req.baseUrl, 'provas', provaAtualizada.id);
+            res.json(response);
+        } catch (error) {
+            logger.error('Erro ao adicionar matéria à prova', { error: error.message });
+            res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+    }    // Remover matéria de uma prova
+    async removeMateria(req, res) {
+        try {
+            const { id, materiaId } = req.params;
+
+            // Verificar se a prova existe e pertence ao usuário
+            const prova = await this.getUseCase.execute(id, req.userId);
+            if (!prova) {
+                return res.status(404).json({ error: 'Prova não encontrada' });
+            }
+
+            // Remover a matéria da prova
+            await provaRepository.removeMateriaFromProva(id, materiaId);
+
+            // Buscar a prova atualizada
+            const provaAtualizada = await this.getUseCase.execute(id, req.userId);
+
+            logger.info('Matéria removida da prova com sucesso', { provaId: id, materiaId });
+
+            const response = HateoasConfig.wrapResponse(provaAtualizada, req.baseUrl, 'provas', provaAtualizada.id);
+            res.json(response);
+        } catch (error) {
+            logger.error('Erro ao remover matéria da prova', { error: error.message });
+            res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+    }
+
+    // Atualizar status da prova
+    async updateStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+
+            logger.info('Atualizando status da prova', { provaId: id, status, userId: req.userId });
+
+            // Validar status
+            const statusValidos = ['PENDENTE', 'CONCLUIDA', 'CANCELADA'];
+            if (!status || !statusValidos.includes(status)) {
+                return res.status(400).json({
+                    error: 'Status inválido. Valores aceitos: PENDENTE, CONCLUIDA, CANCELADA'
+                });
+            }
+
+            // Verificar se a prova existe e pertence ao usuário
+            const prova = await this.getUseCase.execute(id, req.userId);
+            if (!prova) {
+                return res.status(404).json({ error: 'Prova não encontrada' });
+            }
+
+            // Atualizar o status da prova
+            const provaAtualizada = await provaRepository.updateStatus(id, status);
+
+            logger.info('Status da prova atualizado com sucesso', {
+                provaId: id,
+                statusAnterior: prova.status,
+                novoStatus: status
+            });
+
+            // Publicar evento de status atualizado
+            try {
+                await rabbitMQService.publishEntityUpdated('prova', id, provaAtualizada, prova, req.userId);
+                logger.info('📤 Evento de status da prova atualizado publicado', { provaId: id, status });
+            } catch (eventError) {
+                logger.error('❌ Erro ao publicar evento de status da prova', {
+                    provaId: id,
+                    error: eventError.message
+                });
+            }
+
+            const response = HateoasConfig.wrapResponse(provaAtualizada, req.baseUrl, 'provas', provaAtualizada.id);
+            res.json(response);
+        } catch (error) {
+            logger.error('Erro ao atualizar status da prova', {
+                error: error.message,
+                provaId: req.params.id,
+                userId: req.userId
+            });
+
+            if (error.message.includes('não encontrada') || error.message.includes('Acesso negado')) {
+                return res.status(404).json({ error: 'Prova não encontrada' });
+            }
+
+            res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+    }
+
+    // Obter estatísticas das provas por status
+    async getEstatisticas(req, res) {
+        try {
+            logger.info('Obtendo estatísticas de provas', { userId: req.userId });
+
+            const estatisticas = await this.getEstatisticasUseCase.execute(req.userId);
+
+            logger.info('Estatísticas de provas obtidas com sucesso', {
+                userId: req.userId,
+                total: estatisticas.total,
+                concluidas: estatisticas.concluidas
+            });
+
+            res.json({
+                success: true,
+                data: estatisticas
+            });
+        } catch (error) {
+            logger.error('Erro ao obter estatísticas de provas', {
+                error: error.message,
+                userId: req.userId
+            });
+
+            res.status(500).json({
+                success: false,
+                error: 'Erro interno do servidor'
+            });
+        }
+    }
+
+    // Obter estatísticas das provas por status
+    async obterEstatisticasPorStatus(req, res) {
+        try {
+            const { userId } = req.query;
+
+            if (!userId) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'userId é obrigatório'
+                });
+            }
+
+            logger.info('Obtendo estatísticas das provas por status', { userId });
+
+            // Usar o repository diretamente para obter as provas
+            const provas = await provaRepository.findByUserId(userId);
+
+            // Calcular estatísticas por status
+            const total = provas.length;
+            const pendentes = provas.filter(prova => prova.status === 'PENDENTE').length;
+            const concluidas = provas.filter(prova => prova.status === 'CONCLUIDA').length;
+            const canceladas = provas.filter(prova => prova.status === 'CANCELADA').length;
+
+            // Calcular percentuais
+            const percentualConcluidas = total > 0 ? (concluidas / total) * 100 : 0;
+            const percentualPendentes = total > 0 ? (pendentes / total) * 100 : 0;
+            const percentualCanceladas = total > 0 ? (canceladas / total) * 100 : 0;
+
+            const estatisticas = {
+                total,
+                pendentes,
+                concluidas,
+                canceladas,
+                percentualConcluidas: Math.round(percentualConcluidas * 100) / 100,
+                percentualPendentes: Math.round(percentualPendentes * 100) / 100,
+                percentualCanceladas: Math.round(percentualCanceladas * 100) / 100,
+            };
+
+            logger.info('Estatísticas obtidas com sucesso', { userId, estatisticas });
+
+            res.status(200).json(estatisticas);
+        } catch (error) {
+            logger.error('Erro ao obter estatísticas das provas por status', {
+                error: error.message,
+                userId: req.query.userId
+            });
+
+            res.status(500).json({
+                success: false,
+                error: 'Erro interno do servidor'
+            });
         }
     }
 }

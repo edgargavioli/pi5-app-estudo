@@ -1,5 +1,6 @@
 const express = require('express');
 const userController = require('../controllers/UserController');
+const StreakController = require('../controllers/StreakController');
 const { authMiddleware } = require('../../middleware/auth');
 const { validateRequest, schemas } = require('../../middleware/validation');
 const { userRateLimit } = require('../../middleware/rateLimiter');
@@ -343,5 +344,248 @@ router.get('/:id/image', authMiddleware, userRateLimit, userController.getProfil
  *         description: Internal server error
  */
 router.patch('/:id/fcm-token', authMiddleware, userRateLimit, userController.updateFcmToken);
+
+/**
+ * @swagger
+ * /api/users/{id}/points:
+ *   post:
+ *     summary: Add points to user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - points
+ *               - reason
+ *             properties:
+ *               points:
+ *                 type: integer
+ *                 minimum: 1
+ *                 description: Number of points to add
+ *                 example: 50
+ *               reason:
+ *                 type: string
+ *                 description: Reason for adding points
+ *                 example: "Sessão de estudo concluída"
+ *               type:
+ *                 type: string
+ *                 enum: [ADD, REMOVE]
+ *                 default: ADD
+ *                 description: Type of transaction
+ *     responses:
+ *       200:
+ *         description: Points added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/HATEOASResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/User'
+ *                     message:
+ *                       type: string
+ *                       example: "Successfully added 50 points"
+ *       400:
+ *         description: Bad request - invalid points or reason
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - can only add points to own account
+ *       404:
+ *         description: User not found
+ */
+router.post('/:id/points', authMiddleware, userRateLimit, userController.addPoints);
+
+/**
+ * @swagger
+ * /users/gamification/sessao:
+ *   post:
+ *     summary: Processar XP de finalização de sessão de estudo
+ *     tags: [Gamificação]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - tempoEstudoMinutos
+ *             properties:
+ *               tempoEstudoMinutos:
+ *                 type: number
+ *                 description: Tempo de estudo em minutos
+ *               isAgendada:
+ *                 type: boolean
+ *                 description: Se a sessão é agendada
+ *               metaTempo:
+ *                 type: number
+ *                 description: Meta de tempo em minutos
+ *               cumpriuPrazo:
+ *                 type: boolean
+ *                 description: Se cumpriu o prazo agendado
+ *               questoesAcertadas:
+ *                 type: number
+ *                 description: Número de questões acertadas
+ *               totalQuestoes:
+ *                 type: number
+ *                 description: Total de questões respondidas
+ *               sessionId:
+ *                 type: string
+ *                 description: ID da sessão para referência
+ *     responses:
+ *       200:
+ *         description: XP processado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 usuario:
+ *                   $ref: '#/components/schemas/User'
+ *                 xpAdicionado:
+ *                   type: number
+ *                 pontosTotal:
+ *                   type: number
+ *                 level:
+ *                   type: number
+ *                 subiumLevel:
+ *                   type: boolean
+ *                 detalhamentoXp:
+ *                   type: object
+ *                   properties:
+ *                     xpBase:
+ *                       type: number
+ *                     xpTempo:
+ *                       type: number
+ *                     xpQuestoes:
+ *                       type: number
+ *                     multiplicador:
+ *                       type: number
+ *                     bonus:
+ *                       type: number
+ *                     detalhes:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *       400:
+ *         description: Dados inválidos
+ *       401:
+ *         description: Não autorizado
+ *       500:
+ *         description: Erro interno do servidor */
+router.post('/gamification/sessao', authMiddleware, userController.processarXpSessao);
+
+// ==================== STREAK ROUTES ====================
+
+/**
+ * @swagger
+ * /api/users/{id}/streak:
+ *   get:
+ *     summary: Obter informações da sequência de estudos do usuário
+ *     tags: [Streaks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do usuário
+ *     responses:
+ *       200:
+ *         description: Informações da sequência obtidas com sucesso
+ *       401:
+ *         description: Não autorizado
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.get('/:id/streak', authMiddleware, userRateLimit, StreakController.getStreak);
+
+/**
+ * @swagger
+ * /api/users/{id}/streak:
+ *   put:
+ *     summary: Atualizar sequência de estudos (adicionar tempo estudado)
+ *     tags: [Streaks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do usuário
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               studyMinutes:
+ *                 type: integer
+ *                 description: Minutos de estudo para adicionar
+ *                 minimum: 1
+ *               timezone:
+ *                 type: string
+ *                 description: Fuso horário do usuário
+ *                 default: "America/Sao_Paulo"
+ *             required:
+ *               - studyMinutes
+ *     responses:
+ *       200:
+ *         description: Sequência atualizada com sucesso
+ *       400:
+ *         description: Dados inválidos
+ *       401:
+ *         description: Não autorizado
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.put('/:id/streak', authMiddleware, userRateLimit, StreakController.updateStreak);
+
+/**
+ * @swagger
+ * /api/users/{id}/streak/achievements:
+ *   get:
+ *     summary: Obter conquistas de sequência do usuário
+ *     tags: [Streaks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do usuário
+ *     responses:
+ *       200:
+ *         description: Conquistas obtidas com sucesso
+ *       401:
+ *         description: Não autorizado
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.get('/:id/streak/achievements', authMiddleware, userRateLimit, StreakController.getAchievements);
 
 module.exports = router;

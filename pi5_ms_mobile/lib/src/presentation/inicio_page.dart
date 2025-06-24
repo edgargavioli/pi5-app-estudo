@@ -1,9 +1,10 @@
 // ignore: file_names
 import 'package:flutter/material.dart';
-import '../shared/services/gamificacao_service.dart';
+import '../shared/services/gamificacao_backend_service.dart';
 import '../shared/services/sessao_service.dart';
 import '../shared/services/prova_service.dart';
 import '../shared/services/evento_service.dart';
+import '../shared/services/streak_service.dart';
 import '../shared/models/prova_model.dart';
 import '../shared/models/evento_model.dart';
 import 'package:intl/intl.dart';
@@ -15,13 +16,16 @@ class InicioPage extends StatefulWidget {
   State<InicioPage> createState() => _InicioPageState();
 }
 
-class _InicioPageState extends State<InicioPage> with TickerProviderStateMixin {
+class _InicioPageState extends State<InicioPage>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotateAnimation;
-
   Map<String, dynamic> _estatisticasGamificacao = {};
   bool _carregandoGamificacao = true;
+
+  Map<String, dynamic> _streakData = {};
+  bool _carregandoStreak = true;
 
   List<SessaoEstudo> _sessoes = [];
   List<Prova> _provas = [];
@@ -43,48 +47,73 @@ class _InicioPageState extends State<InicioPage> with TickerProviderStateMixin {
       begin: 1.0,
       end: 1.1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-
     _rotateAnimation = Tween<double>(
       begin: 0,
       end: 0.05,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
+    WidgetsBinding.instance.addObserver(this);
     _carregarTodosDados();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Recarregar dados quando o app volta ao foco
+      _carregarTodosDados();
+    }
   }
 
   Future<void> _carregarTodosDados() async {
     setState(() {
       _carregandoGamificacao = true;
       _carregandoDados = true;
+      _carregandoStreak = true;
     });
 
     try {
       // Carregar dados em paralelo
       final results = await Future.wait([
-        GamificacaoService.obterEstatisticasCompletas(),
+        GamificacaoBackendService.obterEstatisticasCompletas(),
         SessaoService.listarSessoes(),
         ProvaService.listarProvas(),
         EventoService.listarEventos(),
+        StreakService.obterStreak(),
       ]);
-
       if (mounted) {
+        // Se não conseguir dados do backend, usar dados padrão
+        final estatisticasBackend = results[0] as Map<String, dynamic>?;
+        final estatisticasFinal =
+            estatisticasBackend ?? {'xpTotal': 0, 'nivel': 1, 'pontosTotal': 0};
+
+        print('📊 Estatísticas finais carregadas: $estatisticasFinal');
         setState(() {
-          _estatisticasGamificacao = results[0] as Map<String, dynamic>;
+          _estatisticasGamificacao = estatisticasFinal;
           _sessoes = results[1] as List<SessaoEstudo>;
           _provas = results[2] as List<Prova>;
           _eventos = results[3] as List<Evento>;
+          _streakData = results[4] as Map<String, dynamic>;
+
+          // Calcular provas realizadas baseado no status
+          final provasRealizadas =
+              _provas
+                  .where((prova) => prova.status == StatusProva.CONCLUIDA)
+                  .length;
+          _estatisticasGamificacao['provasRealizadas'] = provasRealizadas;
 
           _ultimaSessao = _obterUltimaSessao();
           _proximoEvento = _obterProximoEvento();
-
           _carregandoGamificacao = false;
           _carregandoDados = false;
+          _carregandoStreak = false;
         });
       }
     } catch (e) {
@@ -94,33 +123,267 @@ class _InicioPageState extends State<InicioPage> with TickerProviderStateMixin {
           _estatisticasGamificacao = {};
           _carregandoGamificacao = false;
           _carregandoDados = false;
+          _carregandoStreak = false;
         });
       }
     }
   }
 
-  Future<void> _carregarEstatisticasGamificacao() async {
-    setState(() {
-      _carregandoGamificacao = true;
-    });
+  void _mostrarDetalhesStreak() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder:
+          (context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 8,
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.orange.shade50,
+                    Colors.orange.shade100.withOpacity(0.3),
+                  ],
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header com ícone animado
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade100,
+                      borderRadius: BorderRadius.circular(50),
+                      border: Border.all(
+                        color: Colors.orange.shade300,
+                        width: 2,
+                      ),
+                    ),
+                    child: AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _scaleAnimation.value,
+                          child: Icon(
+                            Icons.local_fire_department,
+                            color: Colors.orange.shade600,
+                            size: 32,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Sequência de Estudos',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange.shade700,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
-    try {
-      final stats = await GamificacaoService.obterEstatisticasCompletas();
-      if (mounted) {
-        setState(() {
-          _estatisticasGamificacao = stats;
-          _carregandoGamificacao = false;
-        });
-      }
-    } catch (e) {
-      print('Erro ao carregar estatísticas de gamificação: $e');
-      if (mounted) {
-        setState(() {
-          _estatisticasGamificacao = {};
-          _carregandoGamificacao = false;
-        });
-      }
-    }
+                  // Cards de estatísticas
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.orange.shade200,
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.orange.shade100,
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        _buildStreakStatRow(
+                          'Sequência Atual',
+                          '${_streakData['currentStreak'] ?? 0} dias',
+                          Icons.whatshot,
+                          Colors.orange.shade600,
+                        ),
+                        const SizedBox(height: 12),
+                        Divider(color: Colors.orange.shade100),
+                        const SizedBox(height: 12),
+                        _buildStreakStatRow(
+                          'Maior Sequência',
+                          '${_streakData['longestStreak'] ?? 0} dias',
+                          Icons.emoji_events,
+                          Colors.amber.shade600,
+                        ),
+                        const SizedBox(height: 12),
+                        Divider(color: Colors.orange.shade100),
+                        const SizedBox(height: 12),
+                        _buildStreakStatusRow(),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Dica motivacional
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue.shade200, width: 1),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.lightbulb_outline,
+                          color: Colors.blue.shade600,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Estude pelo menos 10 segundos para manter sua sequência ativa!',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Botão de fechar estilizado
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange.shade600,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: const Text(
+                        'Entendi!',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
+  }
+
+  Widget _buildStreakStatRow(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade700,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStreakStatusRow() {
+    final isActivated = _streakData['isActivatedToday'] ?? false;
+    final statusColor =
+        isActivated ? Colors.green.shade600 : Colors.orange.shade600;
+    final statusIcon = isActivated ? Icons.check_circle : Icons.pending;
+    final statusText = isActivated ? 'Ativada hoje!' : 'Pendente';
+
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: statusColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(statusIcon, color: statusColor, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            'Status Hoje',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade700,
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: statusColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: statusColor.withOpacity(0.3), width: 1),
+          ),
+          child: Text(
+            statusText,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: statusColor,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   SessaoEstudo? _obterUltimaSessao() {
@@ -238,7 +501,7 @@ class _InicioPageState extends State<InicioPage> with TickerProviderStateMixin {
                     context,
                   ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 24), // Card principal com streak e nível
                 Container(
                   decoration: BoxDecoration(
                     border: Border.all(
@@ -250,70 +513,108 @@ class _InicioPageState extends State<InicioPage> with TickerProviderStateMixin {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
+                      // Streak Section
                       Expanded(
-                        child: Column(
-                          children: [
-                            const Text(
-                              'Mantenha o Ritmo',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
-                              ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Theme.of(context).colorScheme.surface,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    _buildAnimatedIcon(
-                                      Icons.local_fire_department,
-                                      Colors.orange,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      _carregandoGamificacao
-                                          ? '...'
-                                          : '${_estatisticasGamificacao['sessoesFinalizadas'] ?? 0} sessões',
-                                      style: const TextStyle(
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: _mostrarDetalhesStreak,
+                            borderRadius: BorderRadius.circular(8),
+                            splashColor: Colors.orange.withOpacity(0.1),
+                            highlightColor: Colors.orange.withOpacity(0.05),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                        'Sequência',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontFamily: 'Roboto',
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14,
+                                        ),
                                       ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.touch_app,
+                                        size: 14,
+                                        color: Colors.grey[500],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.outline,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                      color:
+                                          Theme.of(context).colorScheme.surface,
                                     ),
-                                  ],
-                                ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                      horizontal: 16,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        _buildAnimatedIcon(
+                                          Icons.local_fire_department,
+                                          _streakData['isActivatedToday'] ??
+                                                  false
+                                              ? Colors.orange
+                                              : Colors.grey,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          _carregandoStreak
+                                              ? '...'
+                                              : '${_streakData['currentStreak'] ?? 0} dias',
+                                          style: const TextStyle(
+                                            fontFamily: 'Roboto',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    _streakData['isActivatedToday'] ?? false
+                                        ? 'Ativada hoje! 🔥'
+                                        : 'Toque para detalhes',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color:
+                                          _streakData['isActivatedToday'] ??
+                                                  false
+                                              ? Colors.green[600]
+                                              : Colors.blue[600],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Sessões Finalizadas',
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                       Container(
                         width: 1,
-                        height: 80,
+                        height: 100,
                         color: Theme.of(context).colorScheme.outlineVariant,
                       ),
+                      // Nível Section
                       Expanded(
                         child: Column(
                           children: [
@@ -327,50 +628,46 @@ class _InicioPageState extends State<InicioPage> with TickerProviderStateMixin {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                color: Theme.of(context).colorScheme.surface,
                               ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildAnimatedIcon(
+                                    Icons.flash_on,
+                                    Colors.amber,
                                   ),
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Theme.of(context).colorScheme.surface,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    _buildAnimatedIcon(
-                                      Icons.flash_on,
-                                      Colors.amber,
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _carregandoGamificacao
+                                        ? '...'
+                                        : '${_estatisticasGamificacao['nivel'] ?? 1}',
+                                    style: const TextStyle(
+                                      fontFamily: 'Roboto',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
                                     ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      _carregandoGamificacao
-                                          ? '...'
-                                          : '${_estatisticasGamificacao['nivel'] ?? 1}',
-                                      style: const TextStyle(
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
+                            Text(
                               'Nível Atual',
                               style: TextStyle(
-                                fontSize: 10,
-                                fontFamily: 'Poppins',
+                                fontSize: 11,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],

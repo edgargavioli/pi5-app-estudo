@@ -10,6 +10,12 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+enum StatusProva {
+    PENDENTE
+    CONCLUIDA
+    CANCELADA
+}
+
 enum TipoProva {
     VESTIBULAR
     PROVA
@@ -36,8 +42,9 @@ model Materia {
     id            String         @id @default(uuid())
     nome          String
     descricao     String?
-    userId        String         // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
-    provas        Prova[]
+    userId        String // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
+    provas        Prova[] // Relacionamento antigo (manter por compatibilidade)
+    provaMaterias ProvaMateria[] // Novo relacionamento many-to-many
     eventos       Evento[]
     sessoesEstudo SessaoEstudo[]
     createdAt     DateTime       @default(now())
@@ -55,40 +62,52 @@ model Prova {
     data          DateTime
     horario       DateTime
     local         String
-    userId        String         // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
-    materiaId     String
-    materia       Materia        @relation(fields: [materiaId], references: [id])
+    status        StatusProva    @default(PENDENTE)
+    userId        String // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
+    materiaId     String? // Mantido por compatibilidade (deprecated)
+    materia       Materia?       @relation(fields: [materiaId], references: [id])
+    provaMaterias ProvaMateria[] // Novo relacionamento many-to-many
     filtros       Json?
-    totalQuestoes Int?           // Número total de questões da prova
-    acertos       Int?           // Número de acertos do usuário
     sessoesEstudo SessaoEstudo[]
     sessoes       Sessao[]
-    createdAt     DateTime      @default(now())
-    updatedAt     DateTime      @updatedAt
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
 
     // Índice para performance em consultas por usuário
     @@index([userId])
     @@map("provas")
 }
 
+model ProvaMateria {
+    id        String   @id @default(uuid())
+    provaId   String
+    materiaId String
+    prova     Prova    @relation(fields: [provaId], references: [id], onDelete: Cascade)
+    materia   Materia  @relation(fields: [materiaId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+
+    @@unique([provaId, materiaId])
+    @@map("prova_materias")
+}
+
 model Evento {
-    id              String         @id @default(uuid())
-    titulo          String         // "ENEM 2025", "Vestibular USP 2025"
-    descricao       String?
-    tipo            TipoEvento
-    data            DateTime
-    horario         DateTime
-    local           String
-    userId          String?        // 🔒 Opcional para eventos públicos
-    materiaId       String?        // Opcional, alguns eventos são multi-matéria
-    materia         Materia?       @relation(fields: [materiaId], references: [id])
-    urlInscricao    String?        // Link para inscrição oficial
-    taxaInscricao   Decimal?       // Valor da inscrição
-    dataLimiteInscricao DateTime?  // Data limite para inscrição
-    inscricoes      EventoInscricao[]
-    sessoesEstudo   SessaoEstudo[] // Estudos direcionados para este evento
-    createdAt       DateTime       @default(now())
-    updatedAt       DateTime       @updatedAt
+    id                  String            @id @default(uuid())
+    titulo              String // "ENEM 2025", "Vestibular USP 2025"
+    descricao           String?
+    tipo                TipoEvento
+    data                DateTime
+    horario             DateTime
+    local               String
+    userId              String? // 🔒 Opcional para eventos públicos
+    materiaId           String? // Opcional, alguns eventos são multi-matéria
+    materia             Materia?          @relation(fields: [materiaId], references: [id])
+    urlInscricao        String? // Link para inscrição oficial
+    taxaInscricao       Decimal? // Valor da inscrição
+    dataLimiteInscricao DateTime? // Data limite para inscrição
+    inscricoes          EventoInscricao[]
+    sessoesEstudo       SessaoEstudo[] // Estudos direcionados para este evento
+    createdAt           DateTime          @default(now())
+    updatedAt           DateTime          @updatedAt
 
     // Índice para performance em consultas por usuário
     @@index([userId])
@@ -96,14 +115,14 @@ model Evento {
 }
 
 model EventoInscricao {
-    id          String           @id @default(uuid())
+    id          String          @id @default(uuid())
     eventoId    String
-    evento      Evento           @relation(fields: [eventoId], references: [id])
-    usuarioId   String           // 🔒 ID do estudante (FK para user-service)
-    status      StatusInscricao  @default(INSCRITO)
+    evento      Evento          @relation(fields: [eventoId], references: [id])
+    usuarioId   String // 🔒 ID do estudante (FK para user-service)
+    status      StatusInscricao @default(INSCRITO)
     observacoes String?
-    createdAt   DateTime         @default(now())
-    updatedAt   DateTime         @updatedAt
+    createdAt   DateTime        @default(now())
+    updatedAt   DateTime        @updatedAt
 
     @@unique([eventoId, usuarioId])
     // Índice para performance
@@ -112,24 +131,28 @@ model EventoInscricao {
 }
 
 model SessaoEstudo {
-    id          String    @id @default(uuid())
-    userId      String    // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
-    materiaId   String
-    materia     Materia   @relation(fields: [materiaId], references: [id])
-    provaId     String?
-    prova       Prova?    @relation(fields: [provaId], references: [id])
-    eventoId    String?   // Nova relação com eventos
-    evento      Evento?   @relation(fields: [eventoId], references: [id])
-    conteudo    String
-    topicos     String[]
-    tempoInicio DateTime?
-    tempoFim    DateTime?
+    id                String    @id @default(uuid())
+    userId            String // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
+    materiaId         String
+    materia           Materia   @relation(fields: [materiaId], references: [id])
+    provaId           String?
+    prova             Prova?    @relation(fields: [provaId], references: [id])
+    eventoId          String? // Nova relação com eventos
+    evento            Evento?   @relation(fields: [eventoId], references: [id])
+    conteudo          String
+    topicos           String[]
+    tempoInicio       DateTime?
+    tempoFim          DateTime?
     // Campos para gamificação
-    questoesAcertadas Int?    @default(0)
-    totalQuestoes     Int?    @default(0)
-    finalizada        Boolean @default(false)
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
+    questoesAcertadas Int?      @default(0)
+    totalQuestoes     Int?      @default(0)
+    finalizada        Boolean   @default(false) // Campos para sistema de XP diferenciado
+    isAgendada        Boolean   @default(false) // Se a sessão foi agendada
+    cumpriuPrazo      Boolean? // Se cumpriu o prazo quando agendada
+    horarioAgendado   DateTime? // Horário originalmente agendado
+    metaTempo         Int? // Meta de tempo em minutos para sessões agendadas
+    createdAt         DateTime  @default(now())
+    updatedAt         DateTime  @updatedAt
 
     // Índice para performance em consultas por usuário
     @@index([userId])
@@ -140,7 +163,7 @@ model Sessao {
     id        String   @id @default(uuid())
     data      DateTime
     duracao   Int
-    userId    String   // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
+    userId    String // 🔒 CAMPO OBRIGATÓRIO PARA ISOLAMENTO
     provaId   String
     prova     Prova    @relation(fields: [provaId], references: [id])
     createdAt DateTime @default(now())

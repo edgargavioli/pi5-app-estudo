@@ -182,6 +182,7 @@ class _AdicionarMateriaPageState extends State<AdicionarMateriaPage> {
                         Icons.remove_circle,
                         color: theme.colorScheme.error,
                       ),
+                      tooltip: 'Remover matéria',
                       onPressed: () => _removerMateria(materia),
                     ),
                   );
@@ -193,6 +194,7 @@ class _AdicionarMateriaPageState extends State<AdicionarMateriaPage> {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: theme.colorScheme.primary,
+        tooltip: 'Confirmar seleção de matérias',
         onPressed: () {
           // Lógica para confirmar as matérias selecionadas
           Navigator.pop(context, _materiasAdicionadas);

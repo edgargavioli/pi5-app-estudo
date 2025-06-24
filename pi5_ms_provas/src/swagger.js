@@ -41,21 +41,27 @@ const doc = {
                         }
                     }
                 }
-            },
-            SessaoEstudo: {
+            }, SessaoEstudo: {
                 type: "object",
                 properties: {
                     id: { type: "string", format: "uuid", example: "123e4567-e89b-12d3-a456-426614174002" },
                     materiaId: { type: "string", format: "uuid", example: "123e4567-e89b-12d3-a456-426614174000" },
                     provaId: { type: "string", format: "uuid", example: "123e4567-e89b-12d3-a456-426614174001", nullable: true },
                     conteudo: { type: "string", example: "Estudo sobre derivadas" },
-                    topicos: { 
-                        type: "array", 
+                    topicos: {
+                        type: "array",
                         items: { type: "string" },
                         example: ["Derivadas", "Integrais", "Limites"]
                     },
                     tempoInicio: { type: "string", format: "date-time", example: "2024-12-25T14:00:00Z" },
-                    tempoFim: { type: "string", format: "date-time", nullable: true, example: "2024-12-25T16:00:00Z" }
+                    tempoFim: { type: "string", format: "date-time", nullable: true, example: "2024-12-25T16:00:00Z" },
+                    // Campos para sessões agendadas
+                    isAgendada: { type: "boolean", example: false, description: "Se a sessão foi agendada" },
+                    horarioAgendado: { type: "string", format: "date-time", nullable: true, example: "2024-12-25T14:00:00Z", description: "Horário agendado para a sessão" },
+                    metaTempo: { type: "integer", nullable: true, example: 120, description: "Meta de tempo em minutos para sessões agendadas" },
+                    questoesAcertadas: { type: "integer", example: 0, description: "Número de questões acertadas" },
+                    totalQuestoes: { type: "integer", example: 0, description: "Total de questões da sessão" },
+                    finalizada: { type: "boolean", example: false, description: "Se a sessão foi finalizada" }
                 }
             },
             Error: {

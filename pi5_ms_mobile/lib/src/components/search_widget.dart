@@ -65,31 +65,43 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         textAlignVertical: TextAlignVertical.center,
         decoration: InputDecoration(
           prefixIcon: GestureDetector(
-            onTap: widget.onFilterPressed ?? () {
-              // Se não houver callback específico, usar o que já existe
-              print("Filtro pressionado");
-            },
-            child: Icon(
-              Icons.filter_list,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            onTap:
+                widget.onFilterPressed ??
+                () {
+                  // Se não houver callback específico, usar o que já existe
+                  print("Filtro pressionado");
+                },
+            child: Tooltip(
+              message: 'Filtros',
+              child: Icon(
+                Icons.filter_list,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
             ),
           ),
-          suffixIcon: _hasText
-              ? GestureDetector(
-                  onTap: () {
-                    widget.controller.clear();
-                    widget.onChanged?.call('');
-                    widget.onSubmitted?.call('');
-                  },
-                  child: Icon(
-                    Icons.clear,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+          suffixIcon:
+              _hasText
+                  ? GestureDetector(
+                    onTap: () {
+                      widget.controller.clear();
+                      widget.onChanged?.call('');
+                      widget.onSubmitted?.call('');
+                    },
+                    child: Tooltip(
+                      message: 'Limpar pesquisa',
+                      child: Icon(
+                        Icons.clear,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  )
+                  : Tooltip(
+                    message: 'Pesquisar',
+                    child: Icon(
+                      Icons.search,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
                   ),
-                )
-              : Icon(
-                  Icons.search,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
           hintText: widget.hintText ?? 'Pesquisar...',
           hintStyle: TextStyle(
             color: Theme.of(context).colorScheme.onPrimaryContainer,

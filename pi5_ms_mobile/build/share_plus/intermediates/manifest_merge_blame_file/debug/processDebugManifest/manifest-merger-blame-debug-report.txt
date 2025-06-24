@@ -1,0 +1,50 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="dev.fluttercommunity.plus.share" >
+4
+5    <uses-sdk android:minSdkVersion="19" />
+6
+7    <application>
+7-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:3:5-22:19
+8
+9        <!--
+10           Declares a provider which allows us to store files to share in
+11           '.../caches/share_plus' and grant the receiving action access
+12        -->
+13        <provider
+13-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:6:7-14:18
+14            android:name="dev.fluttercommunity.plus.share.ShareFileProvider"
+14-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:7:9-73
+15            android:authorities="${applicationId}.flutter.share_provider"
+15-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:8:9-70
+16            android:exported="false"
+16-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:9:9-33
+17            android:grantUriPermissions="true" >
+17-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:10:9-43
+18            <meta-data
+18-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:11:9-13:61
+19                android:name="android.support.FILE_PROVIDER_PATHS"
+19-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:12:11-61
+20                android:resource="@xml/flutter_share_file_paths" />
+20-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:13:11-59
+21        </provider>
+22        <!--
+23           This manifest declared broadcast receiver allows us to use an explicit
+24           Intent when creating a PendingItent to be informed of the user's choice
+25        -->
+26        <receiver
+26-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:17:7-21:18
+27            android:name="dev.fluttercommunity.plus.share.SharePlusPendingIntent"
+27-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:17:17-55
+28            android:exported="false" >
+28-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:17:56-80
+29            <intent-filter>
+29-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:18:9-20:25
+30                <action android:name="EXTRA_CHOSEN_COMPONENT" />
+30-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:19:11-59
+30-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-11.0.0\android\src\main\AndroidManifest.xml:19:19-56
+31            </intent-filter>
+32        </receiver>
+33    </application>
+34
+35</manifest>

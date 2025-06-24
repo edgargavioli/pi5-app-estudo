@@ -1,0 +1,2 @@
+dev.fluttercommunity.plus.share
+xml flutter_share_file_paths

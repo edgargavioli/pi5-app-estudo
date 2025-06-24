@@ -11,6 +11,56 @@
     }
   ],
   "paths": {
+    "/health": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/materias/": {
       "get": {
         "tags": [
@@ -18,6 +68,15 @@
         ],
         "summary": "Listar todas as matérias",
         "description": "Retorna uma lista com todas as matérias cadastradas incluindo links HATEOAS",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Lista de matérias retornada com sucesso",
@@ -150,6 +209,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Erro interno do servidor",
             "content": {
@@ -176,6 +238,15 @@
         ],
         "summary": "Criar nova matéria",
         "description": "Cria uma nova matéria no sistema com links HATEOAS",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Matéria criada com sucesso",
@@ -359,6 +430,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -403,6 +477,350 @@
         }
       }
     },
+    "/materias/nao-utilizadas": {
+      "get": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Listar matérias não utilizadas",
+        "description": "Retorna uma lista com todas as matérias que não estão associadas a nenhuma prova",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de matérias não utilizadas retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/Materia"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/Materia"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "/materias/utilizadas": {
+      "get": {
+        "tags": [
+          "Matérias"
+        ],
+        "summary": "Listar matérias utilizadas",
+        "description": "Retorna uma lista com todas as matérias que estão associadas a pelo menos uma prova",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de matérias utilizadas retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/Materia"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/Materia"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
     "/materias/{id}": {
       "get": {
         "tags": [
@@ -420,6 +838,13 @@
             },
             "description": "ID da matéria",
             "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -590,6 +1015,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Matéria não encontrada",
             "content": {
@@ -638,6 +1066,13 @@
             },
             "description": "ID da matéria",
             "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -723,6 +1158,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Matéria não encontrada",
             "content": {
@@ -793,11 +1231,21 @@
             },
             "description": "ID da matéria",
             "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "204": {
             "description": "Matéria deletada com sucesso"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "404": {
             "description": "Matéria não encontrada",
@@ -965,6 +1413,15 @@
         ],
         "summary": "Listar todas as provas",
         "description": "Retorna uma lista com todas as provas cadastradas incluindo links HATEOAS",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Lista de provas retornada com sucesso",
@@ -1097,6 +1554,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Erro interno do servidor",
             "content": {
@@ -1123,6 +1583,15 @@
         ],
         "summary": "Criar nova prova",
         "description": "Cria uma nova prova no sistema com links HATEOAS. ⚠️ ATENÇÃO: O materiaId deve ser de uma matéria existente!",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Prova criada com sucesso",
@@ -1306,6 +1775,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Matéria não encontrada",
             "content": {
@@ -1402,8 +1874,7 @@
                   "data",
                   "horario",
                   "local",
-                  "materiaId",
-                  "pesos"
+                  "materiaId"
                 ],
                 "properties": {
                   "titulo": {
@@ -1439,24 +1910,18 @@
                     "example": "123e4567-e89b-12d3-a456-426614174000",
                     "description": "🔗 ID da matéria (deve existir no sistema)"
                   },
-                  "pesos": {
+                  "totalQuestoes": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 10,
+                    "description": "Número total de questões da prova (opcional)"
+                  },
+                  "filtros": {
                     "type": "object",
-                    "description": "Pesos das diferentes partes da prova",
-                    "required": [
-                      "teoria",
-                      "pratica"
-                    ],
-                    "properties": {
-                      "teoria": {
-                        "type": "number",
-                        "example": 0.7,
-                        "description": "Peso da parte teórica (0.0 a 1.0)"
-                      },
-                      "pratica": {
-                        "type": "number",
-                        "example": 0.3,
-                        "description": "Peso da parte prática (0.0 a 1.0)"
-                      }
+                    "description": "Filtros adicionais (opcional)",
+                    "example": {
+                      "tipo": "vestibular",
+                      "nivel": "medio"
                     }
                   }
                 }
@@ -1483,6 +1948,13 @@
             },
             "description": "ID da prova",
             "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1653,6 +2125,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Prova não encontrada",
             "content": {
@@ -1701,6 +2176,13 @@
             },
             "description": "ID da prova",
             "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1786,6 +2268,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Prova não encontrada",
             "content": {
@@ -1851,17 +2336,18 @@
                     "example": "Sala 102",
                     "description": "Local da prova"
                   },
-                  "pesos": {
+                  "totalQuestoes": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 15,
+                    "description": "Número total de questões da prova"
+                  },
+                  "filtros": {
                     "type": "object",
-                    "properties": {
-                      "teoria": {
-                        "type": "number",
-                        "example": 0.6
-                      },
-                      "pratica": {
-                        "type": "number",
-                        "example": 0.4
-                      }
+                    "description": "Filtros adicionais",
+                    "example": {
+                      "tipo": "vestibular",
+                      "area": "exatas"
                     }
                   }
                 }
@@ -1886,11 +2372,21 @@
             },
             "description": "ID da prova",
             "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "204": {
             "description": "Prova deletada com sucesso"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "404": {
             "description": "Prova não encontrada",
@@ -1928,6 +2424,481 @@
         }
       }
     },
+    "/provas/{id}/resultado": {
+      "patch": {
+        "tags": [
+          "Provas"
+        ],
+        "summary": "Registrar resultado da prova",
+        "description": "Registra o número de acertos do usuário em uma prova específica para calcular desempenho",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da prova",
+            "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado registrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "allOf": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "example": "object"
+                                  },
+                                  "properties": {
+                                    "type": "object",
+                                    "properties": {
+                                      "acertos": {
+                                        "type": "object",
+                                        "properties": {
+                                          "type": {
+                                            "type": "string",
+                                            "example": "integer"
+                                          },
+                                          "example": {
+                                            "type": "number",
+                                            "example": 8
+                                          }
+                                        }
+                                      },
+                                      "percentualAcerto": {
+                                        "type": "object",
+                                        "properties": {
+                                          "type": {
+                                            "type": "string",
+                                            "example": "integer"
+                                          },
+                                          "example": {
+                                            "type": "number",
+                                            "example": 80
+                                          }
+                                        }
+                                      },
+                                      "foiRealizada": {
+                                        "type": "object",
+                                        "properties": {
+                                          "type": {
+                                            "type": "string",
+                                            "example": "boolean"
+                                          },
+                                          "example": {
+                                            "type": "boolean",
+                                            "example": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "allOf": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "example": "object"
+                                  },
+                                  "properties": {
+                                    "type": "object",
+                                    "properties": {
+                                      "acertos": {
+                                        "type": "object",
+                                        "properties": {
+                                          "type": {
+                                            "type": "string",
+                                            "example": "integer"
+                                          },
+                                          "example": {
+                                            "type": "number",
+                                            "example": 8
+                                          }
+                                        }
+                                      },
+                                      "percentualAcerto": {
+                                        "type": "object",
+                                        "properties": {
+                                          "type": {
+                                            "type": "string",
+                                            "example": "integer"
+                                          },
+                                          "example": {
+                                            "type": "number",
+                                            "example": 80
+                                          }
+                                        }
+                                      },
+                                      "foiRealizada": {
+                                        "type": "object",
+                                        "properties": {
+                                          "type": {
+                                            "type": "string",
+                                            "example": "boolean"
+                                          },
+                                          "example": {
+                                            "type": "boolean",
+                                            "example": true
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou prova sem total de questões definido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Número de acertos (12) não pode ser maior que o total de questões (10)"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "Número de acertos (12) não pode ser maior que o total de questões (10)"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Prova não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "acertos"
+                ],
+                "properties": {
+                  "acertos": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "example": 8,
+                    "description": "Número de questões acertadas pelo usuário"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/provas/{id}/materias": {
+      "post": {
+        "tags": [
+          "Provas"
+        ],
+        "summary": "Adicionar matéria a uma prova",
+        "description": "Vincula uma matéria a uma prova existente",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da prova",
+            "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "ID da matéria a ser vinculada",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "materiaId": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "format": {
+                          "type": "string",
+                          "example": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/provas/{id}/materias/{materiaId}": {
+      "delete": {
+        "tags": [
+          "Provas"
+        ],
+        "summary": "Remover matéria de uma prova",
+        "description": "Remove a vinculação de uma matéria com uma prova",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da prova",
+            "format": "uuid"
+          },
+          {
+            "name": "materiaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID da matéria",
+            "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sessoes/": {
       "get": {
         "tags": [
@@ -1935,6 +2906,15 @@
         ],
         "summary": "Listar todas as sessões de estudo",
         "description": "Retorna uma lista com todas as sessões de estudo cadastradas incluindo links HATEOAS",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Lista de sessões retornada com sucesso",
@@ -2067,6 +3047,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Erro interno do servidor",
             "content": {
@@ -2093,6 +3076,15 @@
         ],
         "summary": "Criar nova sessão de estudo",
         "description": "Cria uma nova sessão de estudo no sistema com links HATEOAS. ⚠️ ATENÇÃO: O materiaId deve ser de uma matéria existente!",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Sessão criada com sucesso",
@@ -2276,6 +3268,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
@@ -2364,6 +3359,13 @@
             },
             "description": "ID da sessão de estudo",
             "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2552,6 +3554,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Sessão não encontrada",
             "content": {
@@ -2600,6 +3605,13 @@
             },
             "description": "ID da sessão de estudo",
             "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2685,6 +3697,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Sessão não encontrada",
             "content": {
@@ -2761,11 +3776,21 @@
             },
             "description": "ID da sessão de estudo",
             "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "204": {
             "description": "Sessão deletada com sucesso"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "404": {
             "description": "Sessão não encontrada",
@@ -2820,6 +3845,13 @@
             },
             "description": "ID da sessão de estudo",
             "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3041,6 +4073,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Sessão não encontrada",
             "content": {
@@ -3072,6 +4107,768 @@
             },
             "schema": {
               "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "/eventos/": {
+      "get": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Listar todos os eventos",
+        "description": "Retorna uma lista com todos os eventos (públicos e do usuário) incluindo links HATEOAS",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de eventos retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/Evento"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "array"
+                            },
+                            "items": {
+                              "$ref": "#/components/schemas/Evento"
+                            }
+                          }
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            },
+                            "properties": {
+                              "type": "object",
+                              "properties": {
+                                "self": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                },
+                                "create": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "object"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Criar novo evento",
+        "description": "Cria um novo evento retornando links HATEOAS",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Evento criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Evento"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Evento"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "titulo": {
+                    "type": "string",
+                    "example": "ENEM 2025",
+                    "description": "Título do evento"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "example": "Exame Nacional do Ensino Médio",
+                    "description": "Descrição do evento"
+                  },
+                  "tipo": {
+                    "type": "string",
+                    "enum": [
+                      "VESTIBULAR",
+                      "CONCURSO_PUBLICO",
+                      "ENEM",
+                      "CERTIFICACAO",
+                      "PROVA_SIMULADA"
+                    ],
+                    "example": "ENEM",
+                    "description": "Tipo do evento"
+                  },
+                  "data": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2025-11-15",
+                    "description": "Data do evento"
+                  },
+                  "horario": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-11-15T08:00:00Z",
+                    "description": "Horário do evento"
+                  },
+                  "local": {
+                    "type": "string",
+                    "example": "Campus Universitário",
+                    "description": "Local do evento"
+                  },
+                  "materiaId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "123e4567-e89b-12d3-a456-426614174000",
+                    "description": "ID da matéria relacionada (opcional)"
+                  },
+                  "urlInscricao": {
+                    "type": "string",
+                    "example": "https://enem.inep.gov.br",
+                    "description": "URL para inscrição (opcional)"
+                  },
+                  "taxaInscricao": {
+                    "type": "number",
+                    "example": 85,
+                    "description": "Taxa de inscrição (opcional)"
+                  },
+                  "dataLimiteInscricao": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2025-05-15",
+                    "description": "Data limite para inscrição (opcional)"
+                  }
+                },
+                "required": [
+                  "titulo",
+                  "tipo",
+                  "data",
+                  "horario",
+                  "local"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/eventos/{id}": {
+      "get": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Buscar evento por ID",
+        "description": "Retorna um evento específico incluindo links HATEOAS",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do evento",
+            "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Evento encontrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Evento"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Evento"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Evento não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Atualizar evento",
+        "description": "Atualiza os dados de um evento existente retornando links HATEOAS",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do evento",
+            "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Evento atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Evento"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Evento"
+                        },
+                        "_links": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "xml": {
+                    "name": "main"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Evento não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "titulo": {
+                    "type": "string",
+                    "example": "ENEM 2025 - Atualizado"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "example": "Exame Nacional do Ensino Médio - Nova descrição"
+                  },
+                  "tipo": {
+                    "type": "string",
+                    "enum": [
+                      "VESTIBULAR",
+                      "CONCURSO_PUBLICO",
+                      "ENEM",
+                      "CERTIFICACAO",
+                      "PROVA_SIMULADA"
+                    ]
+                  },
+                  "data": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "horario": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "local": {
+                    "type": "string"
+                  },
+                  "materiaId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "urlInscricao": {
+                    "type": "string"
+                  },
+                  "taxaInscricao": {
+                    "type": "number"
+                  },
+                  "dataLimiteInscricao": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Eventos"
+        ],
+        "summary": "Deletar evento",
+        "description": "Remove um evento permanentemente",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID do evento",
+            "format": "uuid"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Evento deletado com sucesso"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Evento não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
             }
           }
         }
@@ -3510,36 +5307,6 @@
         },
         "xml": {
           "name": "Error"
-        }
-      },
-      "InternalServerError": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "example": "object"
-          },
-          "properties": {
-            "type": "object",
-            "properties": {
-              "error": {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "example": "string"
-                  },
-                  "example": {
-                    "type": "string",
-                    "example": "Erro interno do servidor"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "xml": {
-          "name": "InternalServerError"
         }
       }
     }
