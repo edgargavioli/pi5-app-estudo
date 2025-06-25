@@ -5,23 +5,23 @@
 5    <uses-sdk android:minSdkVersion="21" />
 6
 7    <application>
-7-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:4:5-14:19
+7-->C:\Users\anabe\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:4:5-14:19
 8        <provider
-8-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:5:9-13:20
+8-->C:\Users\anabe\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:5:9-13:20
 9            android:name="net.nfet.flutter.printing.PrintFileProvider"
-9-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:6:13-46
+9-->C:\Users\anabe\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:6:13-46
 10            android:authorities="${applicationId}.flutter.printing"
-10-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:7:13-68
+10-->C:\Users\anabe\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:7:13-68
 11            android:exported="false"
-11-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:8:13-37
+11-->C:\Users\anabe\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:8:13-37
 12            android:grantUriPermissions="true" >
-12-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:9:13-47
+12-->C:\Users\anabe\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:9:13-47
 13            <meta-data
-13-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:10:13-12:70
+13-->C:\Users\anabe\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:10:13-12:70
 14                android:name="android.support.FILE_PROVIDER_PATHS"
-14-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:11:17-67
+14-->C:\Users\anabe\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:11:17-67
 15                android:resource="@xml/flutter_printing_file_paths" />
-15-->C:\Users\edgar\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:12:17-68
+15-->C:\Users\anabe\AppData\Local\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\src\main\AndroidManifest.xml:12:17-68
 16        </provider>
 17    </application>
 18

@@ -47,7 +47,7 @@ export default class NotificationScheduler {
             console.log(`📱 Sending notification to user ${user.fcmToken}:`, content);
 
             // Descomente para enviar via Firebase real:
-            await this.firebaseService.sendNotification(user, content);
+            //await this.firebaseService.sendNotification(user, content);
 
             // Marca como enviada
             await this.notificationPersistence.updateStatus(notification.id, 'SENT');

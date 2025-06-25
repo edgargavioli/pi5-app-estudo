@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export class Materia {
     constructor(id, nome, disciplina) {
         this.id = id;
