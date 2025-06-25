@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export class SessaoEstudo {
     constructor(id, materiaId, provaId, conteudo, topicos, tempoInicio, tempoFim = null,
         isAgendada = false, horarioAgendado = null, metaTempo = null,
