@@ -148,6 +148,9 @@ dist
 # Flutter specific ignores
 pi5_ms_mobile/.dart_tool/
 pi5_ms_mobile/build/
+pi5_ms_mobile/.flutter-plugins
+pi5_ms_mobile/.flutter-plugins-dependencies
+pi5_ms_mobile/.metadata
 pi5_ms_mobile/ios/Flutter/Generated.xcconfig
 pi5_ms_mobile/ios/Flutter/flutter_export_environment.sh
 pi5_ms_mobile/macos/Flutter/GeneratedPluginRegistrant.swift
