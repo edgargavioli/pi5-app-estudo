@@ -14,7 +14,7 @@ class User {
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.imageBase64 = imageBase64;
-    
+
     this.validate();
   }
 
@@ -25,11 +25,11 @@ class User {
     if (!this.email || !this.isValidEmail(this.email)) {
       throw new Error('Invalid email format');
     }
-    
+
     if (!this.name || this.name.trim().length < 2) {
       throw new Error('Name must be at least 2 characters long');
     }
-    
+
     if (this.points < 0) {
       throw new Error('Points cannot be negative');
     }
@@ -78,7 +78,8 @@ class User {
       isEmailVerified: this.isEmailVerified,
       lastLogin: this.lastLogin,
       createdAt: this.createdAt,
-      updatedAt: this.updatedAt
+      updatedAt: this.updatedAt,
+      imageBase64: this.imageBase64
     };
   }
 
@@ -92,7 +93,8 @@ class User {
       name: this.name,
       points: this.points,
       isEmailVerified: this.isEmailVerified,
-      lastLogin: this.lastLogin
+      lastLogin: this.lastLogin,
+      imageBase64: this.imageBase64
     };
   }
 }

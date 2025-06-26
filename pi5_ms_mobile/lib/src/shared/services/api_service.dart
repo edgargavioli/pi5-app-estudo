@@ -1,11 +1,25 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
   // 🌐 URLs DOS MICROSERVIÇOS
-  static const String _userServiceUrl = 'http://10.0.2.2:3000';
-  static const String _provasServiceUrl = 'http://10.0.2.2:3002';
+
+  static String get baseUrl {
+    final tipoDispositivo = dotenv.env['TIPODISPOSITIVO'] ?? 'Real';
+
+    if (tipoDispositivo == 'Emulator') {
+      final baseUrlEmulator = dotenv.env['API_BASE_URL_EMULATOR'];
+      return (baseUrlEmulator ?? 'http://10.0.2.2');
+    } else {
+      final baseUrlReal = dotenv.env['API_BASE_URL_REAL'];
+      return (baseUrlReal ?? 'http://192.168.1.100');
+    }
+  }
+
+  static final String _userServiceUrl = '$baseUrl:3000';
+  static final String _provasServiceUrl = '$baseUrl:3002';
 
   // 🔐 INSTÂNCIA DO SERVIÇO DE AUTENTICAÇÃO
   static final AuthService _authService = AuthService();

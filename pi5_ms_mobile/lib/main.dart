@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pi5_ms_mobile/src/routes/app_routes.dart';
 import 'package:pi5_ms_mobile/src/services/firebase_notification_service.dart';
 import 'package:pi5_ms_mobile/src/shared/theme.dart';
@@ -10,6 +11,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔧 CARREGAR VARIÁVEIS DE AMBIENTE
+  await dotenv.load(fileName: '.env');
+
   await FirebaseNotificationService.initialize();
   // 🔐 INICIALIZAR SERVIÇOS CRÍTICOS
   try {

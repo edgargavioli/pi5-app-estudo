@@ -1487,22 +1487,48 @@ class _ProvasListagemPageState extends State<ProvasListagemPage> {
         ),
       );
     } else {
+      // Calcular quantos dias faltam para a prova
+      final diasRestantes = dataProva.difference(agora).inDays;
+      final horasRestantes = dataProva.difference(agora).inHours;
+
+      String texto;
+      Color cor;
+      IconData icone;
+
+      if (diasRestantes > 7) {
+        texto = 'Agendada';
+        cor = Colors.green[600]!;
+        icone = Icons.event_available;
+      } else if (diasRestantes > 1) {
+        texto = '${diasRestantes}d';
+        cor = Colors.orange[600]!;
+        icone = Icons.schedule;
+      } else if (horasRestantes > 0) {
+        texto = '${horasRestantes}h';
+        cor = Colors.red[600]!;
+        icone = Icons.access_time;
+      } else {
+        texto = 'Hoje';
+        cor = Colors.red[700]!;
+        icone = Icons.priority_high;
+      }
+
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.grey[400],
+          color: cor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[300]!, width: 1),
+          border: Border.all(color: cor.withOpacity(0.3), width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.settings, color: Colors.grey[600], size: 14),
+            Icon(icone, color: cor, size: 14),
             const SizedBox(width: 4),
             Text(
-              'Config',
+              texto,
               style: TextStyle(
-                color: Colors.grey[600],
+                color: cor,
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
               ),

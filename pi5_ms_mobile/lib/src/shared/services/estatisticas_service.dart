@@ -4,6 +4,7 @@ import 'auth_service.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class EstatisticasService {
   static const String _keySequencia = 'sequencia_estudos';
@@ -418,6 +419,18 @@ class EstatisticasService {
     }
   }
 
+  static String get baseUrl {
+    final tipoDispositivo = dotenv.env['TIPODISPOSITIVO'] ?? 'Real';
+
+    if (tipoDispositivo == 'Emulator') {
+      final baseUrlEmulator = dotenv.env['API_BASE_URL_EMULATOR'];
+      return (baseUrlEmulator ?? 'http://10.0.2.2');
+    } else {
+      final baseUrlReal = dotenv.env['API_BASE_URL_REAL'];
+      return (baseUrlReal ?? 'http://192.168.1.100');
+    }
+  }
+
   /// Obter estatísticas de sessões de estudo do backend
   static Future<Map<String, dynamic>?> obterEstatisticasSessoes({
     String? provaId,
@@ -429,8 +442,8 @@ class EstatisticasService {
         print('❌ Token não encontrado para buscar estatísticas');
         return null;
       }
-      const baseUrl = 'http://10.0.2.2:3002'; // URL do microsserviço de provas
-      var url = '$baseUrl/sessoes/estatisticas';
+      final baseApiUrl = '$baseUrl:3002'; // URL do microsserviço de provas
+      var url = '$baseApiUrl/sessoes/estatisticas';
 
       if (provaId != null) {
         url += '?provaId=$provaId';

@@ -81,11 +81,16 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage>
 
   /// Selecionar e compactar imagem de perfil
   Future<void> _selecionarFotoPerfil() async {
+    // Mostrar modal com opções de câmera ou galeria
+    final ImageSource? source = await _mostrarOpcoesImagem();
+
+    if (source == null) return;
+
     try {
       setState(() => _carregandoFoto = true);
 
       final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         maxWidth: 400,
         maxHeight: 400,
         imageQuality: 70,
@@ -106,13 +111,197 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage>
       }
     } catch (e) {
       if (mounted) {
-        CustomSnackBar.showError(context, 'Erro ao selecionar imagem: $e');
+        String errorMessage = 'Erro ao selecionar imagem: $e';
+
+        // Tratar erros específicos
+        if (e.toString().contains('permission')) {
+          errorMessage =
+              'Permissão negada para acessar ${source == ImageSource.camera ? 'câmera' : 'galeria'}';
+        } else if (e.toString().contains('camera')) {
+          errorMessage =
+              'Erro ao acessar a câmera. Verifique se o dispositivo possui câmera.';
+        }
+
+        CustomSnackBar.showError(context, errorMessage);
       }
     } finally {
       if (mounted) {
         setState(() => _carregandoFoto = false);
       }
     }
+  }
+
+  /// Mostrar modal com opções de imagem (câmera ou galeria)
+  Future<ImageSource?> _mostrarOpcoesImagem() async {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle do modal
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.outline.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Título
+              Text(
+                'Escolher foto de perfil',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Opção câmera
+              _buildOpcaoImagem(
+                icon: Icons.camera_alt,
+                titulo: 'Tirar foto',
+                subtitulo: 'Usar câmera do dispositivo',
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+                color: colorScheme.primary,
+              ),
+
+              const SizedBox(height: 12),
+
+              // Opção galeria
+              _buildOpcaoImagem(
+                icon: Icons.photo_library,
+                titulo: 'Escolher da galeria',
+                subtitulo: 'Selecionar foto existente',
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+                color: colorScheme.tertiary,
+              ),
+
+              // Opção remover foto (se existir)
+              if (_usuario?.imageBase64?.isNotEmpty == true ||
+                  _novaFotoBase64 != null) ...[
+                const SizedBox(height: 12),
+                _buildOpcaoImagem(
+                  icon: Icons.delete_outline,
+                  titulo: 'Remover foto',
+                  subtitulo: 'Usar avatar padrão',
+                  onTap: () {
+                    setState(() {
+                      _novaFotoBase64 = " ";
+                    });
+                    Navigator.pop(context);
+                  },
+                  color: colorScheme.error,
+                ),
+              ],
+
+              const SizedBox(height: 12),
+
+              // Botão cancelar
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: Text(
+                    'Cancelar',
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Espaçamento para safe area
+              SizedBox(height: MediaQuery.of(context).padding.bottom),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Widget para opção de imagem no modal
+  Widget _buildOpcaoImagem({
+    required IconData icon,
+    required String titulo,
+    required String subtitulo,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: color.withOpacity(0.2), width: 1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titulo,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitulo,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// Compactar imagem para reduzir tamanho
@@ -431,11 +620,16 @@ class _PerfilUsuarioPageState extends State<PerfilUsuarioPage>
   ImageProvider? _getProfileImage() {
     // Priorizar nova foto selecionada
     if (_novaFotoBase64 != null) {
+      // Se é string vazia, significa que foi removida
+      if (_novaFotoBase64!.isEmpty) {
+        return null;
+      }
+
       try {
         final bytes = base64Decode(_novaFotoBase64!);
         return MemoryImage(bytes);
       } catch (e) {
-        print('Erro ao decodificar nova foto: $e');
+        print("");
       }
     }
 

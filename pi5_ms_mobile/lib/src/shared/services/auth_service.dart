@@ -6,10 +6,23 @@ import 'cache_service.dart';
 import 'gamificacao_service.dart';
 import 'streak_service.dart';
 import 'estatisticas_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
   // 🌐 URL DO USER-SERVICE
-  static const String _userServiceUrl = 'http://10.0.2.2:3000/api';
+  static String get baseUrl {
+    final tipoDispositivo = dotenv.env['TIPODISPOSITIVO'] ?? 'Real';
+
+    if (tipoDispositivo == 'Emulator') {
+      final baseUrlEmulator = dotenv.env['API_BASE_URL_EMULATOR'];
+      return (baseUrlEmulator ?? 'http://10.0.2.2');
+    } else {
+      final baseUrlReal = dotenv.env['API_BASE_URL_REAL'];
+      return (baseUrlReal ?? 'http://192.168.1.100');
+    }
+  }
+
+  static final String _userServiceUrl = '$baseUrl:3000/api';
 
   // 🔑 CHAVES PARA ARMAZENAMENTO LOCAL
   static const String _accessTokenKey = 'access_token';
