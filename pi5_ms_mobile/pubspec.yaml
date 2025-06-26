@@ -53,6 +53,7 @@ dependencies:
   path_provider: ^2.1.5
   image_picker: ^1.1.2
   image: ^4.5.4
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +80,7 @@ flutter:
   assets:
     - assets/images/login_header.png
     - assets/images/logo.png
+    - .env
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

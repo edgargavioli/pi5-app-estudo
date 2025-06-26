@@ -107,7 +107,7 @@ services:
       - ./pi5_ms_notificacoes:/app
       - /app/node_modules
       # Monta o arquivo Firebase do diretório correto
-      - C:/Users/anabe/Downloads/pi5-ms-notificacoes.json:/app/config/firebase-service-account.json:ro
+      - D:/Faculdade/pi5-ms-notificacoes.json:/app/config/firebase-service-account.json:ro
     networks:
       - microservices-network
     restart: unless-stopped

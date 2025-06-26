@@ -2,9 +2,22 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pi5_ms_mobile/src/shared/services/auth_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class StreakService {
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
+  static String get baseUrl {
+    final tipoDispositivo = dotenv.env['TIPODISPOSITIVO'] ?? 'Real';
+
+    String base;
+    if (tipoDispositivo == 'Emulator') {
+      final baseUrlEmulator = dotenv.env['API_BASE_URL_EMULATOR'];
+      base = (baseUrlEmulator ?? 'http://10.0.2.2');
+    } else {
+      final baseUrlReal = dotenv.env['API_BASE_URL_REAL'];
+      base = (baseUrlReal ?? 'http://192.168.1.100');
+    }
+    return '$base:3000/api';
+  }
 
   // Modelo de dados do streak
   static Map<String, dynamic> _currentStreak = {};
@@ -56,6 +69,7 @@ class StreakService {
       return await _loadFromCache();
     }
   }
+
   /// Atualizar streak com tempo estudado
   static Future<Map<String, dynamic>> atualizarStreak(
     double minutosEstudados, {

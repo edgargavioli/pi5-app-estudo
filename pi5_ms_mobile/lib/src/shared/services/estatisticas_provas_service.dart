@@ -1,10 +1,23 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'auth_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class EstatisticasProvasService {
+  static String get baseUrl {
+    final tipoDispositivo = dotenv.env['TIPODISPOSITIVO'] ?? 'Real';
+
+    if (tipoDispositivo == 'Emulator') {
+      final baseUrlEmulator = dotenv.env['API_BASE_URL_EMULATOR'];
+      return (baseUrlEmulator ?? 'http://10.0.2.2');
+    } else {
+      final baseUrlReal = dotenv.env['API_BASE_URL_REAL'];
+      return (baseUrlReal ?? 'http://192.168.1.100');
+    }
+  }
+
   // URL do microsserviço de provas
-  static const String _baseUrl = 'http://10.0.2.2:3002/api';
+  static final String _baseUrl = '$baseUrl:3002/api';
 
   /// Obtém estatísticas das provas por status
   static Future<Map<String, dynamic>> obterEstatisticasPorStatus() async {

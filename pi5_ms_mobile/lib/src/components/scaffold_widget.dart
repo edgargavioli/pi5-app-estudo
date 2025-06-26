@@ -35,7 +35,6 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PI5 MS Mobile'),
         centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,

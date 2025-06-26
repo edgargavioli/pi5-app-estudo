@@ -20,7 +20,7 @@ class UpdateUserUseCase {
       }
 
       const user = await this.userRepository.findById(userId);
-      
+
       if (!user) {
         throw new AppError('User not found', 404);
       }
@@ -28,13 +28,13 @@ class UpdateUserUseCase {
       // Validate and update email if provided
       if (updateData.email) {
         const emailVO = new Email(updateData.email);
-        
+
         // Check if email is already taken by another user
         const emailExists = await this.userRepository.emailExists(emailVO.toString(), userId);
         if (emailExists) {
           throw new AppError('Email already in use', 400);
         }
-        
+
         user.email = emailVO.toString();
       }
 
@@ -49,6 +49,11 @@ class UpdateUserUseCase {
         user.name = updateData.name.trim();
       }
 
+      // Update imageBase64 if provided
+      if (updateData.imageBase64) {
+        user.imageBase64 = updateData.imageBase64;
+      }
+
       // Validate the updated user entity
       user.validate();
 
@@ -58,13 +63,13 @@ class UpdateUserUseCase {
       const updatedUser = await this.userRepository.update(user);
 
       LoggingService.info('User updated successfully', { userId });
-      
+
       return updatedUser.toPublicJSON();
     } catch (error) {
-      LoggingService.error('Error in UpdateUserUseCase', { 
-        error: error.message, 
+      LoggingService.error('Error in UpdateUserUseCase', {
+        error: error.message,
         userId,
-        requestingUserId 
+        requestingUserId
       });
       throw error;
     }
