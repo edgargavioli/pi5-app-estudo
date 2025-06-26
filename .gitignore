@@ -22,6 +22,20 @@ lib-cov
 # Ignore APK build outputs
 pi5_ms_mobile/build/app/outputs/apk/
 
+# Flutter specific ignores
+pi5_ms_mobile/.dart_tool/
+pi5_ms_mobile/build/
+pi5_ms_mobile/ios/Flutter/Generated.xcconfig
+pi5_ms_mobile/ios/Flutter/flutter_export_environment.sh
+pi5_ms_mobile/macos/Flutter/GeneratedPluginRegistrant.swift
+pi5_ms_mobile/windows/flutter/generated_plugin_registrant.cc
+pi5_ms_mobile/windows/flutter/generated_plugin_registrant.h
+pi5_ms_mobile/windows/flutter/generated_plugins.cmake
+pi5_ms_mobile/linux/flutter/generated_plugin_registrant.cc
+pi5_ms_mobile/linux/flutter/generated_plugin_registrant.h
+pi5_ms_mobile/linux/flutter/generated_plugins.cmake
+pi5_ms_mobile/web/manifest.json
+
 # Coverage directory used by tools like istanbul
 coverage
 *.lcov
@@ -130,3 +144,28 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Flutter specific ignores
+pi5_ms_mobile/.dart_tool/
+pi5_ms_mobile/build/
+pi5_ms_mobile/ios/Flutter/Generated.xcconfig
+pi5_ms_mobile/ios/Flutter/flutter_export_environment.sh
+pi5_ms_mobile/macos/Flutter/GeneratedPluginRegistrant.swift
+pi5_ms_mobile/windows/flutter/generated_plugin_registrant.cc
+pi5_ms_mobile/windows/flutter/generated_plugin_registrant.h
+pi5_ms_mobile/windows/flutter/generated_plugins.cmake
+pi5_ms_mobile/linux/flutter/generated_plugin_registrant.cc
+pi5_ms_mobile/linux/flutter/generated_plugin_registrant.h
+pi5_ms_mobile/linux/flutter/generated_plugins.cmake
+pi5_ms_mobile/web/manifest.json
+
+# APK and other build outputs
+*.apk
+*.aab
+*.ipa
+*.dill
+
+# IDE
+.vscode/
+.idea/
+*.iml
