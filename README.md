@@ -1,11 +1,12 @@
-<img width="387" height="832" alt="image" src="https://github.com/user-attachments/assets/a4c49db0-f16a-4bb6-a58c-f97871ad274e" /># PI5 - Aplicativo de Estudos com Gamificação
+# PI5 - Aplicativo de Estudos com Gamificação
 
 ## 📱 Visão Geral
 
 O **PI5** é uma solução completa para gestão de estudos com gamificação, desenvolvida como projeto integrador do 5º período. O sistema utiliza arquitetura de microsserviços distribuídos com aplicativo móvel Flutter, proporcionando uma experiência de estudo interativa e motivacional.
 
-## Imagens
+## 📱 Screenshots
 
+<img width="387" height="832" alt="image" src="https://github.com/user-attachments/assets/a4c49db0-f16a-4bb6-a58c-f97871ad274e" />
 <img width="395" height="843" alt="image" src="https://github.com/user-attachments/assets/a208fb10-9b99-4c97-8e9f-15ba778a8288" />
 <img width="390" height="839" alt="image" src="https://github.com/user-attachments/assets/31a95b81-009c-483a-87cd-b7c22e3ede36" />
 <img width="381" height="830" alt="image" src="https://github.com/user-attachments/assets/d974f4fd-fb7e-4471-a5df-88325212751c" />
