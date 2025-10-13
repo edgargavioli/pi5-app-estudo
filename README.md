@@ -6,11 +6,11 @@ O **PI5** é uma solução completa para gestão de estudos com gamificação, d
 
 ## 📱 Screenshots
 
-<img width="387" height="832" alt="image" src="https://github.com/user-attachments/assets/a4c49db0-f16a-4bb6-a58c-f97871ad274e" />
 <img width="395" height="843" alt="image" src="https://github.com/user-attachments/assets/a208fb10-9b99-4c97-8e9f-15ba778a8288" />
 <img width="390" height="839" alt="image" src="https://github.com/user-attachments/assets/31a95b81-009c-483a-87cd-b7c22e3ede36" />
 <img width="381" height="830" alt="image" src="https://github.com/user-attachments/assets/d974f4fd-fb7e-4471-a5df-88325212751c" />
 <img width="387" height="832" alt="image" src="https://github.com/user-attachments/assets/135e02c4-6e18-4fcb-87b2-3916db97f69c" />
+<img width="387" height="832" alt="image" src="https://github.com/user-attachments/assets/a4c49db0-f16a-4bb6-a58c-f97871ad274e" />
 <img width="412" height="861" alt="image" src="https://github.com/user-attachments/assets/a2bf821d-4221-4d68-a5f6-fe141cfd055f" />
 <img width="406" height="845" alt="image" src="https://github.com/user-attachments/assets/6ec54a37-c5f4-4fa9-8e71-c898ec32769c" />
 <img width="395" height="841" alt="image" src="https://github.com/user-attachments/assets/895dd9d5-2198-44d2-9a58-2bbdcb4c95f9" />
